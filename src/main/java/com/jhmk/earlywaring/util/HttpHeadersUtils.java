@@ -4,6 +4,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 
 import java.nio.charset.Charset;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -21,6 +22,15 @@ public class HttpHeadersUtils {
     public static HttpHeaders getHttpHeadersByContentType(MediaType mediaType){
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(mediaType);
+        return headers;
+    }
+
+
+    public static HttpHeaders getHeader() {
+        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+        HttpHeaders headers = HttpHeadersUtils.getHttpHeadersByCharsAndMed(Collections.singletonList(Charset.forName("UTF-8")),
+                Collections.singletonList(MediaType.ALL));
+        headers.setContentType(type);
         return headers;
     }
 }

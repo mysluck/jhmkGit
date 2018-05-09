@@ -66,10 +66,7 @@ public class CmsController {
                 data.put("message", "密码错误");
 
             }
-            data.put("status", "10001");
-
-            data.put("status", "10000");
-
+            data.put("status", "200");
             request.getSession().setAttribute("user", admin);
         } else {
             resp.setResponseCode(ResponseCode.CUSTOMER_NOT_EXIST);

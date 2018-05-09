@@ -1,8 +1,13 @@
 package com.jhmk.earlywaring.service;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.config.BaseConstants;
+import com.jhmk.earlywaring.entity.rule.ReciveRule;
+import com.jhmk.earlywaring.entity.rule.SendRule;
+import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -11,10 +16,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class RuleService {
@@ -75,6 +77,7 @@ public class RuleService {
     public String addRule(String rule) {
         return "ok";
     }
+
     /**
      * 删除规则
      *
@@ -88,6 +91,7 @@ public class RuleService {
 
     /**
      * 提交规则  修改状态
+     *
      * @param id 规则唯一标识
      * @return
      */
@@ -98,6 +102,7 @@ public class RuleService {
 
     /**
      * 获取提交的规则
+     *
      * @param id
      */
     public void getSubmitRule(String id) {
@@ -106,6 +111,7 @@ public class RuleService {
 
     /**
      * 修改规则
+     *
      * @param id
      */
     public void updataSubmitRule(String id) {
@@ -113,5 +119,32 @@ public class RuleService {
     }
 
 
+    /**
+     * 规则匹配
+     *
+     * @param mes
+     */
+    public Object ruleMatch(String mes) {
+        JSONObject object = JSON.parseObject(mes);
+        ReciveRule fill = ReciveRule.fill(object);
+        SendRule sendRule = new SendRule();
+        BeanUtils.copyProperties(fill, sendRule);
+        System.out.println(sendRule.toString());
+        List<Map<String, String>> binglizhenduan = fill.getBinglizhenduan();
+        Collections.sort(binglizhenduan,  CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
+        sendRule.setBinglizhenduan(binglizhenduan.get(0));
+        List<Map<String, String>> shouyezhenduan = fill.getShouyezhenduan();
+        Collections.sort(shouyezhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
+        sendRule.setShouyezhenduan(shouyezhenduan.get(0));
+        //检查报告
+        List<Map<String, String>> jianchabaogao = fill.getJianchabaogao();
+        Collections.sort(jianchabaogao, CompareUtil.createComparatorForMap(-1, "exam_time"));
+        sendRule.setJianchabaogao(jianchabaogao.get(0));
+        //检验报告
+        List<Map<String, String>> jianyanbaogao = fill.getJianyanbaogao();
+        Collections.sort(jianyanbaogao, CompareUtil.createComparatorForMap(-1, "report_time"));
+        sendRule.setJianchabaogao(jianyanbaogao.get(0));
+        return JSON.toJSON(sendRule);
+    }
 
 }

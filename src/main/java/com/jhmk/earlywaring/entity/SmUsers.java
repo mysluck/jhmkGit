@@ -56,6 +56,16 @@ public class SmUsers {
     private String foreignExperts;
     private String allowSetStudents;
     private String userDept1;
+    private String roleId;
+
+    @Transient
+    public String getRoleId() {
+        return roleId;
+    }
+
+    public void setRoleId(String roleId) {
+        this.roleId = roleId;
+    }
 
     @Basic
     @Id

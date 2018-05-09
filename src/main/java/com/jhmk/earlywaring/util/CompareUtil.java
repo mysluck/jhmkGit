@@ -3,6 +3,7 @@ package com.jhmk.earlywaring.util;
 import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -129,5 +130,34 @@ public class CompareUtil {
             return false;
         }
         return true;
+    }
+
+
+    public static <T> Comparator createComparatorForMap(int sort, String filed) {
+        return new ImComparatorForMap(sort, filed);
+    }
+
+    public static class ImComparatorForMap implements Comparator {
+        int sort = 1;
+        String filed;
+
+        public ImComparatorForMap(int sort, String filed) {
+            this.sort = sort == -1 ? -1 : 1;
+            this.filed = filed;
+        }
+
+        @Override
+        public int compare(Object o1, Object o2) {
+
+            Map<String, String> v1 = ((Map) o1);
+            Map<String, String> v2 = ((Map) o2);
+            if (sort == 1) {
+                return v1.get(filed).compareTo(v2.get(filed));
+            } else if (sort == -1) {
+                return v2.get(filed).compareTo(v1.get(filed));
+            } else {
+                return v2.get(filed).compareTo(v1.get(filed));
+            }
+        }
     }
 }

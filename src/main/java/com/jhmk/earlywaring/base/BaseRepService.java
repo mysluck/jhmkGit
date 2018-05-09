@@ -1,10 +1,15 @@
 package com.jhmk.earlywaring.base;
 
+import com.jhmk.earlywaring.util.HttpHeadersUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 
 import java.io.Serializable;
+import java.nio.charset.Charset;
+import java.util.Collections;
 
 /**
  * mycat 数据库访问服务接口类
@@ -35,6 +40,13 @@ public class BaseRepService<T, ID extends Serializable> {
     }
 
     public void delete(ID var1) {
+    }
 
+    private HttpHeaders getHeader() {
+        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
+        HttpHeaders headers = HttpHeadersUtils.getHttpHeadersByCharsAndMed(Collections.singletonList(Charset.forName("UTF-8")),
+                Collections.singletonList(MediaType.ALL));
+        headers.setContentType(type);
+        return headers;
     }
 }

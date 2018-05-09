@@ -11,13 +11,13 @@ public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, S
 
 //    SmUsers findByUserIdAndStatus(String id, String status);
 
-//    //删除
+    //    //删除
 //    @Modifying
 //    @Query("update SmUser u set u.deleted = ?1 where u.userId = ?2")
 //    int setUserDeleted(String deleted, String id);
 //
-//    //修改密码
-//    @Modifying
-//    @Query("update SmUser u set u.password = ?1 where u.userId = ?2")
-//    int setUserPassword(String password, String id);
+    //修改密码
+    @Modifying
+    @Query("update SmUsers u set u.userPwd = ?1 where u.userId = ?2")
+    int setUserPasswordFor(String password, String id);
 }

@@ -1,6 +1,7 @@
 package com.jhmk.earlywaring.auth;
 
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jhmk.earlywaring.config.BaseConstants;
@@ -74,7 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
 
-                .antMatchers("/rule/**", "/dept/**", "/login").permitAll()
+                .antMatchers("users/**","/rule/**", "/dept/**", "/login").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin().successHandler(new LogonSucessHandler())
                 .and().csrf().disable()
@@ -103,6 +104,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             logger.debug(userDetails.getUsername() + " logout.");
+            PrintWriter out = null;
+            AtResponse resp = new AtResponse(System.currentTimeMillis());
+            try {
+                out = response.getWriter();
+                resp.setMessage(BaseConstants.SUCCESS);
+                resp.setResponseCode(ResponseCode.OK);
+                out.print(JSON.toJSON(resp));
+            } catch (IOException e) {
+                resp.setMessage(BaseConstants.FALSE);
+                resp.setResponseCode(ResponseCode.INERERROR);
+                e.printStackTrace();
+            }
+            out.flush();
+            out.close();
         }
     }
 
@@ -145,14 +160,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             }
 
             httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, currentRoleId);
-            //设置session超时时间(24小时)
-            httpServletRequest.getSession().setMaxInactiveInterval(24 * 60 * 60);
+            //设置session超时时间(12小时)
+            httpServletRequest.getSession().setMaxInactiveInterval(12 * 60 * 60);
             logger.info("登录成功");
             httpServletResponse.setHeader(BaseConstants.TOKEN, token);
             PrintWriter out = null;
+            AtResponse resp = new AtResponse(System.currentTimeMillis());
+
             try {
                 out = httpServletResponse.getWriter();
+                resp.setResponseCode(ResponseCode.OK);
+                out.print(JSON.toJSON(resp));
             } catch (IOException e) {
+                resp.setResponseCode(ResponseCode.INERERROR);
                 e.printStackTrace();
             }
             out.flush();

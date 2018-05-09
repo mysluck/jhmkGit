@@ -1,7 +1,9 @@
 package com.jhmk.earlywaring.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.jhmk.earlywaring.base.BaseEntityController;
+import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.RoleUser;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.RoleUserRepository;
@@ -9,16 +11,19 @@ import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.SmUserService;
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Bean;
 import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -29,6 +34,7 @@ import java.util.Map;
 @RequestMapping("/users")
 public class UsersController extends BaseEntityController<SmUsers> {
 
+    private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
 
     @Autowired
     SmUsersRepService smUsersRepService;
@@ -38,32 +44,43 @@ public class UsersController extends BaseEntityController<SmUsers> {
     RoleUserRepository roleUserRepository;
 
 
-    @RequestMapping("")
+    @PostMapping("")
     public String list() {
         return "/users/list";
     }
 
     //分页展示
-    @RequestMapping(value = "/list")
+    @PostMapping(value = "/list")
     @ResponseBody
-    public AtResponse userList(@RequestParam Map<String, Object> reqParams) {
-
-
+    public void userList(HttpServletResponse response, @RequestBody String map) {
+        Map<String, Object> reqParams = (Map) JSON.parse(map);
         AtResponse<Map<String, Object>> resp = listData(reqParams, smUsersRepService, "userId");
         Map<String, Object> data = resp.getData();
-        Map<String, String> mm = (Map<String, String>) data.get("params");
         List<SmUsers> uu = (List<SmUsers>) data.get(LIST_DATA);
         data.put(LIST_DATA, uu);
         resp.setResponseCode(ResponseCode.OK);
         resp.setData(data);
-        return resp;
+        wirte(response, resp);
     }
 
 
     //筛选功能
     @RequestMapping(value = "/serach")
     @ResponseBody
-    public AtResponse serach(@ModelAttribute SmUsers user, String pageNum) {
+    public void serach(HttpServletResponse response, @RequestBody String map) {
+        Map<String, String> fromMap = (Map) JSON.parse(map);
+        String pageNum = fromMap.get("pageNum");
+        SmUsers user = new SmUsers();
+        try {
+            BeanUtils.copyProperties(fromMap, user);
+        } catch (IllegalAccessException e) {
+            logger.error("用户转换失败1：" + fromMap.toString());
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            logger.error("用户转换失败2：" + fromMap.toString());
+            logger.error(e.getMessage());
+            e.printStackTrace();
+        }
         int page = 1;
         //当前页不为空
         if (pageNum != null && !"".equals(pageNum.trim())) {
@@ -74,31 +91,29 @@ public class UsersController extends BaseEntityController<SmUsers> {
         AtResponse<Map<String, Object>> resp = new AtResponse(System.currentTimeMillis());
         resp.setResponseCode(ResponseCode.OK);
         resp.setData(params);
-        return resp;
+        wirte(response, resp);
     }
 
 
     //添加操作
-    @RequestMapping(value = "/add")
+    @PostMapping(value = "/add")
     @ResponseBody
-    public AtResponse addUser(@ModelAttribute SmUsers user, String role) {
-        AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
-        if (StringUtils.isEmpty(role)) {
-            resp.setMessage("请选择角色！");
+    public void addUser(HttpServletResponse response, @RequestBody SmUsers user) {
+        AtResponse<String> resp = new AtResponse<>();
+        SmUsers one = smUsersRepService.findOne(user.getUserId());
+        if (one != null) {
             resp.setResponseCode(ResponseCode.INERERROR);
-            return resp;
-        }
-        SmUsers saveUser = smUserService.save(user, role);
-        if (saveUser == null) {
-            resp.setMessage("添加失败,请重新添加！");
-            resp.setResponseCode(ResponseCode.INERERROR);
-            return resp;
+            resp.setMessage("用户已存在");
         } else {
-            resp.setMessage("添加成功！");
-            resp.setResponseCode(ResponseCode.OK);
-            return resp;
+            SmUsers save = smUsersRepService.save(user);
+            if (save != null) {
+                resp.setResponseCode(ResponseCode.OK);
+            } else {
+                logger.debug("用户添加失败：" + save.toString());
+                resp.setResponseCode(ResponseCode.INERERROR);
+            }
         }
-
+        wirte(response, resp);
     }
 
     //根据id查询用户是否存在
@@ -120,65 +135,61 @@ public class UsersController extends BaseEntityController<SmUsers> {
 //    //删除
     @RequestMapping(value = "/delete")
     @ResponseBody
-    public AtResponse<String> delete(@RequestParam(name = "userId", required = true) String userId) {
+    public void delete(HttpServletResponse response, @RequestBody(required = true) String map) {
+        Map<String, String> parse = (Map) JSON.parse(map);
+        String userId = parse.get("userId");
         smUsersRepService.delete(userId);
         String message;
         AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
         message = "删除成功";
         resp.setResponseCode(ResponseCode.OK);
         resp.setData(message);
-        return resp;
+        wirte(response, resp);
     }
 
     @RequestMapping(value = "/editor")
     @ResponseBody
-    public AtResponse editor(@RequestParam(name = "userId", required = true) String userId) {
-        Map<String, Object> params = new HashMap<>();
-        SmUsers user = smUsersRepService.findOne(userId);
-        params.put("user", user);
-        RoleUser roleUser = null;
-        //roleUserRepository.findByUser(user);
-        params.put("role", roleUser.getRole());
-        AtResponse<Map<String, Object>> resp = new AtResponse(System.currentTimeMillis());
-        resp.setResponseCode(ResponseCode.OK);
-        resp.setData(params);
-        return resp;
+    public AtResponse editor(HttpServletResponse response, @RequestBody SmUsers map) {
+        AtResponse<String> stringAtResponse = super.editSave(map, map.getUserId(), smUsersRepService);
+        return stringAtResponse;
     }
 
-//    //修改密码
-//    @RequestMapping(value = "/changePassword")
-//    @ResponseBody
-//    public AtResponse updPwd(String jiuPassword, String password) {
-//        AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
-//        SmUsers user = smUsersRepService.findOne(getUserId());
-//        ShaPasswordEncoder encoder = new ShaPasswordEncoder();
+    //修改密码
+    @RequestMapping(value = "/changePassword")
+    @ResponseBody
+    public void updPwd(HttpServletResponse response, @RequestBody String map) {
+        AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
+        Map<String, String> parse = (Map) JSON.parse(map);
+        SmUsers user = smUsersRepService.findOne(getUserId());
+        ShaPasswordEncoder encoder = new ShaPasswordEncoder();
 //        if (user.getUserPwd().equals(encoder.encodePassword(jiuPassword, null))) {
+        if (user.getUserPwd().equals(parse.get("jiuPassword"))) {
 //            String pwd = encoder.encodePassword(password, null);
-//            smUsersRepService.setPasswordFor(pwd, getUserId());
-//            resp.setResponseCode(ResponseCode.OK);
-//            resp.setMessage("修改成功！");
-//        } else {
-//            resp.setResponseCode(ResponseCode.INERERROR2);
-//            resp.setMessage("原密码错误！");
-//        }
-//
-//        return resp;
-//
-//
-//    }
+            smUsersRepService.setPasswordFor(parse.get("password"), getUserId());
+            resp.setResponseCode(ResponseCode.OK);
+            resp.setMessage("修改成功！");
+        } else {
+            resp.setResponseCode(ResponseCode.INERERROR2);
+            resp.setMessage("原密码错误！");
+        }
+
+        wirte(response, resp);
+
+
+    }
 
     //保存编辑
-    @RequestMapping(value = "/editorUser")
+    @PostMapping(value = "/editorUser")
     @ResponseBody
-    public AtResponse editorUser(@ModelAttribute SmUsers user, String role) {
+    public AtResponse editorUser(HttpServletResponse response, @RequestBody SmUsers user) {
+
         AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
-        if (StringUtils.isEmpty(role)) {
+        if (StringUtils.isEmpty(user.getRoleId())) {
             resp.setResponseCode(ResponseCode.INERERROR);
             resp.setMessage("请选择角色！");
             return resp;
         }
-        SmUsers updateUser = smUserService.editor(user, role);
-        String message = "";
+        SmUsers updateUser = smUserService.editor(user, user.getRoleId());
         if (updateUser == null) {
             resp.setResponseCode(ResponseCode.INERERROR);
             resp.setMessage("编辑失败,请重新添加！");

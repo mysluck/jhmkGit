@@ -1,11 +1,11 @@
 package com.jhmk.earlywaring.auth;
 
+import com.jhmk.earlywaring.controller.HosptailLogController;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.util.JWTUtil;
 import io.jsonwebtoken.Claims;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,7 +24,8 @@ import java.util.Map;
 
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
-    public static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
+    Logger logger = Logger.getLogger(HosptailLogController.class);
+
     @Autowired
     private AuthUserDetailsServiceImpl userDetailsService;
     @Autowired
@@ -35,12 +36,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             HttpServletRequest request,
             HttpServletResponse response,
             FilterChain chain) throws ServletException, IOException {
-        String servletPath = request.getServletPath();
-
-//        if (servletPath.contains("login") || servletPath.contains("rule") || servletPath.contains("dept")) {
-//            chain.doFilter(request, response);
-//        } else {
-
         String token = request.getHeader("token");
         try {
             Claims claims = JWTUtil.parseJWT(token);
@@ -66,7 +61,6 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             writer.flush();
             writer.close();
         }
-//        }
 
     }
 

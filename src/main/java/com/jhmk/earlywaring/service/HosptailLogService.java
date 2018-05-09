@@ -160,8 +160,8 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
      * @return
      */
 
-    public Map<String, Object> getKpi() {
-        HttpHeaders headers = getHeader();
+    public String getKpi() {
+        HttpHeaders headers = HttpHeadersUtils.getHeader();
         Map<String, String> postParameters = new HashMap<>();
 //        if (deptName == null || deptName.equals("")) {
 //            deptName = "全科室";
@@ -173,16 +173,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         //发送
         String json = restTemplate.postForObject(KPICOUNT, r, String.class);
 
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String code = (String) jsonObject.get("code");
-        String message = (String) jsonObject.get("message");
-        Map<String, Object> result = null;
-//        if (BaseConstants.OK.equals(code) && BaseConstants.SUCCESS.equals(message)) {
-        result = (Map) jsonObject.get("result");
-        return result;
-//        }
-//        logger.info("统计kpi科室部门无法匹配：:"+deptName);
-//        return result;
+        return json;
     }
 
     /**
@@ -193,8 +184,8 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
      * @param deptName  父dept Name
      * @return
      */
-    public Map<String, Object> countForDate(String startTime, String endTime, String deptName) {
-        HttpHeaders headers = getHeader();
+    public String countForDate(String startTime, String endTime, String deptName) {
+        HttpHeaders headers = HttpHeadersUtils.getHeader();
         Map<String, String> postParameters = new HashMap<>();
         postParameters.put("department", deptName);
         postParameters.put("startdate", startTime);
@@ -203,34 +194,11 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         HttpEntity<String> r = new HttpEntity(postParameters, headers);
         //发送
         String json = restTemplate.postForObject(HOSPITALINFO, r, String.class);
-
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String code = (String) jsonObject.get("code");
-        String message = (String) jsonObject.get("message");
-        if (BaseConstants.OK.equals(code) && BaseConstants.SUCCESS.equals(message)) {
-            Map<String, Object> result = (Map) jsonObject.get("result");
-            if(result!=null){
-                Map<String, Object> o = (Map)result.get(deptName);
-            return o;
-            }
-            logger.info(HOSPITALINFO+"查询失败：部门id" + code + ",返回信息：" + message);
-
-            return null;
-        } else {
-            logger.error("全院数据科室分析之科室门诊数和住院数查询失败：部门id" + code + ",返回信息：" + message);
-            return null;
-        }
+        return json;
 
     }
 
 
-    private HttpHeaders getHeader() {
-        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
-        HttpHeaders headers = HttpHeadersUtils.getHttpHeadersByCharsAndMed(Collections.singletonList(Charset.forName("UTF-8")),
-                Collections.singletonList(MediaType.ALL));
-        headers.setContentType(type);
-        return headers;
-    }
 
 }
 

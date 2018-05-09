@@ -7,6 +7,7 @@ import com.jhmk.earlywaring.entity.SmRole;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.RoleUserRepository;
 import com.jhmk.earlywaring.entity.repository.SmRoleRepository;
+import com.jhmk.earlywaring.entity.repository.service.RoleUserRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ public class SmRoleService {
     @Autowired
     SmUsersRepService userRepository;
     @Autowired
-    RoleUserRepository roleUserRepository;
+    RoleUserRepService roleUserRepository;
 
     /**
      * 更新用户角色
@@ -33,19 +34,15 @@ public class SmRoleService {
      */
     public void updateRoleUser(String id, String role) {
         SmUsers user = userRepository.findOne(id);
-        List<RoleUser> roleUserByUserId = null;
-        //roleUserRepository.getRoleUserByUserId(id);
-        //roleUserRepository.findOne(id);
-        roleUserRepository.delete(roleUserByUserId);
+        RoleUser byUser = roleUserRepository.findByUser(user);
+        roleUserRepository.delete(byUser);
         if (StringUtils.isNotBlank(role)) {
-            String[] roles = role.split(",");
-            List<RoleUser> list = new ArrayList<>();
             RoleUser r = new RoleUser();
             RoleUserId roleUserId = new RoleUserId();
             roleUserId.setRoleId(role);
             roleUserId.setUserId(id);
-//                roleUser.setUserRoleId(roleUserId);
-//            roleUserRepository.save(roleUser);
+            r.setUserRoleId(roleUserId);
+            roleUserRepository.save(r);
         }
     }
 

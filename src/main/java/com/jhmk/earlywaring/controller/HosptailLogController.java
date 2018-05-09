@@ -1,12 +1,9 @@
 package com.jhmk.earlywaring.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.DeptRel;
-import com.jhmk.earlywaring.entity.SmDepts;
-import com.jhmk.earlywaring.entity.SmEvaluate;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.repository.service.DeptRelRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
@@ -17,26 +14,23 @@ import com.jhmk.earlywaring.service.HosptailLogService;
 import com.jhmk.earlywaring.service.RuleService;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
 import java.util.*;
 
 @Controller
 @RequestMapping("/smHosptailLog")
 public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
 
+
+    private static final Logger logger = LoggerFactory.getLogger(HosptailLogController.class);
 
     @Autowired
     HosptailLogService hosptailLogService;
@@ -52,7 +46,6 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     DeptRelRepService deptRelRepService;
 
 
-
     /**
      * 获取医院kpi数据
      *
@@ -61,7 +54,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getKpi")
     @ResponseBody
     public void getKpi(HttpServletResponse response) {
-        Map<String, Object> data = hosptailLogService.getKpi();
+        String data = hosptailLogService.getKpi();
         wirte(response, data);
     }
 
@@ -75,10 +68,10 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @ResponseBody
     public void getCountByDate(HttpServletResponse response, @RequestBody String map) {
         Map<String, String> paramMap = (Map) JSON.parse(map);
-        String startTime = paramMap.get("startTime");
-        String endTime = paramMap.get("endTime");
-        String deptName = paramMap.get("deptName");
-        Map<String, Object> data = hosptailLogService.countForDate(startTime, endTime, deptName);
+        String startTime = paramMap.get("startdate");
+        String endTime = paramMap.get("enddate");
+        String deptName = paramMap.get("department");
+        String data = hosptailLogService.countForDate(startTime, endTime, deptName);
         wirte(response, data);
     }
 
@@ -90,6 +83,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getAlartCount")
     @ResponseBody
     public void getAlartCount(HttpServletResponse response) {
+        AtResponse<Map<String,Object>> resp=new AtResponse();
         //科室预警c次数
         int deptCount = smHosptailLogRepService.getCountAllByAlarmCode(BaseConstants.ALARM_CODE1, BaseConstants.ALARMSTSTUS1);
         //住院预警
@@ -100,7 +94,9 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
         data.put("deptCount", deptCount);
         data.put("hospitalCount", hospitalCount);
         data.put("allCount", allCount);
-        wirte(response, data);
+        resp.setData(data);
+        resp.setResponseCode(ResponseCode.OK);
+        wirte(response, resp);
     }
 
     /**
@@ -112,7 +108,9 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getDeptCount")
     @ResponseBody
     public void getDeptCount(HttpServletResponse response, @RequestBody(required = false) String map) {
+        AtResponse<Map<String, Map<String, Integer>>>resp=new AtResponse<>();
         Map<String, String> paramMap = (Map) JSON.parse(map);
+
         int yearNow;
         if (paramMap != null) {
             yearNow = Integer.valueOf(paramMap.get("year"));
@@ -120,8 +118,10 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
             yearNow = DateFormatUtil.getYearNow();
         }
 
-        Map<String, Map<String, Integer>> deptForSicknesss = hosptailLogService.countByDept(yearNow);
-        wirte(response, deptForSicknesss);
+        Map<String, Map<String, Integer>>  deptForSicknesss = hosptailLogService.countByDept(yearNow);
+        resp.setData(deptForSicknesss);
+        resp.setResponseCode(ResponseCode.OK);
+        wirte(response, resp);
     }
 
     /**
@@ -130,22 +130,37 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getDepts")
     @ResponseBody
     public void getDepts(HttpServletResponse response) {
+        AtResponse<Integer>resp=new AtResponse<>();
         List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
-        wirte(response, distinctByDeptCode.size());
+        resp.setData(distinctByDeptCode.size());
+        resp.setResponseCode(ResponseCode.OK);
+        wirte(response, resp);
     }
 
 
     /**
      * 获取主管医生数量 todo
-     *
      */
     @PostMapping("/getDoctors")
     @ResponseBody
     public void getDoctors(HttpServletResponse response) {
-        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
-        wirte(response, distinctByDeptCode.size());
-    }
+        AtResponse<String> atResponse = new AtResponse(System.currentTimeMillis());
 
+        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
+        if (distinctByDeptCode != null) {
+            atResponse.setMessage(BaseConstants.SUCCESS);
+            atResponse.setResponseCode(ResponseCode.OK);
+            int size = distinctByDeptCode.size();
+            atResponse.setData(String.valueOf(size));
+            wirte(response,atResponse );
+        }
+        else{
+            atResponse.setResponseCode(ResponseCode.INERERROR);
+            logger.info("获取医生数量失败："+distinctByDeptCode.size());
+            wirte(response,atResponse );
+
+        }
+    }
 
 
     /**
@@ -157,6 +172,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getPersonCount")
     @ResponseBody
     public void getPersonCount(HttpServletResponse response, @RequestBody(required = false) String map) {
+        AtResponse<Map<String, Map<String, Integer>> > atResponse = new AtResponse(System.currentTimeMillis());
         String deptId;
         int yearTime = 0;
         Map<String, String> paramMap = (Map) JSON.parse(map);
@@ -167,12 +183,12 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
             yearTime = DateFormatUtil.getYearNow();
             deptId = getFuDeptId();
         }
-
-        Map<String, Object> data = new HashMap<>();
         //人员分布
         Map<String, Map<String, Integer>> peopleForSicknesss = hosptailLogService.countByDeptAndUser(deptId, yearTime);
-        data.put("peopleForSicknesss", peopleForSicknesss);
-        wirte(response, data);
+        atResponse.setResponseCode(ResponseCode.OK);
+        atResponse.setMessage(BaseConstants.SUCCESS);
+        atResponse.setData(peopleForSicknesss);
+        wirte(response, atResponse);
     }
 
 
@@ -187,7 +203,8 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @ResponseBody
     public void getCountForSick(HttpServletResponse response, @RequestBody(required = false) String map) {
 
-
+        AtResponse<Map<String, Object>> atResponse = new AtResponse(System.currentTimeMillis());
+        Map<String, Object> param = new HashMap<>();
         String deptId;
         int yearTime = 0;
         Map<String, String> paramMap = (Map) JSON.parse(map);
@@ -200,7 +217,13 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
         }
         //触发疾病统功能
         Map<String, Integer> countByDeptAndSickness = hosptailLogService.getCountByDeptAndSickness(deptId, yearTime);
-        wirte(response, countByDeptAndSickness);
+        param.put("result", countByDeptAndSickness);
+        atResponse.setResponseCode(ResponseCode.OK);
+        atResponse.setMessage(BaseConstants.SUCCESS);
+        atResponse.setData(param);
+
+
+        wirte(response, atResponse);
     }
 
 }
