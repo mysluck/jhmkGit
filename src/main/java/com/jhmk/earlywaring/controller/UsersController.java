@@ -108,9 +108,11 @@ public class UsersController extends BaseEntityController<SmUsers> {
             SmUsers save = smUsersRepService.save(user);
             if (save != null) {
                 resp.setResponseCode(ResponseCode.OK);
+                resp.setMessage("用户添加成功");
             } else {
                 logger.debug("用户添加失败：" + save.toString());
                 resp.setResponseCode(ResponseCode.INERERROR);
+                resp.setMessage("用户添加失败");
             }
         }
         wirte(response, resp);

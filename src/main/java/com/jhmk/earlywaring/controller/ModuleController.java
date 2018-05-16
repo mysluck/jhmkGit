@@ -1,9 +1,11 @@
 package com.jhmk.earlywaring.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.jhmk.earlywaring.auth.AuthUserDetailsServiceImpl;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.entity.SmModule;
 import com.jhmk.earlywaring.entity.SmRole;
+import com.jhmk.earlywaring.entity.repository.service.SmModuleRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmRoleRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
@@ -16,7 +18,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/module")
@@ -29,27 +33,67 @@ public class ModuleController extends BaseEntityController<SmModule> {
     SmRoleRepService smRoleRepService;
     @Autowired
     RoleModuleService roleModuleService;
+    @Autowired
+    SmModuleRepService smModuleRepService;
 
-    @PostMapping("/moduleList")
+    /**
+     * 添加菜单
+     *
+     * @param response
+     * @param smModule
+     */
+    @PostMapping("/add")
     @ResponseBody
-    public void moduleList(HttpServletResponse response, @RequestBody String roleId) {
-        SmRole one = smRoleRepService.findOne(roleId);
-        AtResponse atResponse = new AtResponse();
-        if (one == null) {
-            atResponse.setResponseCode(ResponseCode.INERERROR);
-            logger.info("角色为空，请管理员添加角色后访问" + roleId);
-            wirte(response, atResponse);
-        } else {
-            List<SmModule> modules = roleModuleService.queryComponetByRole(roleId);
-            atResponse.setResponseCode(ResponseCode.OK);
-            wirte(response, modules);
+    public void add(HttpServletResponse response, @RequestBody SmModule smModule) {
+        smModule.setModUpdatedtime(new Timestamp(System.currentTimeMillis()));
+        smModule.setModUpdatedby(getUserId());
+        AtResponse<String> resp = super.add(smModule, smModuleRepService);
+        wirte(response, resp);
+    }
 
-        }
+    /**
+     * 删除菜单
+     *
+     * @param response
+     */
+
+    @PostMapping("/del")
+    @ResponseBody
+    public void del(HttpServletResponse response, @RequestBody String map) {
+        Map<String, String> param = (Map<String, String>) JSON.parse(map);
+        AtResponse<String> resp = super.delete(param.get("modCode"), smModuleRepService);
+
+        wirte(response, resp);
+    }
+
+    @PostMapping("/view")
+    @ResponseBody
+    public void view(HttpServletResponse response, @RequestBody SmModule smModule) {
+        //查询所有菜单  菜单级别分层
+        AtResponse<String> resp = super.editSave(smModule, smModuleRepService);
+        wirte(response, resp);
     }
 
 
     /**
-     * 角色对应功能
+     * 查询所有菜单
+     *
+     * @param response
+     */
+    @PostMapping("/moduleList")
+    @ResponseBody
+    public void moduleList(HttpServletResponse response) {
+        //查询所有菜单  菜单级别分层
+        List<SmModule> allModule = roleModuleService.getAllModule();
+        AtResponse atResponse = new AtResponse();
+        atResponse.setResponseCode(ResponseCode.OK);
+        atResponse.setData(allModule);
+        wirte(response, atResponse);
+    }
+
+
+    /**
+     * 角色对应菜单
      *
      * @return
      */
@@ -63,5 +107,18 @@ public class ModuleController extends BaseEntityController<SmModule> {
         atResponse.setResponseCode(ResponseCode.OK);
         atResponse.setData(modules);
         wirte(response, atResponse);
+    }
+
+    /**
+     * 为角色添加功能菜单
+     * todo  前端确定传输内容
+     *
+     * @param response
+     * @param map
+     */
+    @PostMapping("/addRoleModules")
+    @ResponseBody
+    public void addRoleModules(HttpServletResponse response, @RequestBody String map) {
+
     }
 }

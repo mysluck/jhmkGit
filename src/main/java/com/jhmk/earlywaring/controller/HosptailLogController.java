@@ -54,7 +54,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getKpi")
     @ResponseBody
     public void getKpi(HttpServletResponse response) {
-        String data = hosptailLogService.getKpi();
+        AtResponse data = hosptailLogService.getKpi();
         wirte(response, data);
     }
 
@@ -110,7 +110,6 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     public void getDeptCount(HttpServletResponse response, @RequestBody(required = false) String map) {
         AtResponse<Map<String, Map<String, Integer>>>resp=new AtResponse<>();
         Map<String, String> paramMap = (Map) JSON.parse(map);
-
         int yearNow;
         if (paramMap != null) {
             yearNow = Integer.valueOf(paramMap.get("year"));
@@ -148,7 +147,6 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
 
         List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
         if (distinctByDeptCode != null) {
-            atResponse.setMessage(BaseConstants.SUCCESS);
             atResponse.setResponseCode(ResponseCode.OK);
             int size = distinctByDeptCode.size();
             atResponse.setData(String.valueOf(size));
@@ -203,8 +201,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @ResponseBody
     public void getCountForSick(HttpServletResponse response, @RequestBody(required = false) String map) {
 
-        AtResponse<Map<String, Object>> atResponse = new AtResponse(System.currentTimeMillis());
-        Map<String, Object> param = new HashMap<>();
+        AtResponse<Map<String, Integer>> atResponse = new AtResponse(System.currentTimeMillis());
         String deptId;
         int yearTime = 0;
         Map<String, String> paramMap = (Map) JSON.parse(map);
@@ -217,12 +214,8 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
         }
         //触发疾病统功能
         Map<String, Integer> countByDeptAndSickness = hosptailLogService.getCountByDeptAndSickness(deptId, yearTime);
-        param.put("result", countByDeptAndSickness);
         atResponse.setResponseCode(ResponseCode.OK);
-        atResponse.setMessage(BaseConstants.SUCCESS);
-        atResponse.setData(param);
-
-
+        atResponse.setData(countByDeptAndSickness);
         wirte(response, atResponse);
     }
 
