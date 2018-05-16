@@ -1,13 +1,12 @@
 package com.jhmk.earlywaring.entity.repository;
 
-import com.jhmk.earlywaring.base.BaseRepository;
 import com.jhmk.earlywaring.entity.SmUsers;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, String>, JpaSpecificationExecutor<SmUsers>, BaseRepository<SmUsers> {
+public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, String>, JpaSpecificationExecutor<SmUsers>{
 
 //    SmUsers findByUserIdAndStatus(String id, String status);
 

@@ -1,9 +1,8 @@
 package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
-import com.jhmk.earlywaring.entity.SmEvaluate;
-import com.jhmk.earlywaring.entity.repository.SmEvaluateRepository;
-import com.jhmk.earlywaring.entity.repository.SmRoleRepository;
+import com.jhmk.earlywaring.entity.UserModel;
+import com.jhmk.earlywaring.entity.repository.UserModelRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,20 +14,20 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class SmEvaluateRepService extends BaseRepService<SmEvaluate, Integer> {
+public class UserModelRepService extends BaseRepService<UserModel, Integer> {
 
 
     @Autowired
-    SmEvaluateRepository repository;
+    UserModelRepository repository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public SmEvaluate save(SmEvaluate role) {
-        return repository.save(role);
+    public UserModel save(UserModel user) {
+        return repository.save(user);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Iterable<SmEvaluate> save(List<SmEvaluate> list) {
+    public Iterable<UserModel> save(List<UserModel> list) {
         return repository.save(list);
     }
 
@@ -39,31 +38,31 @@ public class SmEvaluateRepService extends BaseRepService<SmEvaluate, Integer> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(SmEvaluate role) {
-        repository.delete(role);
+    public void delete(UserModel user) {
+        repository.delete(user);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(List<SmEvaluate> list) {
+    public void delete(List<UserModel> list) {
         repository.delete(list);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmEvaluate findOne(Integer id) {
+    public UserModel findOne(Integer id) {
         return repository.findOne(id);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Iterable<SmEvaluate> findAll() {
+    public Iterable<UserModel> findAll() {
         return repository.findAll();
     }
 
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<SmEvaluate> findAll(Pageable pageable) {
+    public Page<UserModel> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
@@ -71,12 +70,18 @@ public class SmEvaluateRepService extends BaseRepService<SmEvaluate, Integer> {
     //筛选列表
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<SmEvaluate> findAll(Specification<SmEvaluate> specification, Pageable pageable) {
+    public Page<UserModel> findAll(Specification<UserModel> specification, Pageable pageable) {
         return repository.findAll(specification, pageable);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public  int setStatus(String status, String id){
-        return repository.setStatus(status,id);
+    public List<UserModel>findByUmParentIdAndUmHospitalName(Integer pid,String hname){
+        return repository.findByUmParentIdAndUmHospitalName(pid,hname);
     }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<UserModel>findByUmHospitalName(String hname){
+        return repository.findByUmHospitalName(hname);
+    }
+
 }

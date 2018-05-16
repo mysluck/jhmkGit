@@ -1,44 +1,27 @@
 package com.jhmk.earlywaring.entity;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_hosptail_log", schema = "jhmk_waring", catalog = "")
+@Table(name = "sm_hosptail_log", schema = "jhmk_waring")
 public class SmHosptailLog {
     private int id;
     private String suffererId;
     private String doctorId;
     private String deptId;
-    private String fa_dept_name;
-    private String faDeptName;
-    private String hitRate1;
-    private String hitRate3;
-    private String hitRate5;
-    //确认主疾病
     private String affirmSickness;
-    //疾病等级
     private String sicknessGrade;
-
-
-
-    //警报原因
     private String alarmCause;
-    //警报触发条件
     private String alarmCondition;
-    //警报结果
     private String alarmResult;
-    //1-科室预警 2-住院预警
     private String alarmCode;
-    //0 触发警报 1 未触发
     private String alarmStatus;
-    //c commom 通用 s Specialty 专科
     private String ruleType;
     private Date createTime;
     private Date outTime;
-
-
+    private String faDeptName;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -71,53 +54,13 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "dept_id", nullable = true)
+    @Column(name = "dept_id", nullable = true, length = 32)
     public String getDeptId() {
         return deptId;
     }
 
     public void setDeptId(String deptId) {
         this.deptId = deptId;
-    }
-
-    @Basic
-    @Column(name = "fa_dept_name", nullable = true)
-    public String getFaDeptName() {
-        return faDeptName;
-    }
-
-    public void setFaDeptName(String faDeptName) {
-        this.faDeptName = faDeptName;
-    }
-
-    @Basic
-    @Column(name = "hit_rate1", nullable = true, length = 255)
-    public String getHitRate1() {
-        return hitRate1;
-    }
-
-    public void setHitRate1(String hitRate1) {
-        this.hitRate1 = hitRate1;
-    }
-
-    @Basic
-    @Column(name = "hit_rate3", nullable = true, length = 255)
-    public String getHitRate3() {
-        return hitRate3;
-    }
-
-    public void setHitRate3(String hitRate3) {
-        this.hitRate3 = hitRate3;
-    }
-
-    @Basic
-    @Column(name = "hit_rate5", nullable = true, length = 255)
-    public String getHitRate5() {
-        return hitRate5;
-    }
-
-    public void setHitRate5(String hitRate5) {
-        this.hitRate5 = hitRate5;
     }
 
     @Basic
@@ -130,8 +73,8 @@ public class SmHosptailLog {
         this.affirmSickness = affirmSickness;
     }
 
-
-    @Column(name = "sickness_grade", nullable = true)
+    @Basic
+    @Column(name = "sickness_grade", nullable = true, length = 2)
     public String getSicknessGrade() {
         return sicknessGrade;
     }
@@ -220,6 +163,16 @@ public class SmHosptailLog {
         this.outTime = outTime;
     }
 
+    @Basic
+    @Column(name = "fa_dept_name", nullable = true, length = 32)
+    public String getFaDeptName() {
+        return faDeptName;
+    }
+
+    public void setFaDeptName(String faDeptName) {
+        this.faDeptName = faDeptName;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -229,10 +182,8 @@ public class SmHosptailLog {
                 Objects.equals(suffererId, that.suffererId) &&
                 Objects.equals(doctorId, that.doctorId) &&
                 Objects.equals(deptId, that.deptId) &&
-                Objects.equals(hitRate1, that.hitRate1) &&
-                Objects.equals(hitRate3, that.hitRate3) &&
-                Objects.equals(hitRate5, that.hitRate5) &&
                 Objects.equals(affirmSickness, that.affirmSickness) &&
+                Objects.equals(sicknessGrade, that.sicknessGrade) &&
                 Objects.equals(alarmCause, that.alarmCause) &&
                 Objects.equals(alarmCondition, that.alarmCondition) &&
                 Objects.equals(alarmResult, that.alarmResult) &&
@@ -240,12 +191,13 @@ public class SmHosptailLog {
                 Objects.equals(alarmStatus, that.alarmStatus) &&
                 Objects.equals(ruleType, that.ruleType) &&
                 Objects.equals(createTime, that.createTime) &&
-                Objects.equals(outTime, that.outTime);
+                Objects.equals(outTime, that.outTime) &&
+                Objects.equals(faDeptName, that.faDeptName);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, suffererId, doctorId, deptId, hitRate1, hitRate3, hitRate5, affirmSickness, alarmCause, alarmCondition, alarmResult, alarmCode, alarmStatus, ruleType, createTime, outTime);
+        return Objects.hash(id, suffererId, doctorId, deptId, affirmSickness, sicknessGrade, alarmCause, alarmCondition, alarmResult, alarmCode, alarmStatus, ruleType, createTime, outTime, faDeptName);
     }
 }
