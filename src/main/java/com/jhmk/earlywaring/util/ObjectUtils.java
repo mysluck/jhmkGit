@@ -164,4 +164,10 @@ public class ObjectUtils {
 
     }
 
+//    类似于3目运算符
+
+    public static String flagObj(Object str) {
+        return (String) Optional.ofNullable(str)
+                .orElse("");
+    }
 }

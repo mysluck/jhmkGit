@@ -151,6 +151,7 @@ public class CompareUtil {
 
             Map<String, String> v1 = ((Map) o1);
             Map<String, String> v2 = ((Map) o2);
+
             if (sort == 1) {
                 return v1.get(filed).compareTo(v2.get(filed));
             } else if (sort == -1) {

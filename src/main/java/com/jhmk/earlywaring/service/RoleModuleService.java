@@ -6,6 +6,7 @@ import com.jhmk.earlywaring.entity.SmRoleModule;
 import com.jhmk.earlywaring.entity.repository.service.SmModuleRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmRoleModuleRepService;
 import com.jhmk.earlywaring.util.CompareUtil;
+import org.apache.commons.collections.IteratorUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -56,6 +57,15 @@ public class RoleModuleService {
 //        Map<String, Map<String, String>> newMap = new HashMap<>();
 //        return list;
 //    }
+    public List<SmModule> getAllModule() {
+        Iterable<SmModule> all = smModuleRepService.findAll();
+        List<SmModule> list = new ArrayList<>();
+        all.forEach(single -> {
+            list.add(single);
+        });
+        List<SmModule> modules = gradeModule(list);
+        return modules;
+    }
 
 
     /**
@@ -69,9 +79,18 @@ public class RoleModuleService {
         for (SmRoleModule s : allByRoleId) {
             moduleNameList.add(s.getModuleId());
         }
-        List<SmModule> moduleList = new ArrayList<>();
         List<SmModule> modules = smModuleRepService.findByModCodeIn(moduleNameList);
-        Map<String, List<SmModule>> map = new HashMap<>();
+        List<SmModule> modules1 = gradeModule(modules);
+        return modules1;
+    }
+
+    /**
+     * 菜单分级  1级菜单下分 2级菜单
+     *
+     * @return
+     */
+    private List<SmModule> gradeModule(List<SmModule> modules) {
+        List<SmModule> moduleList = new ArrayList<>();
 
         for (int i = 0; i < modules.size(); i++) {
             SmModule s = modules.get(i);
@@ -96,7 +115,6 @@ public class RoleModuleService {
                         childMdules.add(s);
                     }
                     module1.setChildMdules(childMdules);
-//                    modules.get(i).setChildMdules(childMdules);
                 } else {
                     List<SmModule> childMdules = new ArrayList<>();
                     childMdules.add(s);

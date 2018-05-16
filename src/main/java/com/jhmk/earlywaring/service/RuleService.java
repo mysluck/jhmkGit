@@ -1,13 +1,13 @@
 package com.jhmk.earlywaring.service;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jhmk.earlywaring.config.BaseConstants;
+import com.jhmk.earlywaring.entity.rule.FormatRule;
 import com.jhmk.earlywaring.entity.rule.ReciveRule;
-import com.jhmk.earlywaring.entity.rule.SendRule;
-import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
-import org.springframework.beans.BeanUtils;
+import com.jhmk.earlywaring.util.MapUtil;
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -124,27 +124,116 @@ public class RuleService {
      *
      * @param mes
      */
-    public Object ruleMatch(String mes) {
+    public ReciveRule ruleMatch(String mes) {
         JSONObject object = JSON.parseObject(mes);
         ReciveRule fill = ReciveRule.fill(object);
-        SendRule sendRule = new SendRule();
-        BeanUtils.copyProperties(fill, sendRule);
-        System.out.println(sendRule.toString());
-        List<Map<String, String>> binglizhenduan = fill.getBinglizhenduan();
-        Collections.sort(binglizhenduan,  CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
-        sendRule.setBinglizhenduan(binglizhenduan.get(0));
-        List<Map<String, String>> shouyezhenduan = fill.getShouyezhenduan();
-        Collections.sort(shouyezhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
-        sendRule.setShouyezhenduan(shouyezhenduan.get(0));
-        //检查报告
-        List<Map<String, String>> jianchabaogao = fill.getJianchabaogao();
-        Collections.sort(jianchabaogao, CompareUtil.createComparatorForMap(-1, "exam_time"));
-        sendRule.setJianchabaogao(jianchabaogao.get(0));
-        //检验报告
-        List<Map<String, String>> jianyanbaogao = fill.getJianyanbaogao();
-        Collections.sort(jianyanbaogao, CompareUtil.createComparatorForMap(-1, "report_time"));
-        sendRule.setJianchabaogao(jianyanbaogao.get(0));
-        return JSON.toJSON(sendRule);
+//        SendRule sendRule = new SendRule();
+//        BeanUtils.copyProperties(fill, sendRule);
+//        System.out.println(sendRule.toString());
+//        List<Map<String, String>> binglizhenduan = fill.getBinglizhenduan();
+//        Collections.sort(binglizhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
+//        List<Map<String, String>> blzdList = getRecentList(binglizhenduan, "diagnosis_name", "diagnosis_time");
+//
+//        sendRule.setBinglizhenduan(blzdList);
+//        List<Map<String, String>> shouyezhenduan = fill.getShouyezhenduan();
+//        Collections.sort(shouyezhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
+//        List<Map<String, String>> shzdList = getRecentList(shouyezhenduan, "diagnosis_name", "diagnosis_time");
+//        sendRule.setShouyezhenduan(shzdList);
+//        //检查报告
+//        List<Map<String, String>> jianchabaogao = fill.getRjianchabaogao();
+//        Collections.sort(jianchabaogao, CompareUtil.createComparatorForMap(-1, "exam_time"));
+//        List<Map<String, String>> jcList = getRecentList(jianchabaogao, "exam_item_name", "exam_time");
+//        sendRule.setJianchabaogao(jcList);
+//        //检验报告
+//        List<Map<String, String>> jianyanbaogao = fill.getRjianyanbaogao();
+//        Collections.sort(jianyanbaogao, CompareUtil.createComparatorForMap(-1, "report_time"));
+//        List<Map<String, String>> jyList = getRecentList(jianyanbaogao, "lab_item_name", "report_time");
+//
+//        sendRule.setJianyanbaogao(jyList);
+//        //医嘱
+//        List<Map<String, String>> yizhu = fill.getYizhu();
+//        Collections.sort(yizhu, CompareUtil.createComparatorForMap(-1, "order_begin_time"));
+//        sendRule.setYizhu(yizhu.get(0));
+        return fill;
     }
+
+
+    /**
+     * 去重  获取字段名唯一 日期最大的 map
+     *
+     * @param formData
+     * @param judgeField 去重字段名
+     * @param dateField  日期字段名 用来判断时间大小
+     * @return
+     */
+    private List<Map<String, String>> getRecentList(List<Map<String, String>> formData, String judgeField, String dateField) {
+        List<Map<String, String>> resultList = new LinkedList<>();
+        Map<String, Map<String, String>> onlyMap = new HashMap<>();
+        for (Map<String, String> map : formData) {
+            //map中存在此类检验、检查报告名  则判断检验日期 取最近
+            if (onlyMap.containsKey(map.get(judgeField))) {
+                Map<String, String> map1 = onlyMap.get(dateField);
+                if ((map1.get(dateField).compareTo(map.get(dateField))) == 1) {
+                    onlyMap.put(map.get(judgeField), map);
+                }
+            } else {
+                onlyMap.put(map.get(judgeField), map);
+            }
+        }
+
+        for (Map.Entry<String, Map<String, String>> entries : onlyMap.entrySet()) {
+            resultList.add(entries.getValue());
+        }
+        return resultList;
+    }
+    //解析所有原规则（用于界面规则显示）
+    public List<FormatRule> formatData(String forObject) {
+        List<FormatRule> list = new LinkedList<>();
+        Map<String, String> recieveData = (Map) JSON.parse(forObject.toString());
+
+        Object recieveOldData = recieveData.get("result");
+        JSONArray oldData = (JSONArray) recieveOldData;
+        int size = oldData.size();
+        for (int i = 0; i < size; i++) {
+            FormatRule formatRule = new FormatRule();
+            Map<String, String> obj = (Map) JSON.toJSON(oldData.get(i));
+            String ruleCondition1 = obj.get("ruleCondition");
+            System.out.println(ruleCondition1);
+            if (obj.get("ruleCondition") != null) {
+                String ruleCondition = obj.get("ruleCondition");
+                formatRule = MapUtil.map2Bean(obj, FormatRule.class);
+                // 解析"ruleCondition" -> "(门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)"
+                String condition = disposeRule(ruleCondition);
+                formatRule.setRuleCondition(condition);
+                list.add(formatRule);
+            }
+        }
+        return list;
+    }
+
+    /**
+     * @param ruleCondition (门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)
+     * @return 症状名称等于高血压&医嘱项编码等于aaa
+     */
+    private String disposeRule(String ruleCondition) {
+        System.out.println(ruleCondition);
+        //切割 根据and连接符  原始：(门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)
+        String s = ruleCondition.replaceAll("\\(|\\)", "");
+        System.out.println(s);
+        ruleCondition.replace(")", "");
+        String[] ands = s.split("and");
+        StringBuffer sb = new StringBuffer();
+        ;
+        for (int i = 0; i < ands.length; i++) {
+            String condition = ands[i];
+            String substring = condition.substring(condition.lastIndexOf("_") + 1);
+            sb.append(substring);
+            if (i != ands.length - 1) {
+                sb.append("&");
+            }
+        }
+        return sb.toString();
+    }
+
 
 }
