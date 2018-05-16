@@ -1,8 +1,3 @@
-///**
-// * Copyright (c) 2017. 北京江融信科技有限公司 版权所有
-// * Created on 17/6/5.
-// */
-//
 //package com.jhmk.earlywaring.config;
 //
 //import org.springframework.cache.annotation.CachingConfigurerSupport;

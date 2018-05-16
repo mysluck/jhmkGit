@@ -191,49 +191,6 @@ public class BaseEntityController<P> extends BaseController {
 
 
 
-    public AtResponse<Map<String, Object>> listDataByMap(@RequestParam Map<String, Object> params,
-                                                                        BaseRepository repository, String sortField) {
-        String pageStr = (String) params.get(WebPage.PAGE_NUM);
-        int page = 0;
-        if (pageStr != null && !"".equals(pageStr.trim())) {
-            // Pageable页面从0开始计
-            page = new Integer(pageStr) - 1;
-        }
-
-        WebPage webPage = new WebPage();
-        Pageable pageable = new PageRequest(page, webPage.getPageSize(), new Sort(Sort.Direction.DESC, sortField));
-
-        Specification    sf= getWhereClause(params);
-
-        //调用方法查询
-        Page<P> intrPage = jpaSpecificationExecutor.findAll(sf,pageable);
-        //设置查询数据
-        List<P> intrList = intrPage.getContent();
-        params.put(LIST_DATA, intrList);
-        int currentPage = page + 1;
-        // 当前页
-        webPage.setPageNo(currentPage);
-        // 总页数
-        webPage.setTotalPageNum(intrPage.getTotalPages());
-        // 总记录数
-        webPage.setTotalCount(intrPage.getTotalElements());
-
-        if (currentPage < intrPage.getTotalPages()) {
-            webPage.setHasNext(true);
-        }
-        if (currentPage > 1) {
-            webPage.setHasPre(true);
-        }
-        params.put(WebPage.WEB_PAGE, webPage);
-
-//        OperateBean operate = this.getOperateByRoleId(roleId);
-//        params.put(LIST_OPERATE, operate);
-
-        AtResponse<Map<String, Object>> resp = new AtResponse(System.currentTimeMillis());
-        resp.setResponseCode(ResponseCode.OK);
-        resp.setData(params);
-        return resp;
-    }
 
   public AtResponse<Map<String, Object>> listDataByMap(@RequestParam Map<String, Object> params,
                                                                         BaseRepService service, String sortField) {
@@ -442,6 +399,23 @@ public class BaseEntityController<P> extends BaseController {
 
     @Transactional(propagation = Propagation.REQUIRED)
     public AtResponse<String> editSave(P p,Object id,PagingAndSortingRepository repository) {
+        AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
+
+        P pNew = (P) repository.save(p);
+        String message=null;
+        if(pNew==null){
+            message="更新失败,请重新保存";
+            resp.setResponseCode(ResponseCode.INERERROR);
+        }else{
+            message="更新成功";
+            resp.setResponseCode(ResponseCode.OK);
+        }
+
+        resp.setMessage(message);
+        return resp;
+    }
+    @Transactional(propagation = Propagation.REQUIRED)
+    public AtResponse<String> editSave(P p,BaseRepService repository) {
         AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
 
         P pNew = (P) repository.save(p);

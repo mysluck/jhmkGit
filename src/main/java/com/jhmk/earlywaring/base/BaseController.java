@@ -82,7 +82,7 @@ public class BaseController {
 
 
     public void wirte(HttpServletResponse response, Object obj) {
-        response.setCharacterEncoding("UTF-8");
+        response.setCharacterEncoding("utf-8");
         try {
             PrintWriter writer = response.getWriter();
             writer.print(JSON.toJSON(obj));

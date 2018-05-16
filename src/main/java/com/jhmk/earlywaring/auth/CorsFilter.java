@@ -9,7 +9,6 @@ import java.io.IOException;
 public class CorsFilter implements javax.servlet.Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
-    System.err.println("CorsFilter");
     HttpServletResponse res = (HttpServletResponse) response;
     HttpServletRequest req = (HttpServletRequest) request;
 

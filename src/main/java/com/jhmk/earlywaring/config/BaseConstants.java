@@ -44,7 +44,14 @@ public class BaseConstants {
     public static final String findallnotsubmitrule = "http://192.168.8.20:8820/demo/med/cindecision/findallnotsubmitrule.json";
     public static final String findallsubmitrule = "http://192.168.8.20:8820/demo/med/cindecision/findallsubmitrule.json";
     public static final String submitrule = "http://192.168.8.20:8820/demo/med/cindecision/submitrule.json";
-//    public static final String addrule = "http://192.168.8.20:8820/demo/med/cindecision/addrule.json";
-
+    public static final String matchrule = "http://192.168.8.20:8820/demo/med/cindecision/matchrule.json";
+    //3.高级检索值域变量（post）
+    public static final String getfieldbyid = "http://192.168.8.31:8833/med/getfieldbyid.json";
+    //高级检索单位变量（post）
+    public static final String getunitsbyid = "http://192.168.8.31:8833/med/getunitsbyid.json";
+    //5.高级检索根据关键字检索 拼音or汉字（post）
+    public static final String searchbyvariablename = "http://192.168.8.31:8833/med/searchbyvariablename.json";
+    //接口：获取字段的特殊类型
+    public static final String getSpecialTypeByField = "http://192.168.8.31:8833/med/getSpecialTypeByField.json";
 
 }
