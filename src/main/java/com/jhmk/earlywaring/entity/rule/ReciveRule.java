@@ -7,13 +7,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+//规则匹配时，获取调用者请求信息 转化为接收规则信息
 public class ReciveRule extends BaseRule {
 
-
-    private List<Map<String, String>>  binglizhenduan;
-    private List<Map<String, String>>  shouyezhenduan;
-    private List<Map<String, String>>  jianyanbaogao;
-    private List<Map<String, String>> jianchabaogao;
+    private List<Map<String, String>> binglizhenduan;
+    private List<Map<String, String>> shouyezhenduan;
+    private List<Map<String, String>> rjianyanbaogao;
+    private List<Map<String, String>> rjianchabaogao;
     private List<Map<String, String>> yizhu;
 
     public List<Map<String, String>> getBinglizhenduan() {
@@ -32,8 +32,40 @@ public class ReciveRule extends BaseRule {
         this.shouyezhenduan = shouyezhenduan;
     }
 
-    public void setJianyanbaogao(List<Map<String, String>> jianyanbaogao) {
-        this.jianyanbaogao = jianyanbaogao;
+    public List<Map<String, String>> getRjianyanbaogao() {
+        return rjianyanbaogao;
+    }
+
+    public void setRjianyanbaogao(List<Map<String, String>> rjianyanbaogao) {
+        this.rjianyanbaogao = rjianyanbaogao;
+    }
+
+    public List<Map<String, String>> getRjianchabaogao() {
+        return rjianchabaogao;
+    }
+
+    public void setRjianchabaogao(List<Map<String, String>> rjianchabaogao) {
+        this.rjianchabaogao = rjianchabaogao;
+    }
+
+    @Override
+    public String getDept_id() {
+        return super.getDept_id();
+    }
+
+    @Override
+    public void setDept_id(String dept_id) {
+        super.setDept_id(dept_id);
+    }
+
+    @Override
+    public String getDoctor_id() {
+        return super.getDoctor_id();
+    }
+
+    @Override
+    public void setDoctor_id(String doctor_id) {
+        super.setDoctor_id(doctor_id);
     }
 
     @Override
@@ -106,17 +138,6 @@ public class ReciveRule extends BaseRule {
         super.setPhysicalSign(physicalSign);
     }
 
-    public List<Map<String, String>> getJianyanbaogao() {
-        return jianyanbaogao;
-    }
-
-    public List<Map<String, String>> getJianchabaogao() {
-        return jianchabaogao;
-    }
-
-    public void setJianchabaogao(List<Map<String, String>> jianchabaogao) {
-        this.jianchabaogao = jianchabaogao;
-    }
 
     public List<Map<String, String>> getYizhu() {
         return yizhu;
@@ -126,8 +147,16 @@ public class ReciveRule extends BaseRule {
         this.yizhu = yizhu;
     }
 
+
     public static ReciveRule fill(JSONObject jo) {
         ReciveRule o = new ReciveRule();
+
+        if (jo.containsKey("doctor_id")) {
+            o.setPatient_id(jo.getString("doctor_id"));
+        }
+        if (jo.containsKey("dept_id")) {
+            o.setPatient_id(jo.getString("dept_id"));
+        }
         if (jo.containsKey("patient_id")) {
             o.setPatient_id(jo.getString("patient_id"));
         }
@@ -142,28 +171,28 @@ public class ReciveRule extends BaseRule {
             o.setBinganshouye((Map<String, String>) jo.get("binganshouye"));
         }
         if (jo.containsKey("bingchengjilu")) {
-            o.setBingchengjilu((Map<String, String>)jo.get("bingchengjilu"));
+            o.setBingchengjilu((Map<String, String>) jo.get("bingchengjilu"));
         }
         if (jo.containsKey("binglizhenduan")) {
-            o.setBinglizhenduan((List<Map<String, String>>)jo.get("binglizhenduan"));
+            o.setBinglizhenduan((List<Map<String, String>>) jo.get("binglizhenduan"));
         }
         if (jo.containsKey("shouyezhenduan")) {
-            o.setShouyezhenduan((List<Map<String, String>>)jo.get("shouyezhenduan"));
+            o.setShouyezhenduan((List<Map<String, String>>) jo.get("shouyezhenduan"));
         }
         if (jo.containsKey("ruyuanjilu")) {
-            o.setRuyuanjilu((Map<String, String>)jo.get("ruyuanjilu"));
+            o.setRuyuanjilu((Map<String, String>) jo.get("ruyuanjilu"));
         }
         if (jo.containsKey("physicalSign")) {
-            o.setPhysicalSign((Map<String, String>)jo.get("physicalSign"));
+            o.setPhysicalSign((Map<String, String>) jo.get("physicalSign"));
         }
         if (jo.containsKey("jianyanbaogao")) {
-            o.setJianyanbaogao((List<Map<String, String>>)jo.get("jianyanbaogao"));
+            o.setRjianyanbaogao((List<Map<String, String>>) jo.get("jianyanbaogao"));
         }
         if (jo.containsKey("jianchabaogao")) {
-            o.setJianchabaogao((List<Map<String, String>>)jo.get("jianchabaogao"));
+            o.setRjianchabaogao((List<Map<String, String>>) jo.get("jianchabaogao"));
         }
         if (jo.containsKey("yizhu")) {
-            o.setYizhu((List<Map<String, String>>)jo.get("yizhu"));
+            o.setYizhu((List<Map<String, String>>) jo.get("yizhu"));
         }
         return o;
     }

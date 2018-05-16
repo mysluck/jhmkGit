@@ -1,10 +1,10 @@
 package com.jhmk.earlywaring.entity.rule;
 
-import com.jhmk.earlywaring.entity.Binganshouye;
-
 import java.util.Map;
 
 public class BaseRule {
+    private String dept_id;
+    private String doctor_id;
     private String patient_id;
     private String visit_id;
     private String pageSource;
@@ -13,6 +13,22 @@ public class BaseRule {
     private Map<String,String> bingchengjilu;
     private Map<String,String> ruyuanjilu;
     private Map<String,String> physicalSign;
+
+    public String getDept_id() {
+        return dept_id;
+    }
+
+    public void setDept_id(String dept_id) {
+        this.dept_id = dept_id;
+    }
+
+    public String getDoctor_id() {
+        return doctor_id;
+    }
+
+    public void setDoctor_id(String doctor_id) {
+        this.doctor_id = doctor_id;
+    }
 
     public String getPatient_id() {
         return patient_id;

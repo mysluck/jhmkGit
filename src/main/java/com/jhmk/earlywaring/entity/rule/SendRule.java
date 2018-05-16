@@ -1,13 +1,14 @@
 package com.jhmk.earlywaring.entity.rule;
 
+import java.util.List;
 import java.util.Map;
 
 public class SendRule extends BaseRule {
-    private Map<String, String> jianyanbaogao;
-    private Map<String, String> jianchabaogao;
+    private List<Map<String, String>> jianyanbaogao;
+    private List<Map<String, String>> jianchabaogao;
     private Map<String, String> yizhu;
-    private Map<String, String> binglizhenduan;
-    private Map<String, String> shouyezhenduan;
+    private List<Map<String, String>> binglizhenduan;
+    private List<Map<String, String>> shouyezhenduan;
 
     @Override
     public String getPatient_id() {
@@ -69,19 +70,19 @@ public class SendRule extends BaseRule {
         super.setPhysicalSign(physicalSign);
     }
 
-    public Map<String, String> getJianyanbaogao() {
+    public List<Map<String, String>> getJianyanbaogao() {
         return jianyanbaogao;
     }
 
-    public void setJianyanbaogao(Map<String, String> jianyanbaogao) {
+    public void setJianyanbaogao(List<Map<String, String>> jianyanbaogao) {
         this.jianyanbaogao = jianyanbaogao;
     }
 
-    public Map<String, String> getJianchabaogao() {
+    public List<Map<String, String>> getJianchabaogao() {
         return jianchabaogao;
     }
 
-    public void setJianchabaogao(Map<String, String> jianchabaogao) {
+    public void setJianchabaogao(List<Map<String, String>> jianchabaogao) {
         this.jianchabaogao = jianchabaogao;
     }
 
@@ -89,19 +90,19 @@ public class SendRule extends BaseRule {
         return yizhu;
     }
 
-    public Map<String, String> getBinglizhenduan() {
+    public List<Map<String, String>> getBinglizhenduan() {
         return binglizhenduan;
     }
 
-    public void setBinglizhenduan(Map<String, String> binglizhenduan) {
+    public void setBinglizhenduan(List<Map<String, String>> binglizhenduan) {
         this.binglizhenduan = binglizhenduan;
     }
 
-    public Map<String, String> getShouyezhenduan() {
+    public List<Map<String, String>> getShouyezhenduan() {
         return shouyezhenduan;
     }
 
-    public void setShouyezhenduan(Map<String, String> shouyezhenduan) {
+    public void setShouyezhenduan(List<Map<String, String>> shouyezhenduan) {
         this.shouyezhenduan = shouyezhenduan;
     }
 
