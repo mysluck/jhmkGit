@@ -80,13 +80,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().formLogin().successHandler(new LogonSucessHandler())
                 .and().csrf().disable()
                 // 基于token，所以不需要session
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+//                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 //开启匿名访问
                 .anonymous().and()
                 //允许跨域
-                .addFilterBefore(new CorsFilter(), ChannelProcessingFilter.class)
+                .addFilterBefore(new CorsFilter(), ChannelProcessingFilter.class);
                 //验证token
-                .addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
+//                .addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
 
@@ -140,7 +140,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             //todo token 写法
             String token = null;
             try {
-                token = JWTUtil.createJWT(user.getUserId(), user.getUserName(), System.currentTimeMillis());
+                token = JWTUtil.createJWT(user.getUserId(), user.getUserPwd(), System.currentTimeMillis());
             } catch (Exception e) {
                 e.printStackTrace();
             }
