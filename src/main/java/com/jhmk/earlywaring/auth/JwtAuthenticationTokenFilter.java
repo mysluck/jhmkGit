@@ -5,6 +5,8 @@ import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.controller.HosptailLogController;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
+import com.jhmk.earlywaring.model.AtResponse;
+import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.util.JWTUtil;
 import io.jsonwebtoken.Claims;
 import org.apache.log4j.Logger;
@@ -40,12 +42,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             FilterChain chain) throws ServletException, IOException {
 
         String token = request.getHeader("token");
+        //设置session过期时间，每次访问资源都会经过过滤器，如超过2小时时间不访问则过期
+        request.getSession().setMaxInactiveInterval(2 * 60 * 60);
         response.setCharacterEncoding("utf-8");
         PrintWriter writer = response.getWriter();
 
         if (token == null) {
             String requestURI = request.getRequestURI();
-            System.out.println(requestURI);
+//            System.out.println(requestURI);
             if (requestURI.equals("/rule/ruleMatch")
                     || requestURI.contains("/users")
                     || requestURI.contains("/dept") || requestURI.contains("/login")
@@ -53,39 +57,39 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 chain.doFilter(request, response);
             } else {
                 logger.info("请求网址为：" + requestURI);
-                writer.write("user not login！please logn again");
-                writer.flush();
-                writer.close();
+                AtResponse resp = new AtResponse();
+                resp.setResponseCode(ResponseCode.INERERROR3);
+                resp.setMessage("用户未登录，请重新登陆");
+                writer.print(resp);
             }
         } else {
             String username = null;
+            String userPwd = null;
             try {
                 Claims claims = JWTUtil.parseJWT(token);
                 if (claims != null) {
                     Map map = claims;
                     username = (String) map.get("jti");
-                    SmUsers one = smUsersRepService.findOne(username);
+                    userPwd = (String) map.get("sub");
+                    SmUsers one = smUsersRepService.findByUserIdAndUserPwd(username, userPwd);
                     if (one != null) {
                         chain.doFilter(request, response);
                         logger.info("authenticated user " + username + ", setting security context");
                     } else {
-                        logger.info("请求用户为：" + username);
-                        writer.write("用户未注册，请注册后使用");
+                        logger.info("用户名或密码错误，请重新登录");
+                        AtResponse resp = new AtResponse();
+                        resp.setResponseCode(ResponseCode.INERERROR2);
+                        resp.setMessage("用户名或密码错误，请重新登录");
+                        writer.print(resp);
                     }
-//                    UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
-//
-//                    UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-//                            userDetails, null, userDetails.getAuthorities());
-//                    authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(
-//                            request));
-//                    SecurityContextHolder.getContext().setAuthentication(authentication);
-//                    chain.doFilter(request, response);
                 }
             } catch (Exception e) {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                //可以在这里指定重定向还是返回错误接口示例
                 logger.info("请求用户为：" + username);
-                writer.write("user not login！please logn again");
+                AtResponse resp = new AtResponse();
+                resp.setResponseCode(ResponseCode.INERERROR3);
+                resp.setMessage("用户未登录，请重新登录");
+                writer.print(resp);
                 writer.flush();
                 writer.close();
             }

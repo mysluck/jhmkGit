@@ -10,7 +10,8 @@ import java.util.List;
 public interface UserModelRepository extends PagingAndSortingRepository<UserModel, Integer>, JpaSpecificationExecutor<UserModel> {
     /**
      * 根据父id和医院名称查询
-     * @param pid 父id
+     *
+     * @param pid   父id
      * @param hname 医院名称
      * @return
      */
@@ -18,9 +19,17 @@ public interface UserModelRepository extends PagingAndSortingRepository<UserMode
     List<UserModel> findByUmParentIdAndUmHospitalName(Integer pid, String hname);
 
     /**
-     *
-     * @param hname
+     * @param hname 医院名称
      * @return
      */
     List<UserModel> findByUmHospitalName(String hname);
+
+    /**
+     * @param umname 字典名称
+     * @param hname
+     * @return
+     */
+    UserModel findByUmNameAndUmHospitalName(String umname, String hname);
+
+
 }

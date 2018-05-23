@@ -1,9 +1,12 @@
 package com.jhmk.earlywaring.entity.rule;
 
+import java.io.Serializable;
+import java.io.StringReader;
+
 /**
  * 格式化规则 用于前台显示
  */
-public class FormatRule {
+public class FormatRule implements Serializable {
     private String doctorId;
     private String createTime;
     //规则条件
@@ -11,11 +14,26 @@ public class FormatRule {
     private String id;
     //是否提交
     private String isSubmit;
+    //规则出处
     private String ruleSource;
-    private String identification;
+    //所属类别 医嘱 、诊断
+    private String classification;
+    //提示内容
     private String hintContent;
+    //示意内容
     private String signContent;
+    //预警等级
+    private String warninglevel;
+    //审核
+    private String examine;
+    //是否运行规则
+    private String isRun;
 
+    //专科标志
+    private String identification;
+
+    public FormatRule() {
+    }
 
     public String getDoctorId() {
         return doctorId;
@@ -87,5 +105,37 @@ public class FormatRule {
 
     public void setSignContent(String signContent) {
         this.signContent = signContent;
+    }
+
+    public String getWarninglevel() {
+        return warninglevel;
+    }
+
+    public void setWarninglevel(String warninglevel) {
+        this.warninglevel = warninglevel;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
+
+    public String getExamine() {
+        return examine;
+    }
+
+    public void setExamine(String examine) {
+        this.examine = examine;
+    }
+
+    public String getIsRun() {
+        return isRun;
+    }
+
+    public void setIsRun(String isRun) {
+        this.isRun = isRun;
     }
 }

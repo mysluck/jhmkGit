@@ -1,7 +1,10 @@
 package com.jhmk.earlywaring.config;
 
-public class BaseConstants {
+import org.springframework.stereotype.Component;
 
+
+@Component
+public class BaseConstants {
 
     public static final String USER_STATUS = "0";//用户状态 0-正常 1-异常
     public static final String CURRENT_ROLE_ID = "currentRoleId";
@@ -39,19 +42,33 @@ public class BaseConstants {
     public static final String RUYUANJILU = "ruyuanjilu";
 
     //getVariableList获取变量列表
-    public static final String getVariableList = "http://192.168.8.20:8820/demo/med/cindecision/getVariableList.json";
-    public static final String addrule = "http://192.168.8.20:8820/demo/med/cindecision/addrule.json";
-    public static final String findallnotsubmitrule = "http://192.168.8.20:8820/demo/med/cindecision/findallnotsubmitrule.json";
-    public static final String findallsubmitrule = "http://192.168.8.20:8820/demo/med/cindecision/findallsubmitrule.json";
-    public static final String submitrule = "http://192.168.8.20:8820/demo/med/cindecision/submitrule.json";
-    public static final String matchrule = "http://192.168.8.20:8820/demo/med/cindecision/matchrule.json";
+    public static final String getVariableList = "/med/cindecision/getVariableList.json";
+    public static final String addrule = "/med/cindecision/addrule.json";
+    public static final String findallnotsubmitrule = "/med/cindecision/findallnotsubmitrule.json";
+    public static final String findallsubmitrule = "/med/cindecision/findallsubmitrule.json";
+    public static final String submitrule = "/med/cindecision/submitrule.json";
+    public static final String matchrule = "/med/cindecision/matchrule.json";
+
+    //改变预警等级
+    public static final String changewarninglevel = "/med/cindecision/changewarninglevel.json";
+    //审核规则
+    public static final String examinerule = "/med/cindecision/examinerule.json";
+    //是否运行规则
+    public static final String isrunruler = "/med/cindecision/isrunruler.json";
+    //专科标识
+    public static final String changeIdentification = "/med/cindecision/changeIdentification.json";
+    public static final String deleterule = "/med/cindecision/deleterule.json";
+
+
+//医问道接口
     //3.高级检索值域变量（post）
-    public static final String getfieldbyid = "http://192.168.8.31:8833/med/getfieldbyid.json";
+    public static final String getfieldbyid =  "/med/getfieldbyid.json";
     //高级检索单位变量（post）
-    public static final String getunitsbyid = "http://192.168.8.31:8833/med/getunitsbyid.json";
+    public static final String getunitsbyid =  "/med/getunitsbyid.json";
     //5.高级检索根据关键字检索 拼音or汉字（post）
-    public static final String searchbyvariablename = "http://192.168.8.31:8833/med/searchbyvariablename.json";
+    public static final String searchbyvariablename =  "/med/searchbyvariablename.json";
     //接口：获取字段的特殊类型
-    public static final String getSpecialTypeByField = "http://192.168.8.31:8833/med/getSpecialTypeByField.json";
+    public static final String getSpecialTypeByField =  "/med/getSpecialTypeByField.json";
+    public static final String getVariableListNew =  "/med/getVariableListNew.json";
 
 }

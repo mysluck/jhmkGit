@@ -69,5 +69,10 @@ public class UserDataModelMappingRepService extends BaseRepService<UserDataModel
         return repository.findByUmNamePath(umNamePath);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public UserDataModelMapping findByDmNamePath(String dmNamePath) {
+        return repository.findByDmNamePath(dmNamePath);
+    }
+
 
 }

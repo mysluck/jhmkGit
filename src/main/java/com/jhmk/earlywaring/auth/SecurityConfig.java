@@ -75,7 +75,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
 
-                .antMatchers("users/**","/rule/**", "/dept/**", "/login").permitAll()
+                .antMatchers("users/**", "/rule/**", "/dept/**", "/login").permitAll()
                 .anyRequest().authenticated()
                 .and().formLogin().successHandler(new LogonSucessHandler())
                 .and().csrf().disable()
@@ -85,7 +85,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .anonymous().and()
                 //允许跨域
                 .addFilterBefore(new CorsFilter(), ChannelProcessingFilter.class);
-                //验证token
+        //验证token
 //                .addFilterAfter(authenticationTokenFilterBean(), UsernamePasswordAuthenticationFilter.class);
     }
 
@@ -160,8 +160,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             }
 
             httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, currentRoleId);
-            //设置session超时时间(12小时)
-            httpServletRequest.getSession().setMaxInactiveInterval(12 * 60 * 60);
+            //设置session超时时间(2小时)
+            httpServletRequest.getSession().setMaxInactiveInterval(2 * 60 * 60);
+//            System.out.println("session登陆：=================" + httpServletRequest.getSession().getId());
+
             logger.info("登录成功");
             httpServletResponse.setHeader(BaseConstants.TOKEN, token);
             PrintWriter out = null;
@@ -174,9 +176,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
             } catch (IOException e) {
                 resp.setResponseCode(ResponseCode.INERERROR);
                 e.printStackTrace();
+            } finally {
+                out.close();
             }
-            out.flush();
-            out.close();
         }
     }
 

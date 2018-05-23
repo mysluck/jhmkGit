@@ -5,4 +5,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserDataModelMappingRepository extends JpaRepository<UserDataModelMapping, Integer> {
     UserDataModelMapping findByUmNamePath(String umNamePath);
+    UserDataModelMapping findByDmNamePath(String dmNamePath);
 }

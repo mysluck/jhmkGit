@@ -12,8 +12,8 @@ public class ReciveRule extends BaseRule {
 
     private List<Map<String, String>> binglizhenduan;
     private List<Map<String, String>> shouyezhenduan;
-    private List<Map<String, String>> rjianyanbaogao;
-    private List<Map<String, String>> rjianchabaogao;
+    private List<Map<String, String>> jianyanbaogao;
+    private List<Map<String, String>> jianchabaogao;
     private List<Map<String, String>> yizhu;
 
     public List<Map<String, String>> getBinglizhenduan() {
@@ -33,19 +33,23 @@ public class ReciveRule extends BaseRule {
     }
 
     public List<Map<String, String>> getRjianyanbaogao() {
-        return rjianyanbaogao;
+        return jianyanbaogao;
     }
 
-    public void setRjianyanbaogao(List<Map<String, String>> rjianyanbaogao) {
-        this.rjianyanbaogao = rjianyanbaogao;
+    public List<Map<String, String>> getJianyanbaogao() {
+        return jianyanbaogao;
     }
 
-    public List<Map<String, String>> getRjianchabaogao() {
-        return rjianchabaogao;
+    public void setJianyanbaogao(List<Map<String, String>> jianyanbaogao) {
+        this.jianyanbaogao = jianyanbaogao;
     }
 
-    public void setRjianchabaogao(List<Map<String, String>> rjianchabaogao) {
-        this.rjianchabaogao = rjianchabaogao;
+    public List<Map<String, String>> getJianchabaogao() {
+        return jianchabaogao;
+    }
+
+    public void setJianchabaogao(List<Map<String, String>> jianchabaogao) {
+        this.jianchabaogao = jianchabaogao;
     }
 
     @Override
@@ -186,10 +190,10 @@ public class ReciveRule extends BaseRule {
             o.setPhysicalSign((Map<String, String>) jo.get("physicalSign"));
         }
         if (jo.containsKey("jianyanbaogao")) {
-            o.setRjianyanbaogao((List<Map<String, String>>) jo.get("jianyanbaogao"));
+            o.setJianyanbaogao((List<Map<String, String>>) jo.get("jianyanbaogao"));
         }
         if (jo.containsKey("jianchabaogao")) {
-            o.setRjianchabaogao((List<Map<String, String>>) jo.get("jianchabaogao"));
+            o.setJianchabaogao((List<Map<String, String>>) jo.get("jianchabaogao"));
         }
         if (jo.containsKey("yizhu")) {
             o.setYizhu((List<Map<String, String>>) jo.get("yizhu"));

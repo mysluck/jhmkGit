@@ -4,15 +4,15 @@ package com.jhmk.earlywaring.controller;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
-import com.jhmk.earlywaring.entity.SmUsers;
+import com.jhmk.earlywaring.config.UrlConfig;
 import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
+import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
 import com.jhmk.earlywaring.entity.rule.FormatRule;
 import com.jhmk.earlywaring.entity.rule.ReciveRule;
-import com.jhmk.earlywaring.entity.rule.SendRule;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
@@ -22,7 +22,11 @@ import com.jhmk.earlywaring.util.DateFormatUtil;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -50,6 +54,8 @@ public class RuleController extends BaseEntityController<Object> {
     @Autowired
     UserModelService userModelService;
     @Autowired
+    UrlConfig urlConfig;
+    @Autowired
     SmHosptailLogRepService smHosptailLogRepService;
 
     private static final Logger logger = LogManager.getLogger(RuleController.class);
@@ -62,7 +68,7 @@ public class RuleController extends BaseEntityController<Object> {
     @GetMapping("/getVariableList")
     @ResponseBody
     public void getVariableList(HttpServletResponse response) {
-        String forObject = restTemplate.getForObject(BaseConstants.getVariableList, String.class);
+        String forObject = restTemplate.getForObject(urlConfig.getCdssurl() + BaseConstants.getVariableList, String.class);
         wirte(response, forObject);
     }
 
@@ -88,7 +94,7 @@ public class RuleController extends BaseEntityController<Object> {
         Object o = JSON.toJSON(param);
         String forObject = "";
         try {
-            forObject = restTemplate.postForObject(BaseConstants.addrule, o, String.class);
+            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.addrule, o, String.class);
         } catch (Exception e) {
             logger.info("添加规则失败：" + o);
         } finally {
@@ -111,7 +117,8 @@ public class RuleController extends BaseEntityController<Object> {
         String forObject = "";
         List<FormatRule> foramtData = null;
         try {
-            forObject = restTemplate.postForObject(BaseConstants.findallnotsubmitrule, o, String.class);
+//            System.out.println(BaseConstants.findallnotsubmitrule);
+            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.findallnotsubmitrule, o, String.class);
             foramtData = ruleService.formatData(forObject);
 
 
@@ -134,8 +141,17 @@ public class RuleController extends BaseEntityController<Object> {
         Map<String, String> params = new HashMap<>();
         params.put("doctorId", userId);
         Object o = JSONObject.toJSON(params);
-        String forObject = restTemplate.postForObject(BaseConstants.findallsubmitrule, o, String.class);
-        wirte(response, forObject);
+        String forObject = "";
+        List<FormatRule> foramtData = null;
+        try {
+            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.findallsubmitrule, o, String.class);
+            foramtData = ruleService.formatData(forObject);
+        } catch (Exception e) {
+            logger.info("查询所有以提交的规则信息失败：" + o);
+        } finally {
+
+            wirte(response, foramtData);
+        }
     }
 
 
@@ -148,9 +164,64 @@ public class RuleController extends BaseEntityController<Object> {
     @ResponseBody
     public void submitrule(HttpServletResponse response, @RequestBody String map) {
         Object parse = JSONObject.parse(map);
-        String forObject = restTemplate.postForObject(BaseConstants.submitrule, parse, String.class);
+        String forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.submitrule, parse, String.class);
         wirte(response, forObject);
     }
+
+
+    /**
+     * 改变预警等级
+     *
+     * @param response
+     */
+    @PostMapping("/changewarninglevel")
+    @ResponseBody
+    public void changewarninglevel(HttpServletResponse response, @RequestBody String map) {
+        Object parse = JSONObject.parse(map);
+        String forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.changewarninglevel, parse, String.class);
+        wirte(response, forObject);
+    }
+
+    /**
+     * 审核规则
+     *
+     * @param response
+     */
+    @PostMapping("/examinerule")
+    @ResponseBody
+    public void examinerule(HttpServletResponse response, @RequestBody String map) {
+        Object parse = JSONObject.parse(map);
+        String forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.examinerule, parse, String.class);
+        wirte(response, forObject);
+    }
+
+
+    /**
+     * 是否运行规则
+     *
+     * @param response
+     */
+    @PostMapping("/isrunruler")
+    @ResponseBody
+    public void isrunruler(HttpServletResponse response, @RequestBody String map) {
+        Object parse = JSONObject.parse(map);
+        String forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.isrunruler, parse, String.class);
+        wirte(response, forObject);
+    }
+
+    /**
+     * 专科标识
+     *
+     * @param response
+     */
+    @PostMapping("/changeIdentification")
+    @ResponseBody
+    public void changeIdentification(HttpServletResponse response, @RequestBody String map) {
+        Object parse = JSONObject.parse(map);
+        String forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.changeIdentification, parse, String.class);
+        wirte(response, forObject);
+    }
+
 
     /**
      * 6. 规则匹配
@@ -163,11 +234,12 @@ public class RuleController extends BaseEntityController<Object> {
         ReciveRule sendRule = ruleService.ruleMatch(map);
         Object o = JSON.toJSON(sendRule);
         System.out.println(o.toString());
+//        System.out.println(o.toString());
         AtResponse resp = new AtResponse();
         String data = "";
         try {
-
-            data = restTemplate.postForObject(BaseConstants.matchrule, o, String.class);
+//            System.out.println(urlConfig.getCdssurl() + BaseConstants.matchrule);
+            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
             Map<String, Object> result = (Map<String, Object>) JSON.parse(data);
             if ("200".equals(result.get("code"))) {
                 if (result.get("result") != null) {
@@ -179,21 +251,85 @@ public class RuleController extends BaseEntityController<Object> {
 
                 } else {
                     logger.info(map + "没有匹配到规则！" + data);
-                    resp.setMessage(BaseConstants.FALSE);
+                    resp.setMessage("规则匹配失败" + data);
                 }
                 resp.setResponseCode(ResponseCode.OK);
             } else {
                 logger.info("规则匹配失败！" + data);
-                resp.setMessage(BaseConstants.FALSE);
-                resp.setResponseCode(ResponseCode.INERERROR);
+                resp.setMessage("规则匹配失败" + data);
+                resp.setResponseCode(ResponseCode.INERERROR4);
             }
         } catch (Exception e) {
             logger.info("cdss服务器规则匹配失败！" + e.getMessage());
             resp.setMessage("规则匹配失败！服务器发生异常");
-            resp.setResponseCode(ResponseCode.INERERROR);
+            resp.setResponseCode(ResponseCode.INERERROR4);
         } finally {
             wirte(response, resp);
         }
 
     }
+
+    @PostMapping("/getRuleById")
+    @ResponseBody
+    public void getRuleById(HttpServletResponse response, @RequestBody String map) {
+
+        //todo 根据id获取原始规则
+        String data = null;
+        List<AnalyzeBean> restList = null;
+        try {
+
+            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, map, String.class);
+            restList = ruleService.restoreRule(data);
+        } catch (Exception e) {
+
+        } finally {
+            wirte(response, restList);
+        }
+
+
+    }
+
+
+    @PostMapping("/deleterule")
+    @ResponseBody
+    public void deleterule(HttpServletResponse response, @RequestBody String map) {
+        Map parse = (Map) JSONObject.parse(map);
+        String result = null;
+        try {
+            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, map, String.class);
+//            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, parse, String.class);
+        } catch (Exception e) {
+            logger.info("删除规则失败：" + map);
+        } finally {
+            wirte(response, result);
+        }
+
+    }
+
+
+    @PostMapping("/getVariableListNew")
+    @ResponseBody
+    public void getVariableListNew(HttpServletResponse response) {
+        String result = null;
+        LinkedMultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<LinkedMultiValueMap> entity = new HttpEntity<LinkedMultiValueMap>(multiValueMap, headers);
+        Map map = null;
+        try {
+            result = restTemplate.postForObject(urlConfig.getYwdurl() + BaseConstants.getVariableListNew, entity, String.class);
+            map = (Map) JSONObject.parse(result);
+            map.put("标识符", "");
+            System.out.println(map.get("再入院"));
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            logger.info("查询失败：");
+        } finally {
+            wirte(response, map);
+        }
+
+    }
+
+
 }

@@ -76,19 +76,14 @@ public class SmUsersRepService extends BaseRepService<SmUsers, String> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public int setPasswordFor(String password, String id){
-        return repository.setUserPasswordFor(password,id);
+    public int setPasswordFor(String password, String id) {
+        return repository.setUserPasswordFor(password, id);
     }
 
-//    //删除
-//    @Transactional(propagation = Propagation.REQUIRED)
-//    public int setUserDeleted(String deleted, String id) {
-//        return repository.setUserDeleted(deleted, id);
-//    }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public SmUsers findByUserIdAndUserPwd(String userId, String userPwd) {
+        return repository.findByUserIdAndUserPwd(userId, userPwd);
+    }
 
-//    @Transactional(propagation = Propagation.REQUIRED)
-//    public int setPasswordFor(String password, String id) {
-//        return repository.setUserPassword(password, id);
-//    }
 }

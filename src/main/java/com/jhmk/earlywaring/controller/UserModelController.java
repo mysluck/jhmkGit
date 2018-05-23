@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
+import com.jhmk.earlywaring.config.UrlConfig;
 import com.jhmk.earlywaring.entity.UserDataModelMapping;
 import com.jhmk.earlywaring.entity.UserModel;
 import com.jhmk.earlywaring.entity.repository.service.UserDataModelMappingRepService;
@@ -37,6 +38,8 @@ public class UserModelController extends BaseEntityController<UserModel> {
     public static final Logger logger = LoggerFactory.getLogger(UserModelController.class);
     @Autowired
     UserModelService userModelService;
+    @Autowired
+    UrlConfig urlConfig;
     @Autowired
     UserDataModelMappingRepService userDataModelMappingRepService;
     @Autowired
@@ -78,8 +81,8 @@ public class UserModelController extends BaseEntityController<UserModel> {
             Object o = JSON.toJSON(map);
             String data = "";
             try {
-                data = restTemplate.postForObject(BaseConstants.getfieldbyid, o, String.class);
-                Map<String,Object> parse = (Map<String, Object>) JSON.parse(data);
+                data = restTemplate.postForObject(urlConfig.getYwdurl() + BaseConstants.getfieldbyid, o, String.class);
+                Map<String, Object> parse = (Map<String, Object>) JSON.parse(data);
 //                resp.setResponseCode(ResponseCode.OK);
 //                resp.setData(data);
             } catch (Exception e) {
@@ -101,7 +104,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
     @RequestMapping(value = "/getunitsbyid")
     @ResponseBody
     public void getunitsbyid(HttpServletResponse response, @RequestBody String param) {
-        AtResponse resp=new AtResponse();
+        AtResponse resp = new AtResponse();
         Map<String, String> map = (Map) JSON.parse(param);
         String s = map.get("variableid");
         UserDataModelMapping mapping = userDataModelMappingRepService.findByUmNamePath(s);
@@ -111,7 +114,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
             String data = "";
             try {
 
-                data = restTemplate.postForObject(BaseConstants.getunitsbyid, o, String.class);
+                data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.getunitsbyid, o, String.class);
 //                JSONObject list=JSON.parseObject(data);
 //                Object o1 = list.get(0);
 //                JSONArray objects = JSONArray.parseArray(data);
@@ -137,7 +140,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
     @RequestMapping(value = "/searchbyvariablename")
     @ResponseBody
     public void searchbyvariablename(HttpServletResponse response, @RequestBody String param) {
-        AtResponse resp=new AtResponse();
+        AtResponse resp = new AtResponse();
         Map<String, String> map = (Map) JSON.parse(param);
         String fieldname = map.get("fieldname");
         map.put("fieldname", fieldname);
@@ -145,7 +148,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
         String data = "";
         try {
 
-            data = restTemplate.postForObject(BaseConstants.searchbyvariablename, o, String.class);
+            data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.searchbyvariablename, o, String.class);
             resp.setResponseCode(ResponseCode.OK);
             resp.setData(data);
         } catch (Exception e) {
@@ -174,7 +177,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
             String body = "";
 
             try {
-                data = restTemplate.postForEntity(BaseConstants.getSpecialTypeByField, entity, String.class);
+                data = restTemplate.postForEntity(urlConfig.getYwdurl() +BaseConstants.getSpecialTypeByField, entity, String.class);
                 body = data.getBody();
                 resp.setResponseCode(ResponseCode.OK);
             } catch (Exception e) {

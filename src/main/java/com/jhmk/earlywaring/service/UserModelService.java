@@ -9,7 +9,9 @@ import com.jhmk.earlywaring.entity.UserModel;
 import com.jhmk.earlywaring.entity.repository.service.UserDataModelMappingRepService;
 import com.jhmk.earlywaring.entity.repository.service.UserModelRepService;
 import com.jhmk.earlywaring.util.JsonUtil;
+import com.jhmk.earlywaring.util.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.LinkedList;
@@ -17,8 +19,9 @@ import java.util.List;
 
 @Service
 public class UserModelService {
-    private static final String hosptialName = "chaoyang";
-
+    //    private static final String hosptialName = "chaoyang";
+    @Value("${hospitalName}")
+    String hospitalName;
     @Autowired
     UserModelRepService userModelRepService;
     @Autowired
@@ -26,7 +29,7 @@ public class UserModelService {
 
     public List<UserModel> getVariableList() {
         //查询所有父类modul集合
-        List<UserModel> pModuls = userModelRepService.findByUmHospitalName(hosptialName);
+        List<UserModel> pModuls = userModelRepService.findByUmHospitalName(hospitalName);
 //        List<UserModel> pModuls = userModulRepService.findByUmParentIdAndUmHospitalName(null, hosptialName);
         List<UserModel> userModels = recursiveSel1(pModuls);
         return userModels;
@@ -76,7 +79,7 @@ public class UserModelService {
 
     public List<UserModel> recursiveSel(List<UserModel> pModuls) {
         for (int i = 0; i < pModuls.size(); i++) {
-            List<UserModel> childList = userModelRepService.findByUmParentIdAndUmHospitalName(pModuls.get(i).getUmId(), hosptialName);
+            List<UserModel> childList = userModelRepService.findByUmParentIdAndUmHospitalName(pModuls.get(i).getUmId(), hospitalName);
             if (childList.size() > 0) {
                 return recursiveSel(childList);
             }
@@ -196,10 +199,10 @@ public class UserModelService {
             AnalyzeBean child = JsonUtil.parseObject(obj.toString(), AnalyzeBean.class);
             String field = child.getField();
             UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-            sb.append(byUmNamePath.getDmNamePath())
-                    .append(child.getExp())
-                    .append(child.getValues())
-                    .append(child.getUnit());
+            sb.append(ObjectUtils.flagObj(byUmNamePath.getDmNamePath()))
+                    .append(ObjectUtils.flagObj(child.getExp()))
+                    .append(ObjectUtils.flagObj(child.getValues()))
+                    .append(ObjectUtils.flagObj(child.getUnit()));
 
             if (i != size - 1) {
                 sb.append("and");

@@ -84,4 +84,9 @@ public class UserModelRepService extends BaseRepService<UserModel, Integer> {
         return repository.findByUmHospitalName(hname);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public  UserModel findByUmNameAndUmHospitalName(String umname,String hname){
+        return repository.findByUmNameAndUmHospitalName(umname,hname);
+    }
+
 }

@@ -6,7 +6,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, String>, JpaSpecificationExecutor<SmUsers>{
+public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, String>, JpaSpecificationExecutor<SmUsers> {
 
 //    SmUsers findByUserIdAndStatus(String id, String status);
 
@@ -19,4 +19,7 @@ public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, S
     @Modifying
     @Query("update SmUsers u set u.userPwd = ?1 where u.userId = ?2")
     int setUserPasswordFor(String password, String id);
+
+
+    SmUsers findByUserIdAndUserPwd(String userId, String userPwd);
 }

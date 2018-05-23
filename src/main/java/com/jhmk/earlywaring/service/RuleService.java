@@ -3,6 +3,12 @@ package com.jhmk.earlywaring.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
+import com.jhmk.earlywaring.entity.UserDataModelMapping;
+import com.jhmk.earlywaring.entity.UserModel;
+import com.jhmk.earlywaring.entity.repository.service.UserDataModelMappingRepService;
+import com.jhmk.earlywaring.entity.repository.service.UserModelRepService;
+import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
 import com.jhmk.earlywaring.entity.rule.FormatRule;
 import com.jhmk.earlywaring.entity.rule.ReciveRule;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
@@ -21,6 +27,12 @@ import java.util.*;
 @Service
 public class RuleService {
 
+    @Autowired
+    UserDataModelMappingRepService userDataModelMappingRepService;
+    @Autowired
+    UserModelRepService userModelRepService;
+    @Autowired
+    UserModelService userModelService;
     @Autowired
     RestTemplate restTemplate;
 
@@ -186,19 +198,21 @@ public class RuleService {
         }
         return resultList;
     }
+
     //解析所有原规则（用于界面规则显示）
     public List<FormatRule> formatData(String forObject) {
         List<FormatRule> list = new LinkedList<>();
         Map<String, String> recieveData = (Map) JSON.parse(forObject.toString());
 
         Object recieveOldData = recieveData.get("result");
+//        List<FormatRule> formatRules = JSON.parseObject(JSON.toJSONString(recieveOldData), new TypeReference<List<FormatRule>>() {
+//        });
+//        System.out.println(formatRules.size());
         JSONArray oldData = (JSONArray) recieveOldData;
         int size = oldData.size();
         for (int i = 0; i < size; i++) {
             FormatRule formatRule = new FormatRule();
             Map<String, String> obj = (Map) JSON.toJSON(oldData.get(i));
-            String ruleCondition1 = obj.get("ruleCondition");
-            System.out.println(ruleCondition1);
             if (obj.get("ruleCondition") != null) {
                 String ruleCondition = obj.get("ruleCondition");
                 formatRule = MapUtil.map2Bean(obj, FormatRule.class);
@@ -216,11 +230,11 @@ public class RuleService {
      * @return 症状名称等于高血压&医嘱项编码等于aaa
      */
     private String disposeRule(String ruleCondition) {
-        System.out.println(ruleCondition);
         //切割 根据and连接符  原始：(门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)
+
         String s = ruleCondition.replaceAll("\\(|\\)", "");
+        s = s.trim();
         System.out.println(s);
-        ruleCondition.replace(")", "");
         String[] ands = s.split("and");
         StringBuffer sb = new StringBuffer();
         ;
@@ -236,4 +250,37 @@ public class RuleService {
     }
 
 
+    /**
+     * 解析现有规则，用于前台重新编辑显示
+     *
+     * @param data
+     * @return
+     */
+    public List<AnalyzeBean> restoreRule(String data) {
+        List<AnalyzeBean> objects = JSON.parseObject(data, new TypeReference<List<AnalyzeBean>>() {
+        });
+        List<AnalyzeBean> result = new LinkedList<>();
+        for (int i = 0; i < objects.size(); i++) {
+
+            AnalyzeBean analyzeBean = objects.get(i);
+            String field = analyzeBean.getField();
+            Optional.ofNullable(userModelRepService.findByUmNameAndUmHospitalName(field.substring(field.lastIndexOf("_") + 1), "bysy"))
+                    .ifPresent(s -> {
+                        analyzeBean.setUmType(s.getUmType());
+                    });
+
+            //java8
+            Optional.ofNullable(userDataModelMappingRepService.findByDmNamePath(field))
+                    .ifPresent(s -> {
+                        analyzeBean.setField(s.getUmNamePath());
+                    });
+
+            Optional.ofNullable(analyzeBean.getValue()).ifPresent(s -> {
+                String value = s.get(0);
+                analyzeBean.setValues(value);
+            });
+            result.add(analyzeBean);
+        }
+        return result;
+    }
 }
