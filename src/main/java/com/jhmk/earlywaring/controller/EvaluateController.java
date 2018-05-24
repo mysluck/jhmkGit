@@ -22,7 +22,7 @@ import java.util.Map;
 
 
 @Controller
-@RequestMapping("/evaluate")
+@RequestMapping("/warn/evaluate")
 public class EvaluateController extends BaseEntityController<SmEvaluate> {
 
     @Autowired

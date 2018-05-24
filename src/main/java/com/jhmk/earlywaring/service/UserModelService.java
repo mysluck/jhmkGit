@@ -3,6 +3,7 @@ package com.jhmk.earlywaring.service;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
 import com.jhmk.earlywaring.entity.UserDataModelMapping;
 import com.jhmk.earlywaring.entity.UserModel;
@@ -199,15 +200,34 @@ public class UserModelService {
             AnalyzeBean child = JsonUtil.parseObject(obj.toString(), AnalyzeBean.class);
             String field = child.getField();
             UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-            sb.append(ObjectUtils.flagObj(byUmNamePath.getDmNamePath()))
-                    .append(ObjectUtils.flagObj(child.getExp()))
-                    .append(ObjectUtils.flagObj(child.getValues()))
-                    .append(ObjectUtils.flagObj(child.getUnit()));
+            String dmNamePath = byUmNamePath.getDmNamePath();
 
-            if (i != size - 1) {
-                sb.append("and");
+            if (dmNamePath.contains(",")) {
+                String[] split = dmNamePath.split(",");
+                sb.append(ObjectUtils.flagObj(split[0]))
+                        .append(ObjectUtils.flagObj(child.getExp()))
+                        .append(ObjectUtils.flagObj(child.getValues()))
+                        .append(ObjectUtils.flagObj(child.getUnit()));
+                for (int j = 1; j < split.length; j++) {
+                    sb.append("and").append(split[j].replace("=", "等于"));
+                }
+                if (i != size - 1) {
+                    sb.append("and");
+                }
+
+            } else {
+
+                sb.append(ObjectUtils.flagObj(dmNamePath))
+                        .append(ObjectUtils.flagObj(child.getExp()))
+                        .append(ObjectUtils.flagObj(child.getValues()))
+                        .append(ObjectUtils.flagObj(child.getUnit()));
+
+                if (i != size - 1) {
+                    sb.append("and");
+                }
             }
         }
+
         sb.append(")");
         return sb.toString();
     }

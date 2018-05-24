@@ -30,7 +30,8 @@ public enum ResponseCode {
 
     INERERROR2(502,"用户或密码错误，请重新输入."),
     INERERROR3(503,"用户未登录，请重新登录."),
-    INERERROR4(504,"规则匹配失败."),
+    INERERROR4(504,"规则匹配失败"),
+    INERERROR5(505,"用户过期，请重新登陆"),
 
     ADDRERROR(650,"添加失败,请重新添加"),
 

@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/cdssTest")
+@RequestMapping("/warn/cdssTest")
 public class CdssController extends BaseController {
 
 

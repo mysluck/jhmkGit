@@ -65,6 +65,9 @@ public class SmDeptsRepService extends BaseRepService<SmDepts, String> {
         return repository.findAll(pageable);
     }
 
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<SmDepts> findDistinctByDeptCode() {
+        return repository.findDistinctByDeptCode();
+    }
 
 }

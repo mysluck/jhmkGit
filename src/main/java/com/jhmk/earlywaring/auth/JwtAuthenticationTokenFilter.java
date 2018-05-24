@@ -11,10 +11,6 @@ import com.jhmk.earlywaring.util.JWTUtil;
 import io.jsonwebtoken.Claims;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,8 +26,8 @@ import java.util.Map;
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     Logger logger = Logger.getLogger(HosptailLogController.class);
 
-    @Autowired
-    private AuthUserDetailsServiceImpl userDetailsService;
+    //    @Autowired
+//    private AuthUserDetailsServiceImpl userDetailsService;
     @Autowired
     SmUsersRepService smUsersRepService;
 
@@ -42,59 +38,60 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             FilterChain chain) throws ServletException, IOException {
 
         String token = request.getHeader("token");
+        Object sessionToken = request.getSession().getAttribute("token");
         //设置session过期时间，每次访问资源都会经过过滤器，如超过2小时时间不访问则过期
-        request.getSession().setMaxInactiveInterval(2 * 60 * 60);
         response.setCharacterEncoding("utf-8");
         PrintWriter writer = response.getWriter();
+        AtResponse resp = new AtResponse();
 
         if (token == null) {
             String requestURI = request.getRequestURI();
 //            System.out.println(requestURI);
-            if (requestURI.equals("/rule/ruleMatch")
-                    || requestURI.contains("/users")
-                    || requestURI.contains("/dept") || requestURI.contains("/login")
+            if (requestURI.equals("/warn/rule/ruleMatch")
+                    || requestURI.contains("warn/users")
+                    || requestURI.contains("warn/dept") || requestURI.contains("warn/login")
                     ) {
                 chain.doFilter(request, response);
             } else {
                 logger.info("请求网址为：" + requestURI);
-                AtResponse resp = new AtResponse();
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.setResponseCode(ResponseCode.INERERROR3);
                 resp.setMessage("用户未登录，请重新登陆");
                 writer.print(resp);
+                writer.flush();
+                writer.close();
             }
         } else {
             String username = null;
             String userPwd = null;
-            try {
-                Claims claims = JWTUtil.parseJWT(token);
-                if (claims != null) {
-                    Map map = claims;
-                    username = (String) map.get("jti");
-                    userPwd = (String) map.get("sub");
-                    SmUsers one = smUsersRepService.findByUserIdAndUserPwd(username, userPwd);
-                    if (one != null) {
+                if (sessionToken == null) {
+                    logger.info("用户登录过期，请重新登陆");
+                    resp.setResponseCode(ResponseCode.INERERROR5);
+                    writer.print(resp);
+                    writer.flush();
+                    writer.close();
+                } else {
+//                    Claims claims = JWTUtil.parseJWT(token);
+                    if (token.equals(sessionToken)) {
+//                        Map map = claims;
+//                        username = (String) map.get("jti");
+//                        userPwd = (String) map.get("sub");
+//                        SmUsers one = smUsersRepService.findByUserIdAndUserPwd(username, userPwd);
+//                        if (one != null) {
+//                        request.getSession().setMaxInactiveInterval(15);
+                        request.getSession().setMaxInactiveInterval(2 * 60 * 60);
                         chain.doFilter(request, response);
-                        logger.info("authenticated user " + username + ", setting security context");
                     } else {
-                        logger.info("用户名或密码错误，请重新登录");
-                        AtResponse resp = new AtResponse();
-                        resp.setResponseCode(ResponseCode.INERERROR2);
-                        resp.setMessage("用户名或密码错误，请重新登录");
+                        logger.info("无效token" + token);
+                        resp.setResponseCode(ResponseCode.INERERROR5);
                         writer.print(resp);
+                        writer.flush();
+                        writer.close();
                     }
-                }
-            } catch (Exception e) {
-                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                logger.info("请求用户为：" + username);
-                AtResponse resp = new AtResponse();
-                resp.setResponseCode(ResponseCode.INERERROR3);
-                resp.setMessage("用户未登录，请重新登录");
-                writer.print(resp);
-                writer.flush();
-                writer.close();
             }
         }
 
     }
 
 }
+

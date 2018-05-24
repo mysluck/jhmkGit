@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseRepService;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.controller.HosptailLogController;
+import com.jhmk.earlywaring.entity.SmDepts;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.repository.SmHosptailLogRepository;
@@ -125,6 +126,22 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         return map;
     }
 
+    /**
+     * 获取科室对应id
+     *
+     * @return
+     */
+    public Map<String, String> mapDept() {
+        Iterable<SmDepts> all = smDeptRepService.findAll();
+        Iterator<SmDepts> iterator = all.iterator();
+        Map<String, String> param = new HashMap<>();
+        while (iterator.hasNext()) {
+            SmDepts dept = iterator.next();
+            param.put(dept.getDeptCode(), dept.getDeptName().trim());
+        }
+        return param;
+    }
+
 
     //人员分布功能
     public Map<String, Map<String, Integer>> countByDeptAndUser(String deptId, int year) {
@@ -155,7 +172,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
      */
 
     public AtResponse getKpi() {
-        AtResponse resp=new AtResponse();
+        AtResponse resp = new AtResponse();
         HttpHeaders headers = HttpHeadersUtils.getHeader();
         Map<String, String> postParameters = new HashMap<>();
 //        if (deptName == null || deptName.equals("")) {
@@ -174,7 +191,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         } catch (Exception e) {
             e.printStackTrace();
             resp.setResponseCode(ResponseCode.INERERROR);
-            logger.info("服务器发生错误！"+e.getMessage());
+            logger.info("服务器发生错误！" + e.getMessage());
         }
         resp.setData(json);
         return resp;
@@ -202,7 +219,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
 
     }
 
-    public void addLog(String map) {
+    public SmHosptailLog addLog(String map) {
         SmHosptailLog smHosptailLog = new SmHosptailLog();
         Map<String, Object> jsonObject = (Map) JSON.parseObject(map);
         Object doctor_id = jsonObject.get("doctor_id");
@@ -227,9 +244,9 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
             }
             smHosptailLog.setAffirmSickness(ObjectUtils.flagObj(diagnosis_name));
         }
-        //todo 预警等级需要返回
         smHosptailLog.setCreateTime(new Date());
-        smHosptailLogRepService.save(smHosptailLog);
+        return smHosptailLog;
+
     }
 
 

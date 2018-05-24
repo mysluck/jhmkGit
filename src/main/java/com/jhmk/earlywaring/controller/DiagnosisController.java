@@ -19,7 +19,7 @@ import java.util.Map;
  * 辅助诊疗
  */
 @Controller
-@RequestMapping("/diagnosis")
+@RequestMapping("/warn/diagnosis")
 
 public class DiagnosisController {
     String uri = "http://192.168.8.20:8820/demo/med/machinelearn/Emrdiseaseinfo.json";

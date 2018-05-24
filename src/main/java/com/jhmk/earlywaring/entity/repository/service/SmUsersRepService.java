@@ -86,4 +86,10 @@ public class SmUsersRepService extends BaseRepService<SmUsers, String> {
         return repository.findByUserIdAndUserPwd(userId, userPwd);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
+    public long count(){
+        return repository.count();
+    }
+
+
 }

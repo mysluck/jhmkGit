@@ -32,7 +32,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/userModel")
+@RequestMapping("/warn/userModel")
 public class UserModelController extends BaseEntityController<UserModel> {
 
     public static final Logger logger = LoggerFactory.getLogger(UserModelController.class);

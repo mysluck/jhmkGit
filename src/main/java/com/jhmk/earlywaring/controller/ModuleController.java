@@ -1,7 +1,6 @@
 package com.jhmk.earlywaring.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.jhmk.earlywaring.auth.AuthUserDetailsServiceImpl;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.entity.SmModule;
 import com.jhmk.earlywaring.entity.SmRole;
@@ -23,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/module")
+@RequestMapping("/warn/module")
 public class ModuleController extends BaseEntityController<SmModule> {
 
     private static final Logger logger = LoggerFactory.getLogger(ModuleController.class);
@@ -103,6 +102,8 @@ public class ModuleController extends BaseEntityController<SmModule> {
         //获取当前角色
         AtResponse<List> atResponse = new AtResponse();
         String currentRole = getCurrentRole();
+        String userId = getUserId();
+        System.out.println(userId);
         List<SmModule> modules = roleModuleService.queryComponetByRole(currentRole);
         atResponse.setResponseCode(ResponseCode.OK);
         atResponse.setData(modules);

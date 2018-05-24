@@ -1,81 +1,110 @@
 package com.jhmk.earlywaring.controller;
 
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
+import com.jhmk.earlywaring.base.BaseEntityController;
+import com.jhmk.earlywaring.config.BaseConstants;
+import com.jhmk.earlywaring.entity.RoleUser;
+import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.SmUsers;
+import com.jhmk.earlywaring.entity.repository.service.RoleUserRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
+import com.jhmk.earlywaring.util.JWTUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
 
 @Controller
-public class CmsController {
+
+public class CmsController extends BaseEntityController<SmUsers> {
     @Autowired
     SmUsersRepService smUsersRepService;
-
+    @Autowired
+    RoleUserRepService roleUserRepService;
     private static final Logger logger = LoggerFactory.getLogger(CmsController.class);
 
-//    @RequestMapping("/")
-//    public String index() {
-//        return "login";
-//    }
-
-
-//    @RequestMapping(value = "/login", method = RequestMethod.GET)
-//    public String loginGet(HttpServletRequest request, Model model) {
-//        return "/login";
-//    }
-
-
-//    @RequestMapping(value = "/loginOut", method = RequestMethod.GET)
-//    public String loginOut(HttpServletRequest request, Model model) {
-//        return "/login";
-//    }
-//
-//    @RequestMapping(value = "/loginSuccess", method = RequestMethod.GET)
-//    public String loginSuccess(HttpServletRequest request, Model model) {
-//        return "/login";
-//    }
-
-    @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @RequestMapping(value = "/warn/login", method = RequestMethod.POST)
     @ResponseBody
-    public AtResponse<Map<String, Object>> loginPost(HttpServletRequest request, @RequestParam(required = true) String username,
-                                                     @RequestParam(required = true) String password, Model model) {
+    public void loginPost(HttpServletRequest httpServletRequest, HttpServletResponse response, @RequestBody String map) {
+        Map<String, String> param = (Map) JSONObject.parse(map);
 
         AtResponse<Map<String, Object>> resp = new AtResponse<>(System.currentTimeMillis());
         Map<String, Object> data = new HashMap<>();
-        SmUsers admin = smUsersRepService.findOne(username);
-
-        if (admin != null) {
-            if (password.equals(admin.getUserPwd())) {
-
-            } else {
-                resp.setResponseCode(ResponseCode.INERERROR2);
-
-                data.put("message", "密码错误");
-
-            }
-            data.put("status", "200");
-            request.getSession().setAttribute("user", admin);
+        if (param.get("username") == null || "".equals(param.get("username")) || "".equals(param.get("password"))) {
+            resp.setResponseCode(ResponseCode.INERERROR2);
+            resp.setMessage("用户名或密码为空");
+            wirte(response, resp);
         } else {
-            resp.setResponseCode(ResponseCode.CUSTOMER_NOT_EXIST);
+            String userId = param.get("username");
+            SmUsers admin = smUsersRepService.findOne(userId);
+            String password = param.get("password");
+            if (admin != null) {
+                if (password.equals(admin.getUserPwd())) {
+                    httpServletRequest.getSession().setAttribute(BaseConstants.USER_ID, userId);
+                    //todo token 写法
+                    String token = null;
+                    try {
+                        token = JWTUtil.createJWT(userId, password, System.currentTimeMillis());
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
+                    httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, admin.getRoleId());
+                    httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
+                    //设置session超时时间(2小时)
+                    httpServletRequest.getSession().setMaxInactiveInterval(2 * 60 * 60);
 
-            data.put("message", "用户不存在");
+                    logger.info("登录成功");
+                    resp.setMessage("登录成功");
+                    resp.setResponseCode(ResponseCode.OK);
+                    response.setHeader(BaseConstants.TOKEN, token);
+                } else {
+                    resp.setResponseCode(ResponseCode.INERERROR2);
+                    resp.setMessage("密码错误");
+
+                }
+                data.put("status", "200");
+            } else {
+                resp.setResponseCode(ResponseCode.CUSTOMER_NOT_EXIST);
+                resp.setMessage("用户不存在");
+            }
+
+            wirte(response, resp);
 
         }
-        resp.setData(data);
-        return resp;
+
+    }
+
+    @RequestMapping(value = "/warn/loginout", method = RequestMethod.POST)
+    @ResponseBody
+    public void loginout(HttpServletRequest request, HttpServletResponse response) {
+        request.removeAttribute(BaseConstants.USER_ID);
+        request.removeAttribute(BaseConstants.CURRENT_ROLE_ID);
+        request.removeAttribute(BaseConstants.DEPT_ID);
+//            request.removeAttribute(BaseConstants.FT_DEPT_ID);
+//            request.removeAttribute(BaseConstants.FT_DEPT_NAME);
+        request.removeAttribute(BaseConstants.TOKEN);
+
+        logger.debug(getUserId() + " logout.");
+        AtResponse resp = new AtResponse(System.currentTimeMillis());
+        resp.setMessage(BaseConstants.SUCCESS);
+        resp.setResponseCode(ResponseCode.OK);
+        logger.info("退出成功");
+        wirte(response, request);
+
     }
 
 }

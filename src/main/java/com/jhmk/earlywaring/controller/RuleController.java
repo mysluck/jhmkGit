@@ -8,6 +8,7 @@ import com.alibaba.fastjson.TypeReference;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.config.UrlConfig;
+import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
@@ -39,7 +40,7 @@ import java.util.*;
  * 规则管理
  */
 @Controller
-@RequestMapping("/rule")
+@RequestMapping("/warn/rule")
 public class RuleController extends BaseEntityController<Object> {
 
     @Autowired
@@ -81,6 +82,7 @@ public class RuleController extends BaseEntityController<Object> {
     @ResponseBody
     public void addrule(HttpServletResponse response, @RequestBody String map) {
         //获取原始规则条件
+        System.out.println(map);
         Map<String, Object> param = (Map) JSONObject.parse(map);
         Object condition = param.get("ruleCondition");
         //转换条件格式
@@ -233,35 +235,47 @@ public class RuleController extends BaseEntityController<Object> {
     public void ruleMatch(HttpServletResponse response, @RequestBody String map) {
         ReciveRule sendRule = ruleService.ruleMatch(map);
         Object o = JSON.toJSON(sendRule);
-        System.out.println(o.toString());
-//        System.out.println(o.toString());
         AtResponse resp = new AtResponse();
         String data = "";
         try {
-//            System.out.println(urlConfig.getCdssurl() + BaseConstants.matchrule);
             data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
-            Map<String, Object> result = (Map<String, Object>) JSON.parse(data);
+            Map<String, Object> result = (Map<String, Object>) JSON.parseObject(data);
             if ("200".equals(result.get("code"))) {
                 if (result.get("result") != null) {
 
                     resp.setMessage(BaseConstants.SUCCESS);
                     resp.setData(result.get("result"));
-                    Object result1 = result.get("result");
-                    hosptailLogService.addLog(map);
+                    Map<String, String> resultMap = (Map) result.get("result");
+                    SmHosptailLog smHosptailLog = hosptailLogService.addLog(map);
+                    //todo 预警等级需要返回
+                    Object resultData = result.get("result");
+                    if (resultData != null) {
+                        JSONArray ja = (JSONArray) resultData;
+                        Iterator<Object> iterator = ja.iterator();
+                        while (iterator.hasNext()) {
+                            Object next = iterator.next();
+                            Map<String, String> datamap = (Map) next;
+                            //预警等级
+                            String warninglevel = datamap.get("warninglevel");
+                            smHosptailLog.setAlarmLevel(warninglevel);
+                            //释义
+                            smHosptailLog.setAlarmCause(datamap.get("hintContent"));
+                            smHosptailLogRepService.save(smHosptailLog);
+                        }
+                    }
+
+                    smHosptailLogRepService.save(smHosptailLog);
 
                 } else {
                     logger.info(map + "没有匹配到规则！" + data);
-                    resp.setMessage("规则匹配失败" + data);
                 }
                 resp.setResponseCode(ResponseCode.OK);
             } else {
                 logger.info("规则匹配失败！" + data);
-                resp.setMessage("规则匹配失败" + data);
                 resp.setResponseCode(ResponseCode.INERERROR4);
             }
         } catch (Exception e) {
             logger.info("cdss服务器规则匹配失败！" + e.getMessage());
-            resp.setMessage("规则匹配失败！服务器发生异常");
             resp.setResponseCode(ResponseCode.INERERROR4);
         } finally {
             wirte(response, resp);
@@ -296,7 +310,7 @@ public class RuleController extends BaseEntityController<Object> {
         Map parse = (Map) JSONObject.parse(map);
         String result = null;
         try {
-            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, map, String.class);
+            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, parse, String.class);
 //            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, parse, String.class);
         } catch (Exception e) {
             logger.info("删除规则失败：" + map);

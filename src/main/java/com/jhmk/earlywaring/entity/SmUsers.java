@@ -4,7 +4,7 @@ import javax.persistence.*;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_users", schema = "jhmk_waring", catalog = "")
+@Table(name = "sm_users", schema = "jhmk_waring")
 public class SmUsers {
     private String userId;
     private String userName;
@@ -58,7 +58,8 @@ public class SmUsers {
     private String userDept1;
     private String roleId;
 
-    @Transient
+    @Basic
+    @Column(name = "role_id", nullable = true, length = 255)
     public String getRoleId() {
         return roleId;
     }

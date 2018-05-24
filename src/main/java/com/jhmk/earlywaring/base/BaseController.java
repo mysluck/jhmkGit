@@ -58,15 +58,15 @@ public class BaseController {
         return currentOrgId;
     }
 
-    public String getFuDeptId() {
-        String fuDeptName = (String) getSessionData(BaseConstants.FT_DEPT_ID);
-        return fuDeptName;
-    }
+//    public String getFuDeptId() {
+//        String fuDeptName = (String) getSessionData(BaseConstants.FT_DEPT_ID);
+//        return fuDeptName;
+//    }
 
-    public String getFuDeptName() {
-        String fuDeptName = (String) getSessionData(BaseConstants.FT_DEPT_NAME);
-        return fuDeptName;
-    }
+//    public String getFuDeptName() {
+//        String fuDeptName = (String) getSessionData(BaseConstants.FT_DEPT_NAME);
+//        return fuDeptName;
+//    }
 
 //
 //    public String getCurrentRole(HttpSession httpSession) {

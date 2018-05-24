@@ -4,10 +4,12 @@ import com.alibaba.fastjson.JSON;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.DeptRel;
+import com.jhmk.earlywaring.entity.SmDepts;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.repository.service.DeptRelRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
+import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
@@ -26,7 +28,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.util.*;
 
 @Controller
-@RequestMapping("/smHosptailLog")
+@RequestMapping("/warn/smHosptailLog")
 public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
 
 
@@ -42,6 +44,8 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     RuleService ruleService;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    SmUsersRepService smUsersRepService;
     @Autowired
     DeptRelRepService deptRelRepService;
 
@@ -83,7 +87,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getAlartCount")
     @ResponseBody
     public void getAlartCount(HttpServletResponse response) {
-        AtResponse<Map<String,Object>> resp=new AtResponse();
+        AtResponse<Map<String, Object>> resp = new AtResponse();
         //科室预警c次数
         int deptCount = smHosptailLogRepService.getCountAllByAlarmCode(BaseConstants.ALARM_CODE1, BaseConstants.ALARMSTSTUS1);
         //住院预警
@@ -108,7 +112,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getDeptCount")
     @ResponseBody
     public void getDeptCount(HttpServletResponse response, @RequestBody(required = false) String map) {
-        AtResponse<Map<String, Map<String, Integer>>>resp=new AtResponse<>();
+        AtResponse<Map<String, Map<String, Integer>>> resp = new AtResponse<>();
         Map<String, String> paramMap = (Map) JSON.parse(map);
         int yearNow;
         if (paramMap != null) {
@@ -117,10 +121,27 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
             yearNow = DateFormatUtil.getYearNow();
         }
 
-        Map<String, Map<String, Integer>>  deptForSicknesss = hosptailLogService.countByDept(yearNow);
+        Map<String, Map<String, Integer>> deptForSicknesss = hosptailLogService.countByDept(yearNow);
         resp.setData(deptForSicknesss);
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);
+    }
+
+
+    /**
+     * 获取部门映射 deptcode ： deptName
+     *
+     * @param response
+     */
+    @PostMapping("/mapDept")
+    @ResponseBody
+    public void mapDept(HttpServletResponse response) {
+        AtResponse<Map<String, String>> resp = new AtResponse<>();
+        Map<String, String> map = hosptailLogService.mapDept();
+        resp.setData(map);
+        resp.setResponseCode(ResponseCode.OK);
+        wirte(response, resp);
+
     }
 
     /**
@@ -129,8 +150,11 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getDepts")
     @ResponseBody
     public void getDepts(HttpServletResponse response) {
-        AtResponse<Integer>resp=new AtResponse<>();
-        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
+        AtResponse<Integer> resp = new AtResponse<>();
+        //获取总科室（心内科 ）
+//        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
+        // 获取单科室 如心内科1 心内科2 (日志表中有数量的)
+        List<SmHosptailLog> distinctByDeptCode = smHosptailLogRepService.getCountByDistinctDeptId();
         resp.setData(distinctByDeptCode.size());
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);
@@ -138,26 +162,16 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
 
 
     /**
-     * 获取主管医生数量 todo
+     * 获取主管医生数量
      */
     @PostMapping("/getDoctors")
     @ResponseBody
     public void getDoctors(HttpServletResponse response) {
-        AtResponse<String> atResponse = new AtResponse(System.currentTimeMillis());
-
-        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
-        if (distinctByDeptCode != null) {
-            atResponse.setResponseCode(ResponseCode.OK);
-            int size = distinctByDeptCode.size();
-            atResponse.setData(String.valueOf(size));
-            wirte(response,atResponse );
-        }
-        else{
-            atResponse.setResponseCode(ResponseCode.INERERROR);
-            logger.info("获取医生数量失败："+distinctByDeptCode.size());
-            wirte(response,atResponse );
-
-        }
+        AtResponse atResponse = new AtResponse(System.currentTimeMillis());
+        long size = smUsersRepService.count();
+        atResponse.setData(size);
+        atResponse.setResponseCode(ResponseCode.OK);
+        wirte(response, atResponse);
     }
 
 
@@ -170,7 +184,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getPersonCount")
     @ResponseBody
     public void getPersonCount(HttpServletResponse response, @RequestBody(required = false) String map) {
-        AtResponse<Map<String, Map<String, Integer>> > atResponse = new AtResponse(System.currentTimeMillis());
+        AtResponse<Map<String, Map<String, Integer>>> atResponse = new AtResponse(System.currentTimeMillis());
         String deptId;
         int yearTime = 0;
         Map<String, String> paramMap = (Map) JSON.parse(map);
@@ -179,7 +193,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
             deptId = paramMap.get("deptId");
         } else {
             yearTime = DateFormatUtil.getYearNow();
-            deptId = getFuDeptId();
+            deptId = getDeptId();
         }
         //人员分布
         Map<String, Map<String, Integer>> peopleForSicknesss = hosptailLogService.countByDeptAndUser(deptId, yearTime);
@@ -210,7 +224,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
             deptId = paramMap.get("deptId");
         } else {
             yearTime = DateFormatUtil.getYearNow();
-            deptId = getFuDeptId();
+            deptId = getDeptId();
         }
         //触发疾病统功能
         Map<String, Integer> countByDeptAndSickness = hosptailLogService.getCountByDeptAndSickness(deptId, yearTime);

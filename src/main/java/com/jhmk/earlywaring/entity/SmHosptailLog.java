@@ -14,6 +14,7 @@ public class SmHosptailLog {
     private String affirmSickness;
     private String sicknessGrade;
     private String alarmCause;
+    private String alarmLevel;
     private String alarmCondition;
     private String alarmResult;
     private String alarmCode;
@@ -121,6 +122,14 @@ public class SmHosptailLog {
 
     public void setAlarmCode(String alarmCode) {
         this.alarmCode = alarmCode;
+    }
+    @Column(name = "alarm_level", nullable = true, length = 8)
+    public String getAlarmLevel() {
+        return alarmLevel;
+    }
+
+    public void setAlarmLevel(String alarmLevel) {
+        this.alarmLevel = alarmLevel;
     }
 
     @Basic

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/depts")
+@RequestMapping("/warn/depts")
 public class DeptsController extends BaseEntityController<SmDepts> {
 
     @Autowired

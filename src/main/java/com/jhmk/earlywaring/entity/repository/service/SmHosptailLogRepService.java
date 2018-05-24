@@ -112,4 +112,9 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
         return repository.getAllByDeptIdAndYear(deptId, alarmStatus, startTime, endTime);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<SmHosptailLog> getCountByDistinctDeptId() {
+        return repository.getCountByDistinctDeptId();
+    }
+
 }

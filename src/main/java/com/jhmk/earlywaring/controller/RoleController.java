@@ -22,7 +22,7 @@ import java.util.*;
  * 角色管理
  */
 @Controller
-@RequestMapping("/role")
+@RequestMapping("/warn/role")
 public class RoleController extends BaseEntityController<SmRole> {
 
 

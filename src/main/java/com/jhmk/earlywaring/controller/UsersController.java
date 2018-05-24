@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +30,7 @@ import java.util.Map;
 //import org.springframework.security.authentication.encoding.ShaPasswordEncoder;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/warn/users")
 public class UsersController extends BaseEntityController<SmUsers> {
 
     private static final Logger logger = LoggerFactory.getLogger(UsersController.class);
@@ -163,7 +162,6 @@ public class UsersController extends BaseEntityController<SmUsers> {
         AtResponse<String> resp = new AtResponse(System.currentTimeMillis());
         Map<String, String> parse = (Map) JSON.parse(map);
         SmUsers user = smUsersRepService.findOne(getUserId());
-        ShaPasswordEncoder encoder = new ShaPasswordEncoder();
 //        if (user.getUserPwd().equals(encoder.encodePassword(jiuPassword, null))) {
         if (user.getUserPwd().equals(parse.get("jiuPassword"))) {
 //            String pwd = encoder.encodePassword(password, null);

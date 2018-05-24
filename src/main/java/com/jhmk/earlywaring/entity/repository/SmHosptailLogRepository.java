@@ -130,5 +130,6 @@ public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHo
     @Query("select l from  SmHosptailLog l  where l.deptId=?1 and l.alarmStatus=?2 and l.createTime>=?3 and l.createTime<=?4 group by l.affirmSickness ")
     List<SmHosptailLog> getAllByDeptIdAndYear(int deptId, String alarmStatus, Date startTime, Date endTime);
 
-
+    @Query("select distinct (d.deptId)from SmHosptailLog d ")
+    List<SmHosptailLog>getCountByDistinctDeptId();
 }

@@ -22,4 +22,7 @@ public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, S
 
 
     SmUsers findByUserIdAndUserPwd(String userId, String userPwd);
+
+    @Override
+    long count();
 }
