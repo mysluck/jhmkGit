@@ -43,7 +43,7 @@ public class RoleModuleService {
     /**
      * 查询所有节点操作
      *
-     * @param roleId
+     * @param
      * @return
      */
 //    public List<Map<String, Object>> getAllModule(String roleId) {
@@ -64,6 +64,7 @@ public class RoleModuleService {
             list.add(single);
         });
         List<SmModule> modules = gradeModule(list);
+
         return modules;
     }
 
@@ -81,6 +82,7 @@ public class RoleModuleService {
         }
         List<SmModule> modules = smModuleRepService.findByModCodeIn(moduleNameList);
         List<SmModule> modules1 = gradeModule(modules);
+
         return modules1;
     }
 
@@ -124,6 +126,12 @@ public class RoleModuleService {
 
             }
         }
+        for (SmModule m : moduleList) {
+
+            Collections.sort(m.getChildMdules(), CompareUtil.createComparator(1, "modOrder"));
+        }
+        Collections.sort(moduleList, CompareUtil.createComparator(1, "modOrder"));
+
         return moduleList;
 
     }

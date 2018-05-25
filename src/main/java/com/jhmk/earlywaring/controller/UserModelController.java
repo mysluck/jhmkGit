@@ -137,26 +137,26 @@ public class UserModelController extends BaseEntityController<UserModel> {
      * @param response
      * @param param
      */
-    @RequestMapping(value = "/searchbyvariablename")
-    @ResponseBody
-    public void searchbyvariablename(HttpServletResponse response, @RequestBody String param) {
-        AtResponse resp = new AtResponse();
-        Map<String, String> map = (Map) JSON.parse(param);
-        String fieldname = map.get("fieldname");
-        map.put("fieldname", fieldname);
-        Object o = JSON.toJSON(map);
-        String data = "";
-        try {
-
-            data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.searchbyvariablename, o, String.class);
-            resp.setResponseCode(ResponseCode.OK);
-            resp.setData(data);
-        } catch (Exception e) {
-            logger.info("高级检索根据关键字检索接口服务器匹配异常!" + fieldname);
-            resp.setResponseCode(ResponseCode.INERERROR);
-        }
-        wirte(response, data);
-    }
+//    @RequestMapping(value = "/searchbyvariablename")
+//    @ResponseBody
+//    public void searchbyvariablename(HttpServletResponse response, @RequestBody String param) {
+//        AtResponse resp = new AtResponse();
+//        Map<String, String> map = (Map) JSON.parse(param);
+//        String fieldname = map.get("fieldname");
+//        map.put("fieldname", fieldname);
+//        Object o = JSON.toJSON(map);
+//        String data = "";
+//        try {
+//
+//            data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.searchbyvariablename, o, String.class);
+//            resp.setResponseCode(ResponseCode.OK);
+//            resp.setData(data);
+//        } catch (Exception e) {
+//            logger.info("高级检索根据关键字检索接口服务器匹配异常!" + fieldname);
+//            resp.setResponseCode(ResponseCode.INERERROR);
+//        }
+//        wirte(response, data);
+//    }
 
     //    接口：获取字段的特殊类型
     @RequestMapping(value = "/getSpecialTypeByField")

@@ -60,15 +60,16 @@ public class BaseConstants {
     public static final String deleterule = "/med/cindecision/deleterule.json";
 
 
-//医问道接口
+    //医问道接口
     //3.高级检索值域变量（post）
-    public static final String getfieldbyid =  "/med/getfieldbyid.json";
+    public static final String getfieldbyid = "/med/getfieldbyid.json";
     //高级检索单位变量（post）
-    public static final String getunitsbyid =  "/med/getunitsbyid.json";
+    public static final String getunitsbyid = "/med/getunitsbyid.json";
     //5.高级检索根据关键字检索 拼音or汉字（post）
-    public static final String searchbyvariablename =  "/med/searchbyvariablename.json";
+    public static final String searchbyvariablename = "/med/searchbyvariablename.json";
     //接口：获取字段的特殊类型
-    public static final String getSpecialTypeByField =  "/med/getSpecialTypeByField.json";
-    public static final String getVariableListNew =  "/med/getVariableListNew.json";
+    public static final String getSpecialTypeByField = "/med/getSpecialTypeByField.json";
+    // 获取最新列表
+    public static final String getVariableListNew = "/med/getVariableListNew.json";
 
 }
