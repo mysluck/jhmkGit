@@ -48,6 +48,7 @@ public class BaseController {
         return currentRoleId;
     }
 
+
     public void setCurrentRoleId(String roleId) {
         addSessionData(BaseConstants.CURRENT_ROLE_ID, roleId);
     }
@@ -56,6 +57,11 @@ public class BaseController {
     public String getDeptId() {
         String currentOrgId = (String) getSessionData(BaseConstants.DEPT_ID);
         return currentOrgId;
+    }
+
+    public String getDeptName() {
+        String deptName = (String) getSessionData(BaseConstants.DEPT_NAME);
+        return deptName;
     }
 
 //    public String getFuDeptId() {

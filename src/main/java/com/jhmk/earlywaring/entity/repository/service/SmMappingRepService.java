@@ -1,82 +1,74 @@
 //package com.jhmk.earlywaring.entity.repository.service;
 //
-//
 //import com.jhmk.earlywaring.base.BaseRepService;
-//import com.jhmk.earlywaring.entity.SmUsers;
-//import com.jhmk.earlywaring.entity.repository.RoleUserRepository;
+//import com.jhmk.earlywaring.entity.SmMapping;
+//import com.jhmk.earlywaring.entity.SmMapping;
+//import com.jhmk.earlywaring.entity.repository.SmMappingRepository;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.data.domain.Page;
 //import org.springframework.data.domain.Pageable;
+//import org.springframework.data.jpa.domain.Specification;
 //import org.springframework.stereotype.Service;
 //import org.springframework.transaction.annotation.Propagation;
 //import org.springframework.transaction.annotation.Transactional;
 //
+//import java.util.Date;
 //import java.util.List;
 //
-///**
-// * @author  zzy on 2017/4/20.
-// */
 //@Service
-//public class RoleUserRepService extends BaseRepService<RoleUser,String> {
+//public class SmMappingRepService extends BaseRepService<SmMapping, Integer> {
 //    @Autowired
-//    RoleUserRepository repository;
+//    SmMappingRepository repository;
 //
 //    @Override
 //    @Transactional(propagation = Propagation.REQUIRED)
-//    public RoleUser save(RoleUser roleUser) {
-//        return repository.save(roleUser);
+//    public SmMapping save(SmMapping smMapping) {
+//        return repository.save(smMapping);
 //    }
 //
 //    @Transactional(propagation = Propagation.REQUIRED)
-//    public Iterable<RoleUser> save(List<RoleUser> list) {
+//    public Iterable<SmMapping> save(List<SmMapping> list) {
 //        return repository.save(list);
 //    }
 //
-//
+//    @Override
 //    @Transactional(propagation = Propagation.REQUIRED)
-//    public void delete(RoleUserId roleUserId) {
-//        repository.delete(roleUserId);
+//    public void delete(Integer id) {
+//        repository.delete(id);
 //    }
 //
 //    @Transactional(propagation = Propagation.REQUIRED)
-//    public void delete(List<RoleUser> list) {
+//    public void delete(SmMapping smMapping) {
+//        repository.delete(smMapping);
+//    }
+//
+//    @Transactional(propagation = Propagation.REQUIRED)
+//    public void delete(List<SmMapping> list) {
 //        repository.delete(list);
 //    }
 //
-//    @Transactional(propagation = Propagation.REQUIRED)
-//    public void delete(RoleUser roleUser) {
-//        repository.delete(roleUser);
-//    }
-//
+//    @Override
 //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-//    public RoleUser findOne(RoleUserId id) {
+//    public SmMapping findOne(Integer id) {
 //        return repository.findOne(id);
 //    }
 //
 //
 //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-//    public Iterable<RoleUser> findAll() {
+//    public Iterable<SmMapping> findAll() {
 //        return repository.findAll();
 //    }
 //
+//
 //    @Override
 //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-//    public Page<RoleUser> findAll(Pageable pageable) {
+//    public Page<SmMapping> findAll(Pageable pageable) {
 //        return repository.findAll(pageable);
 //    }
 //
 //    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-//    public RoleUser findByUser(SmUsers smUser){
-//        return repository.findByUser(smUser);
+//    public List<SmMapping> findByKey(String key) {
+//        return repository.findByKey(key);
 //    }
-//    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-//    public Iterable<RoleUser> findAll(List<RoleUserId> list) {
-//        return repository.findAll(list);
-//    }
-//
-////    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-////    public List<RoleUser> getRoleUserByUserId(String userId) {
-////        return repository.getRoleUserByUserId(userId);
-////    }
 //
 //}

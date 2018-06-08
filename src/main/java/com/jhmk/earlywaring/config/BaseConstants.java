@@ -10,8 +10,7 @@ public class BaseConstants {
     public static final String CURRENT_ROLE_ID = "currentRoleId";
     public static final String USER_ID = "userId";
     public static final String DEPT_ID = "deptId";
-    public static final String FT_DEPT_ID = "ftdeptId";
-    public static final String FT_DEPT_NAME = "ftdeptName";
+    public static final String DEPT_NAME = "deptName";
     public static final String TOKEN = "token";
 
 
@@ -24,12 +23,15 @@ public class BaseConstants {
     public static final String PARAMTER_STATUS_0 = "0";//参数未启用
 
 
-    public static final String ALARM_CODE1 = "1";//科室预警
-    public static final String ALARM_CODE2 = "2";//住院预警
+    public static final String ALARM_CODE1 = "住院";//住院预警
+    public static final String ALARM_CODE2 = "门诊";//住院预警
 
 
     public static final String ALARMSTSTUS1 = "1";//触发预警
     public static final String ALARMSTSTUS0 = "0";//没触发预警
+
+    public static final String TYPECLASS = "typeClass";
+
 
     public static final String OK = "200";// 状态码 200 成功
     public static final String SUCCESS = "success";
@@ -41,13 +43,19 @@ public class BaseConstants {
     public static final String SHOUYEZHENDUAN = "shouyezhenduan";
     public static final String RUYUANJILU = "ruyuanjilu";
 
+
+
+
+
     //getVariableList获取变量列表
     public static final String getVariableList = "/med/cindecision/getVariableList.json";
     public static final String addrule = "/med/cindecision/addrule.json";
     public static final String findallnotsubmitrule = "/med/cindecision/findallnotsubmitrule.json";
     public static final String findallsubmitrule = "/med/cindecision/findallsubmitrule.json";
+    public static final String findallrule = "/med/cindecision/findallrule.json";
     public static final String submitrule = "/med/cindecision/submitrule.json";
     public static final String matchrule = "/med/cindecision/matchrule.json";
+    public static final String updaterule = "/med/cindecision/updaterule.json";
 
     //改变预警等级
     public static final String changewarninglevel = "/med/cindecision/changewarninglevel.json";

@@ -4,10 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
-import com.jhmk.earlywaring.entity.RoleUser;
+import com.jhmk.earlywaring.entity.SmDepts;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.SmUsers;
-import com.jhmk.earlywaring.entity.repository.service.RoleUserRepService;
+import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
@@ -21,8 +21,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,9 +29,9 @@ import java.util.Map;
 
 public class CmsController extends BaseEntityController<SmUsers> {
     @Autowired
-    SmUsersRepService smUsersRepService;
+    SmDeptsRepService smDeptsRepService;
     @Autowired
-    RoleUserRepService roleUserRepService;
+    SmUsersRepService smUsersRepService;
     private static final Logger logger = LoggerFactory.getLogger(CmsController.class);
 
     @RequestMapping(value = "/warn/login", method = RequestMethod.POST)
@@ -53,7 +51,7 @@ public class CmsController extends BaseEntityController<SmUsers> {
             String password = param.get("password");
             if (admin != null) {
                 if (password.equals(admin.getUserPwd())) {
-                    httpServletRequest.getSession().setAttribute(BaseConstants.USER_ID, userId);
+                    httpServletRequest.getSession().setAttribute(BaseConstants.USER_ID, userId.trim());
                     //todo token 写法
                     String token = null;
                     try {
@@ -63,6 +61,17 @@ public class CmsController extends BaseEntityController<SmUsers> {
                     }
                     httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
                     httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, admin.getRoleId());
+                    if (admin.getUserDept() != null) {
+                        httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_ID, admin.getUserDept());
+                        SmDepts firstByDeptCode = smDeptsRepService.findFirstByDeptCode(admin.getUserDept());
+                        if(firstByDeptCode!=null){
+                        httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_NAME, firstByDeptCode.getDeptName());
+                        }else {
+//                        httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_NAME, firstByDeptCode.getDeptName());
+                        }
+                    }
+
+
                     httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
                     //设置session超时时间(2小时)
                     httpServletRequest.getSession().setMaxInactiveInterval(2 * 60 * 60);

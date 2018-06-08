@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.util.Collections;
+import java.util.List;
 
 /**
  * mycat 数据库访问服务接口类
@@ -26,6 +27,11 @@ public class BaseRepService<T, ID extends Serializable> {
     public Page<T> findAll(Specification<T> var1, Pageable var2) {
         return null;
     }
+
+    public List<T> findAll(Specification<T> var1) {
+        return null;
+    }
+
 
     public T findOne(ID var1) {
         return null;

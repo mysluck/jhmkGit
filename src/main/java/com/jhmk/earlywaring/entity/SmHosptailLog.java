@@ -8,21 +8,21 @@ import java.util.Objects;
 @Table(name = "sm_hosptail_log", schema = "jhmk_waring")
 public class SmHosptailLog {
     private int id;
-    private String suffererId;
+    private String patientId;
+    private String visitId;
     private String doctorId;
-    private String deptId;
-    private String affirmSickness;
+    private String deptCode;
+    private String diagnosisName;
     private String sicknessGrade;
-    private String alarmCause;
     private String alarmLevel;
-    private String alarmCondition;
-    private String alarmResult;
-    private String alarmCode;
-    private String alarmStatus;
-    private String ruleType;
+    private String hintContent;
+    private String ruleSource;
+    private String signContent;
+    private String classification;
+    private String identification;
+    private String warnSource;
     private Date createTime;
-    private Date outTime;
-    private String faDeptName;
+    private String doctorName;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -35,13 +35,23 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "sufferer_id", nullable = false, length = 32)
-    public String getSuffererId() {
-        return suffererId;
+    @Column(name = "patient_id", nullable = false, length = 32)
+    public String getPatientId() {
+        return patientId;
     }
 
-    public void setSuffererId(String suffererId) {
-        this.suffererId = suffererId;
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+
+    @Basic
+    @Column(name = "visit_id", nullable = true, length = 11)
+    public String getVisitId() {
+        return visitId;
+    }
+
+    public void setVisitId(String visitId) {
+        this.visitId = visitId;
     }
 
     @Basic
@@ -55,23 +65,23 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "dept_id", nullable = true, length = 32)
-    public String getDeptId() {
-        return deptId;
+    @Column(name = "dept_code", nullable = true, length = 32)
+    public String getDeptCode() {
+        return deptCode;
     }
 
-    public void setDeptId(String deptId) {
-        this.deptId = deptId;
+    public void setDeptCode(String deptCode) {
+        this.deptCode = deptCode;
     }
 
     @Basic
-    @Column(name = "affirm_sickness", nullable = true, length = 255)
-    public String getAffirmSickness() {
-        return affirmSickness;
+    @Column(name = "diagnosis_name", nullable = true, length = 255)
+    public String getDiagnosisName() {
+        return diagnosisName;
     }
 
-    public void setAffirmSickness(String affirmSickness) {
-        this.affirmSickness = affirmSickness;
+    public void setDiagnosisName(String diagnosisName) {
+        this.diagnosisName = diagnosisName;
     }
 
     @Basic
@@ -85,44 +95,6 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "alarm_cause", nullable = true, length = 255)
-    public String getAlarmCause() {
-        return alarmCause;
-    }
-
-    public void setAlarmCause(String alarmCause) {
-        this.alarmCause = alarmCause;
-    }
-
-    @Basic
-    @Column(name = "alarm_condition", nullable = true, length = 255)
-    public String getAlarmCondition() {
-        return alarmCondition;
-    }
-
-    public void setAlarmCondition(String alarmCondition) {
-        this.alarmCondition = alarmCondition;
-    }
-
-    @Basic
-    @Column(name = "alarm_result", nullable = true, length = 255)
-    public String getAlarmResult() {
-        return alarmResult;
-    }
-
-    public void setAlarmResult(String alarmResult) {
-        this.alarmResult = alarmResult;
-    }
-
-    @Basic
-    @Column(name = "alarm_code", nullable = true, length = 1)
-    public String getAlarmCode() {
-        return alarmCode;
-    }
-
-    public void setAlarmCode(String alarmCode) {
-        this.alarmCode = alarmCode;
-    }
     @Column(name = "alarm_level", nullable = true, length = 8)
     public String getAlarmLevel() {
         return alarmLevel;
@@ -133,23 +105,63 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "alarm_status", nullable = true, length = 1)
-    public String getAlarmStatus() {
-        return alarmStatus;
+    @Column(name = "hintContent", nullable = true, length = 255)
+    public String getHintContent() {
+        return hintContent;
     }
 
-    public void setAlarmStatus(String alarmStatus) {
-        this.alarmStatus = alarmStatus;
+    public void setHintContent(String hintContent) {
+        this.hintContent = hintContent;
     }
 
     @Basic
-    @Column(name = "rule_type", nullable = true, length = 1)
-    public String getRuleType() {
-        return ruleType;
+    @Column(name = "ruleSource", nullable = true, length = 255)
+    public String getRuleSource() {
+        return ruleSource;
     }
 
-    public void setRuleType(String ruleType) {
-        this.ruleType = ruleType;
+    public void setRuleSource(String ruleSource) {
+        this.ruleSource = ruleSource;
+    }
+
+    @Basic
+    @Column(name = "signContent", nullable = true, length = 255)
+    public String getSignContent() {
+        return signContent;
+    }
+
+    public void setSignContent(String signContent) {
+        this.signContent = signContent;
+    }
+
+    @Basic
+    @Column(name = "classification", nullable = true, length = 8)
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
+
+    @Basic
+    @Column(name = "identification", nullable = true, length = 8)
+    public String getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(String identification) {
+        this.identification = identification;
+    }
+
+    @Basic
+    @Column(name = "warn_source", nullable = true, length = 8)
+    public String getWarnSource() {
+        return warnSource;
+    }
+
+    public void setWarnSource(String warnSource) {
+        this.warnSource = warnSource;
     }
 
     @Basic
@@ -162,51 +174,41 @@ public class SmHosptailLog {
         this.createTime = createTime;
     }
 
-    @Basic
-    @Column(name = "out_time", nullable = true)
-    public Date getOutTime() {
-        return outTime;
-    }
-
-    public void setOutTime(Date outTime) {
-        this.outTime = outTime;
-    }
-
-    @Basic
-    @Column(name = "fa_dept_name", nullable = true, length = 32)
-    public String getFaDeptName() {
-        return faDeptName;
-    }
-
-    public void setFaDeptName(String faDeptName) {
-        this.faDeptName = faDeptName;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SmHosptailLog that = (SmHosptailLog) o;
         return id == that.id &&
-                Objects.equals(suffererId, that.suffererId) &&
+                Objects.equals(patientId, that.patientId) &&
+                Objects.equals(visitId, that.visitId) &&
                 Objects.equals(doctorId, that.doctorId) &&
-                Objects.equals(deptId, that.deptId) &&
-                Objects.equals(affirmSickness, that.affirmSickness) &&
+                Objects.equals(deptCode, that.deptCode) &&
+                Objects.equals(diagnosisName, that.diagnosisName) &&
                 Objects.equals(sicknessGrade, that.sicknessGrade) &&
-                Objects.equals(alarmCause, that.alarmCause) &&
-                Objects.equals(alarmCondition, that.alarmCondition) &&
-                Objects.equals(alarmResult, that.alarmResult) &&
-                Objects.equals(alarmCode, that.alarmCode) &&
-                Objects.equals(alarmStatus, that.alarmStatus) &&
-                Objects.equals(ruleType, that.ruleType) &&
-                Objects.equals(createTime, that.createTime) &&
-                Objects.equals(outTime, that.outTime) &&
-                Objects.equals(faDeptName, that.faDeptName);
+                Objects.equals(alarmLevel, that.alarmLevel) &&
+                Objects.equals(hintContent, that.hintContent) &&
+                Objects.equals(ruleSource, that.ruleSource) &&
+                Objects.equals(signContent, that.signContent) &&
+                Objects.equals(classification, that.classification) &&
+                Objects.equals(identification, that.identification) &&
+                Objects.equals(warnSource, that.warnSource) &&
+                Objects.equals(createTime, that.createTime);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, suffererId, doctorId, deptId, affirmSickness, sicknessGrade, alarmCause, alarmCondition, alarmResult, alarmCode, alarmStatus, ruleType, createTime, outTime, faDeptName);
+        return Objects.hash(id, patientId, visitId, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, hintContent, ruleSource, signContent, classification, identification, warnSource, createTime);
+    }
+
+    @Basic
+    @Column(name = "doctor_name", nullable = true, length = 255)
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
     }
 }

@@ -10,5 +10,7 @@ import java.util.List;
 
 public interface SmDeptsRepository extends JpaRepository<SmDepts, String>, JpaSpecificationExecutor<SmDepts> {
     @Query("select distinct (d.deptCode),d.deptName from SmDepts d ")
-    List<SmDepts>findDistinctByDeptCode();
+    List<SmDepts> findDistinctByDeptCode();
+
+    SmDepts findFirstByDeptCode(String deptCode);
 }

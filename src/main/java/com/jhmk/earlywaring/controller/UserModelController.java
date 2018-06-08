@@ -77,7 +77,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
         String s = map.get("variableid");
         UserDataModelMapping mapping = userDataModelMappingRepService.findByUmNamePath(s);
         if (mapping != null) {
-            map.put("variableid", mapping.getDmTypePath());
+            map.put("variableid", mapping.getDmNamePath());
             Object o = JSON.toJSON(map);
             String data = "";
             try {

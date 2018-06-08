@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -178,7 +179,8 @@ public class ReciveRule extends BaseRule {
             o.setBingchengjilu((Map<String, String>) jo.get("bingchengjilu"));
         }
         if (jo.containsKey("binglizhenduan")) {
-            o.setBinglizhenduan((List<Map<String, String>>) jo.get("binglizhenduan"));
+            List<Map<String, String>> maps = updataFieldValue(jo, "binglizhenduan", "diagnosis_type_name", "初步诊断");
+            o.setBinglizhenduan(maps);
         }
         if (jo.containsKey("shouyezhenduan")) {
             o.setShouyezhenduan((List<Map<String, String>>) jo.get("shouyezhenduan"));
@@ -199,6 +201,24 @@ public class ReciveRule extends BaseRule {
             o.setYizhu((List<Map<String, String>>) jo.get("yizhu"));
         }
         return o;
+    }
+
+    /**
+     * @param jo
+     * @param field1 一级字段名
+     * @param field2 2级字段名
+     * @param value  修改的值
+     */
+    public static  List<Map<String, String>> updataFieldValue(JSONObject jo, String field1, String field2, String value) {
+        List<Map<String, String>> resultMap = new ArrayList<>();
+        List<Map<String, String>> shouyezhenduan = (List<Map<String, String>>) jo.get(field1);
+        Iterator<Map<String, String>> iterator = shouyezhenduan.iterator();
+        while (iterator.hasNext()) {
+            Map<String, String> next = iterator.next();
+            next.put(field2, value);
+            resultMap.add(next);
+        }
+        return resultMap;
     }
 
     public static List<ReciveRule> fillList(JSONArray ja) {

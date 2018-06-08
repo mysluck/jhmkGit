@@ -4,9 +4,7 @@ package com.jhmk.earlywaring.controller;
 import com.alibaba.fastjson.JSON;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
-import com.jhmk.earlywaring.entity.RoleUser;
 import com.jhmk.earlywaring.entity.SmUsers;
-import com.jhmk.earlywaring.entity.repository.RoleUserRepository;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
@@ -39,8 +37,6 @@ public class UsersController extends BaseEntityController<SmUsers> {
     SmUsersRepService smUsersRepService;
     @Autowired
     SmUserService smUserService;
-    @Autowired
-    RoleUserRepository roleUserRepository;
 
 
     @PostMapping("")

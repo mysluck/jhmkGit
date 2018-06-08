@@ -1,11 +1,12 @@
 package com.jhmk.earlywaring.service;
 
-import com.jhmk.earlywaring.entity.RoleUser;
-import com.jhmk.earlywaring.entity.RoleUserId;
+import com.jhmk.earlywaring.entity.SmDepts;
+import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.SmUsers;
+import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
+import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.WebPage;
-import com.jhmk.earlywaring.entity.repository.RoleUserRepository;
 import com.jhmk.earlywaring.entity.repository.SmRoleRepository;
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,11 +32,13 @@ public class SmUserService {
     @Autowired
     SmRoleRepository roleRepository;
     @Autowired
-    RoleUserRepository roleUserRepository;
+    SmHosptailLogRepService smHosptailLogRepService;
+
+    @Autowired
+    SmDeptsRepService smDeptsRepService;
     @Autowired
     SmRoleService smRoleService;
-    @Autowired
-    RoleUserService roleUserService;
+
 
     /**
      * 添加用户
@@ -45,19 +48,10 @@ public class SmUserService {
         SmUsers one = null;
         if (StringUtils.isNotBlank(role)) {
             //1.保存用户
+            user.setRoleId(role);
             one = smUsersRepService.save(user);
             //2.保存用户角色的中间表
-            if (StringUtils.isNotBlank(role)) {
-                String[] roles = role.split(",");
-                for (String str : roles) {
-                    RoleUser roleUser = new RoleUser();
-                    RoleUserId roleUserId = new RoleUserId();
-                    roleUserId.setRoleId(str);
-                    roleUserId.setUserId(one.getUserId());
-                    roleUser.setUserRoleId(roleUserId);
-                    roleUserRepository.save(roleUser);
-                }
-            }
+
         }
         return one;
     }
@@ -148,5 +142,26 @@ public class SmUserService {
         return updateUser;
     }
 
+
+    public void updateDept() {
+        Iterable<SmHosptailLog> all = smHosptailLogRepService.findAll();
+        Iterable<SmUsers> depts = smUsersRepService.findAll();
+        Iterator<SmUsers> deptsIterator = depts.iterator();
+        Map<String, String> deptMap = new HashMap<>();
+        while (deptsIterator.hasNext()) {
+            SmUsers next = deptsIterator.next();
+            deptMap.put(next.getUserName(), next.getUserId());
+        }
+
+        Iterator<SmHosptailLog> iterator = all.iterator();
+        while (iterator.hasNext()) {
+            SmHosptailLog next = iterator.next();
+            if (deptMap.get(next.getDoctorName()) != null) {
+                next.setDoctorId(deptMap.get(next.getDoctorName()));
+                smHosptailLogRepService.save(next);
+            }
+
+        }
+    }
 
 }

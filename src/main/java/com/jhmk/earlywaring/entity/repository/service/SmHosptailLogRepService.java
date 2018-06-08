@@ -75,46 +75,55 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
         return repository.findAll(specification, pageable);
     }
 
+    //筛选列表
+    @Override
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<SmHosptailLog> findAll(Specification specification) {
+        return repository.findAll(specification);
+    }
+
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getAllByDeptAndYear(String deptId, String alarmStatus, Date startTime, Date endTime) {
-        return repository.getAllByDeptAndYear(deptId, alarmStatus, startTime, endTime);
+    public List<SmHosptailLog> getAllByDeptAndYear(String deptId, Date startTime, Date endTime) {
+        return repository.getAllByDeptAndYear(deptId, startTime, endTime);
+    }
+
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptId, Date startTime, Date endTime, Pageable pageable) {
+        return repository.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime, pageable);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public int getCountAllByAlarmCodeAndData(int alarmCode, String alarmStatus, Date startTime, Date endTime) {
-        return repository.getCountAllByAlarmCodeAndData(alarmCode, alarmStatus, startTime, endTime);
+    public List<SmHosptailLog> getDeptCountByYear(Date startTime, Date endTime) {
+        return repository.getDeptCountByYear(startTime, endTime);
+    }
+
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<String> getCountByDistinctDeptCode() {
+        return repository.getCountByDistinctDeptCode();
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public int getCountAllByAlarmCode(String alarmCode, String alarmStatus) {
-        return repository.getCountAllByAlarmCode(alarmCode, alarmStatus);
+    public long getDistinctDoctorIdCount() {
+        return repository.getDistinctDoctorIdCount();
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public int countAllByDeptIdAndAlarmStatus(int deptId, String alarmStatus) {
-        return repository.countAllByDeptIdAndAlarmStatus(deptId, alarmStatus);
+    public List<SmHosptailLog> getCountByDistinctDoctorId() {
+        return repository.getCountByDistinctDoctorId();
+    }
 
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public long count() {
+        return repository.count();
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<Object[]> getCountByAffirmSicknessAndDeptId(String deptId, String alarmStatus, Date startTime, Date endTime, Pageable pageable) {
-        return repository.getCountByAffirmSicknessAndDeptId(deptId, alarmStatus, startTime, endTime, pageable);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getDeptCountByYear(String alarmStatus, Date startTime, Date endTime) {
-        return repository.getDeptCountByYear(alarmStatus, startTime, endTime);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getAllByDeptIdAndYear(int deptId, String alarmStatus, Date startTime, Date endTime) {
-        return repository.getAllByDeptIdAndYear(deptId, alarmStatus, startTime, endTime);
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getCountByDistinctDeptId() {
-        return repository.getCountByDistinctDeptId();
+    public long countByWarnSource(String warnSource) {
+        return repository.countByWarnSource(warnSource);
     }
 
 }

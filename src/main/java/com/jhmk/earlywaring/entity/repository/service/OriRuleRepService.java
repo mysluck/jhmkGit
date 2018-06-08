@@ -1,8 +1,11 @@
 package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
-import com.jhmk.earlywaring.entity.SmDepts;
-import com.jhmk.earlywaring.entity.repository.SmDeptsRepository;
+import com.jhmk.earlywaring.entity.DeptRel;
+import com.jhmk.earlywaring.entity.OriRule;
+import com.jhmk.earlywaring.entity.OriRule;
+import com.jhmk.earlywaring.entity.repository.OriRuleRepository;
+import com.jhmk.earlywaring.entity.repository.OriRuleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,20 +16,18 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class SmDeptsRepService extends BaseRepService<SmDepts, String> {
-
-
+public class OriRuleRepService extends BaseRepService<OriRule, String> {
     @Autowired
-    SmDeptsRepository repository;
+    OriRuleRepository repository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public SmDepts save(SmDepts SmDepts) {
-        return repository.save(SmDepts);
+    public OriRule save(OriRule OriRule) {
+        return repository.save(OriRule);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Iterable<SmDepts> save(List<SmDepts> list) {
+    public Iterable<OriRule> save(List<OriRule> list) {
         return repository.save(list);
     }
 
@@ -37,42 +38,33 @@ public class SmDeptsRepService extends BaseRepService<SmDepts, String> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(SmDepts SmDepts) {
-        repository.delete(SmDepts);
+    public void delete(OriRule OriRule) {
+        repository.delete(OriRule);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(List<SmDepts> list) {
+    public void delete(List<OriRule> list) {
         repository.delete(list);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmDepts findOne(String id) {
+    public OriRule findOne(String id) {
         return repository.findOne(id);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Iterable<SmDepts> findAll() {
+    public Iterable<OriRule> findAll() {
         return repository.findAll();
     }
 
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<SmDepts> findAll(Pageable pageable) {
+    public Page<OriRule> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmDepts> findDistinctByDeptCode() {
-        return repository.findDistinctByDeptCode();
-    }
-
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmDepts findFirstByDeptCode(String deptCode) {
-        return repository.findFirstByDeptCode(deptCode);
-    }
 
 }

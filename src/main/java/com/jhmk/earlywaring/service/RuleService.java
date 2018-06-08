@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.UserDataModelMapping;
 import com.jhmk.earlywaring.entity.UserModel;
 import com.jhmk.earlywaring.entity.repository.service.UserDataModelMappingRepService;
@@ -86,8 +87,64 @@ public class RuleService {
      * @return
      */
 
+    static String s = "{\n" +
+            "  \"code\": \"200\",\n" +
+            "  \"message\": \"success\",\n" +
+            "  \"result\": {\n" +
+            "    \"id\": \"4a2c83e0bffe421b93bc262212c8eaad\",\n" +
+            "    \"doctorId\": \"10401\",\n" +
+            "    \"createTime\": \"2018-05-30\",\n" +
+            "    \"ruleConditions\": [\n" +
+            "      {\n" +
+            "        \"field\": \"住院医嘱_医嘱项名称\",\n" +
+            "        \"value\": [\n" +
+            "          \"啦啦12\"\n" +
+            "        ],\n" +
+            "        \"exp\": \"包含\"\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"field\": \"住院病案首页_就诊信息_年龄值\",\n" +
+            "        \"value\": [\n" +
+            "          \"77岁\"\n" +
+            "        ],\n" +
+            "        \"exp\": \"等于\"\n" +
+            "      },\n" +
+            "      {\n" +
+            "        \"field\": \"住院医嘱_医嘱项编码\",\n" +
+            "        \"value\": [\n" +
+            "          \" 啦啦\"\n" +
+            "        ],\n" +
+            "        \"exp\": \"等于\"\n" +
+            "      }\n" +
+            "    ],\n" +
+            "    \"ruleCondition\": \"(住院医嘱_医嘱项名称包含啦啦12and住院病案首页_就诊信息_年龄值等于77岁and住院医嘱_医嘱项编码等于 啦啦)\",\n" +
+            "    \"hintContent\": \"提示内容\",\n" +
+            "    \"signContent\": \"规则出处\",\n" +
+            "    \"ruleSource\": \"规则出处\",\n" +
+            "    \"isSubmit\": false,\n" +
+            "    \"sts\": \"A\"\n" +
+            "  }\n" +
+            "}";
+
     public String addRule(String rule) {
+        Object parse = JSONObject.parse(s);
+
         return "ok";
+    }
+
+    public static void main(String[] args) {
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        String code = jsonObject.getString("code");
+        if (BaseConstants.OK.equals(code)) {
+            Object result = jsonObject.get("result");
+            if (result != null) {
+                Map<String, String> map = (Map) result;
+                String id = map.get("id");
+
+                System.out.println(result);
+            }
+        }
+
     }
 
     /**
@@ -139,33 +196,6 @@ public class RuleService {
     public ReciveRule ruleMatch(String mes) {
         JSONObject object = JSON.parseObject(mes);
         ReciveRule fill = ReciveRule.fill(object);
-//        SendRule sendRule = new SendRule();
-//        BeanUtils.copyProperties(fill, sendRule);
-//        System.out.println(sendRule.toString());
-//        List<Map<String, String>> binglizhenduan = fill.getBinglizhenduan();
-//        Collections.sort(binglizhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
-//        List<Map<String, String>> blzdList = getRecentList(binglizhenduan, "diagnosis_name", "diagnosis_time");
-//
-//        sendRule.setBinglizhenduan(blzdList);
-//        List<Map<String, String>> shouyezhenduan = fill.getShouyezhenduan();
-//        Collections.sort(shouyezhenduan, CompareUtil.createComparatorForMap(-1, "diagnosis_time"));
-//        List<Map<String, String>> shzdList = getRecentList(shouyezhenduan, "diagnosis_name", "diagnosis_time");
-//        sendRule.setShouyezhenduan(shzdList);
-//        //检查报告
-//        List<Map<String, String>> jianchabaogao = fill.getRjianchabaogao();
-//        Collections.sort(jianchabaogao, CompareUtil.createComparatorForMap(-1, "exam_time"));
-//        List<Map<String, String>> jcList = getRecentList(jianchabaogao, "exam_item_name", "exam_time");
-//        sendRule.setJianchabaogao(jcList);
-//        //检验报告
-//        List<Map<String, String>> jianyanbaogao = fill.getRjianyanbaogao();
-//        Collections.sort(jianyanbaogao, CompareUtil.createComparatorForMap(-1, "report_time"));
-//        List<Map<String, String>> jyList = getRecentList(jianyanbaogao, "lab_item_name", "report_time");
-//
-//        sendRule.setJianyanbaogao(jyList);
-//        //医嘱
-//        List<Map<String, String>> yizhu = fill.getYizhu();
-//        Collections.sort(yizhu, CompareUtil.createComparatorForMap(-1, "order_begin_time"));
-//        sendRule.setYizhu(yizhu.get(0));
         return fill;
     }
 
@@ -200,15 +230,17 @@ public class RuleService {
     }
 
     //解析所有原规则（用于界面规则显示）
-    public List<FormatRule> formatData(String forObject) {
+    public Map<String, Object> formatData(String forObject) {
+        Map<String, Object> map = new HashMap<>();
         List<FormatRule> list = new LinkedList<>();
         Map<String, String> recieveData = (Map) JSON.parse(forObject.toString());
 
         Object recieveOldData = recieveData.get("result");
-//        List<FormatRule> formatRules = JSON.parseObject(JSON.toJSONString(recieveOldData), new TypeReference<List<FormatRule>>() {
-//        });
-//        System.out.println(formatRules.size());
-        JSONArray oldData = (JSONArray) recieveOldData;
+        Map<String, Object> thisMap = (Map) recieveOldData;
+        Object all_page = thisMap.get("all_page");
+        map.put("all_page", all_page);
+        Object decisions = thisMap.get("decisions");
+        JSONArray oldData = (JSONArray) decisions;
         int size = oldData.size();
         for (int i = 0; i < size; i++) {
             FormatRule formatRule = new FormatRule();
@@ -222,7 +254,8 @@ public class RuleService {
                 list.add(formatRule);
             }
         }
-        return list;
+        map.put("result", list);
+        return map;
     }
 
     /**
@@ -282,5 +315,19 @@ public class RuleService {
             result.add(analyzeBean);
         }
         return result;
+    }
+
+    public String getId(String forObject) {
+        JSONObject jsonObject = JSONObject.parseObject(forObject);
+        String code = jsonObject.getString("code");
+        if (BaseConstants.OK.equals(code)) {
+            Object result = jsonObject.get("result");
+            if (result != null) {
+                Map<String, String> map = (Map) result;
+                String id = map.get("id");
+                return id;
+            }
+        }
+        return "";
     }
 }
