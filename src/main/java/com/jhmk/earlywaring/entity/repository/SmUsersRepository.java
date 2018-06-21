@@ -1,10 +1,13 @@
 package com.jhmk.earlywaring.entity.repository;
 
 import com.jhmk.earlywaring.entity.SmUsers;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
+
+import java.util.List;
 
 public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, String>, JpaSpecificationExecutor<SmUsers> {
 
@@ -25,4 +28,6 @@ public interface SmUsersRepository extends PagingAndSortingRepository<SmUsers, S
 
     @Override
     long count();
+
+    List<SmUsers> findByUserName(String username);
 }

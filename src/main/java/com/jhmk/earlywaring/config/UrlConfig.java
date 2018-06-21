@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 public class UrlConfig {
     private String ywdurl;
     private String cdssurl;
+    private String med;
 
     public String getYwdurl() {
         return ywdurl;
@@ -24,5 +25,13 @@ public class UrlConfig {
 
     public void setCdssurl(String cdssurl) {
         this.cdssurl = cdssurl;
+    }
+
+    public String getMed() {
+        return med;
+    }
+
+    public void setMed(String med) {
+        this.med = med;
     }
 }

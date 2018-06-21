@@ -9,7 +9,8 @@ import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.util.JWTUtil;
 import io.jsonwebtoken.Claims;
-import org.apache.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -24,7 +25,8 @@ import java.util.Map;
 
 @Component
 public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
-    Logger logger = Logger.getLogger(HosptailLogController.class);
+    private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationTokenFilter.class);
+
 
     //    @Autowired
 //    private AuthUserDetailsServiceImpl userDetailsService;
@@ -48,6 +50,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             String requestURI = request.getRequestURI();
 //            System.out.println(requestURI);
             if (requestURI.equals("/warn/rule/ruleMatch")
+                    || requestURI.contains("warn/rule/match")
                     || requestURI.contains("warn/users")
                     || requestURI.contains("warn/dept") || requestURI.contains("warn/login")
                     ) {

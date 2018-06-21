@@ -87,9 +87,14 @@ public class SmUsersRepService extends BaseRepService<SmUsers, String> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public long count(){
+    public long count() {
         return repository.count();
     }
 
+
+    @Transactional(propagation = Propagation.REQUIRED)
+    public List<SmUsers> findByUserName(String username) {
+        return repository.findByUserName(username);
+    }
 
 }

@@ -6,8 +6,10 @@ import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.SmDepts;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.SmRole;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
+import com.jhmk.earlywaring.entity.repository.service.SmRoleRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
@@ -30,6 +32,8 @@ import java.util.Map;
 public class CmsController extends BaseEntityController<SmUsers> {
     @Autowired
     SmDeptsRepService smDeptsRepService;
+    @Autowired
+    SmRoleRepService smRoleRepService;
     @Autowired
     SmUsersRepService smUsersRepService;
     private static final Logger logger = LoggerFactory.getLogger(CmsController.class);
@@ -60,13 +64,18 @@ public class CmsController extends BaseEntityController<SmUsers> {
                         e.printStackTrace();
                     }
                     httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
-                    httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, admin.getRoleId());
+                    String roleId = admin.getRoleId();
+                    httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_ID, roleId);
+                    SmRole one = smRoleRepService.findOne(roleId);
+                    httpServletRequest.getSession().setAttribute(BaseConstants.CURRENT_ROLE_RANGE, one.getRuleRange());
+
+
                     if (admin.getUserDept() != null) {
                         httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_ID, admin.getUserDept());
                         SmDepts firstByDeptCode = smDeptsRepService.findFirstByDeptCode(admin.getUserDept());
-                        if(firstByDeptCode!=null){
-                        httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_NAME, firstByDeptCode.getDeptName());
-                        }else {
+                        if (firstByDeptCode != null) {
+                            httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_NAME, firstByDeptCode.getDeptName());
+                        } else {
 //                        httpServletRequest.getSession().setAttribute(BaseConstants.DEPT_NAME, firstByDeptCode.getDeptName());
                         }
                     }

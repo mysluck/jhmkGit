@@ -15,8 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class UserModelService {
@@ -89,100 +88,29 @@ public class UserModelService {
         return pModuls;
     }
 
-    /**
-     * 解析前台规则()
-     * eg:{"expressions":[[{"field":"病案首页_基本信息_年龄","exp":"等于","values":["33"],"flag":"1","unit":"岁"}],[{"field":"检验_检验_检验项目","exp":"等于","values":["心电图"],"flag":"1","unit":""}],[{"field":"病理_基本信息_病理号","exp":"包含","values":["3"],"flag":"1","unit":""}]]}
-     * <p>
-     * 解析成中间用and链接
-     *
-     * @param str
-     * @return
-     */
-    public String analyzeData(String str) {
-
-        JSONObject jsonObject = JSON.parseObject(str);
-        JSONArray expressions = (JSONArray) jsonObject.get("expressions");
-        int size = expressions.size();
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < size; i++) {
-            StringBuffer sb = new StringBuffer("(");
-            JSONArray o = (JSONArray) expressions.get(i);
-            //如果o。size大于1  拼接or
-            if (o.size() > 1) {
-                for (int j = 0; j < o.size(); j++) {
-                    AnalyzeBean child = JSON.parseObject(o.get(j).toString(), AnalyzeBean.class);
-                    String field = child.getField();
-                    UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-                    sb.append(byUmNamePath.getDmNamePath())
-                            .append(child.getExp())
-                            .append(child.getValues())
-                            .append(child.getUnit());
-                    if (j != o.size() - 1) {
-                        sb.append("or");
-                    }
-                }
-                //否则 不拼接
-            } else {
-                AnalyzeBean child = JSON.parseObject(o.get(0).toString(), AnalyzeBean.class);
-                String field = child.getField();
-                UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-                sb.append(byUmNamePath.getDmNamePath())
-                        .append(child.getExp())
-                        .append(child.getValues())
-                        .append(child.getUnit());
-                sb.append(")");
-            }
-            sb.append(")");
-            if (i != size - 1) {
+    public String getOldRule(Object str) {
+        String string = JSONObject.toJSONString(str);
+        JSONArray ruleCondition = JSONArray.parseArray(string);
+        Iterator<Object> iterator = ruleCondition.iterator();
+        List<String> list = new ArrayList<>();
+        while (iterator.hasNext()) {
+            Object next = iterator.next();
+            String s = analyzeOldRule(next);
+            list.add(s);
+        }
+        StringBuffer sb = new StringBuffer();
+        sb.append("(");
+        for (int i = 0; i < list.size(); i++) {
+            sb.append(list.get(i));
+            if (i != list.size() - 1) {
                 sb.append("and");
             }
-            stringBuffer.append(sb);
         }
-        System.out.println(stringBuffer.toString());
-        return stringBuffer.toString();
+        sb.append(")");
+        System.out.println(sb);
+        return sb.toString();
     }
 
-    public String analyzeCollection(Object str) {
-
-        JSONArray expressions = (JSONArray) str;
-        int size = expressions.size();
-        StringBuffer stringBuffer = new StringBuffer();
-        for (int i = 0; i < size; i++) {
-            StringBuffer sb = new StringBuffer("(");
-            JSONArray o = (JSONArray) expressions.get(i);
-            //如果o。size大于1  拼接or
-            if (o.size() > 1) {
-                for (int j = 0; j < o.size(); j++) {
-                    AnalyzeBean child = JSON.parseObject(o.get(j).toString(), AnalyzeBean.class);
-                    String field = child.getField();
-                    UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-                    sb.append(byUmNamePath.getDmNamePath())
-                            .append(child.getExp())
-                            .append(child.getValues())
-                            .append(child.getUnit());
-                    if (j != o.size() - 1) {
-                        sb.append("or");
-                    }
-                }
-                //否则 不拼接
-            } else {
-                AnalyzeBean child = JSON.parseObject(o.get(0).toString(), AnalyzeBean.class);
-                String field = child.getField();
-                UserDataModelMapping byUmNamePath = userDataModelMappingRepService.findByUmNamePath(field);
-                sb.append(byUmNamePath.getDmNamePath())
-                        .append(child.getExp())
-                        .append(child.getValues())
-                        .append(child.getUnit());
-                sb.append(")");
-            }
-            if (i != size - 1) {
-                sb.append("and");
-            }
-            stringBuffer.append(sb);
-        }
-        System.out.println(stringBuffer.toString());
-        return stringBuffer.toString();
-    }
 
     /**
      * 解析原始规则

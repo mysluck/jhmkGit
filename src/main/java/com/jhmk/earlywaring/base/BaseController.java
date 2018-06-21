@@ -48,6 +48,15 @@ public class BaseController {
         return currentRoleId;
     }
 
+    /**
+     * 获取权限范围 1 查看自己提交的规则 2.查看所有提交的规则
+     * @return
+     */
+    public String getCurrentRoleRange() {
+        String range = (String) getSessionData(BaseConstants.CURRENT_ROLE_RANGE);
+        return range;
+    }
+
 
     public void setCurrentRoleId(String roleId) {
         addSessionData(BaseConstants.CURRENT_ROLE_ID, roleId);

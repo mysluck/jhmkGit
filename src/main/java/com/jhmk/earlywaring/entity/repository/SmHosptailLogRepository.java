@@ -40,12 +40,11 @@ public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHo
      * @param deptCode
      * @param startTime
      * @param endTime
-     * @param pageable
      * @return
      */
     @Query("select l.diagnosisName,count(1) from  SmHosptailLog l  where l.deptCode=?1  and l.createTime>=?2 and l.createTime<=?3 group by l.diagnosisName ")
 // limit 10
-    List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptCode, Date startTime, Date endTime, Pageable pageable);
+    List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptCode, Date startTime, Date endTime);
 
 
     /**

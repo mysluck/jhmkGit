@@ -4,15 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.sql.Timestamp;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.GregorianCalendar;
+import java.util.*;
 
 
 /**
@@ -24,6 +23,7 @@ public class DateFormatUtil {
 
 
     public static final String DATE_PATTERN_S = "yyyy-MM-dd";
+    public static final String DATE_PATTERN_MM = "yyyy-MM";
     public static final String DATETIME_PATTERN_S = "yyyyMMddHHmmss";
     public static final String DATETIME_PATTERN_SS = "yyyy-MM-dd HH:mm:ss";
     public static final String DATE_PATTERN = "yyyyMMdd";
@@ -139,6 +139,18 @@ public class DateFormatUtil {
 
 
         return newDate;
+    }
+
+    public static Date parseDateBySdf(String dateStr, String pattern) {
+        SimpleDateFormat sdf = new SimpleDateFormat(pattern);
+        Date parse = null;
+        try {
+            parse = sdf.parse(dateStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return parse;
+
     }
 
     public static Timestamp parseDateTime(String dateStr, String pattern) {
@@ -310,6 +322,51 @@ public class DateFormatUtil {
         return calendar.getTime();
     }
 
+    /**
+     * 获取某月份第一天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static String getFirstDayOfMonth(int year, int month) {
+        Calendar cal = Calendar.getInstance();
+        //设置年份
+        cal.set(Calendar.YEAR, year);
+        //设置月份
+        cal.set(Calendar.MONTH, month - 1);
+        //获取某月最小天数
+        int firstDay = cal.getActualMinimum(Calendar.DAY_OF_MONTH);
+        //设置日历中月份的最小天数
+        cal.set(Calendar.DAY_OF_MONTH, firstDay);
+        //格式化日期
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String firstDayOfMonth = sdf.format(cal.getTime());
+        return firstDayOfMonth;
+    }
+
+    /**
+     * 获得该月最后一天
+     *
+     * @param year
+     * @param month
+     * @return
+     */
+    public static String getLastDayOfMonth(int year, int month) {
+        Calendar cal = Calendar.getInstance();
+        //设置年份
+        cal.set(Calendar.YEAR, year);
+        //设置月份
+        cal.set(Calendar.MONTH, month - 1);
+        //获取某月最大天数
+        int lastDay = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+        //设置日历中月份的最大天数
+        cal.set(Calendar.DAY_OF_MONTH, lastDay);
+        //格式化日期
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        String lastDayOfMonth = sdf.format(cal.getTime());
+        return lastDayOfMonth;
+    }
 
     public static int getYearNow() {
         Calendar calendar = Calendar.getInstance();
@@ -365,6 +422,7 @@ public class DateFormatUtil {
 
     /**
      * 获取上年第一个月
+     *
      * @return 2017-01
      */
     public static String getFirstMonthForLastYear() {
@@ -378,8 +436,10 @@ public class DateFormatUtil {
         String format = simpleDateFormat.format(currYearLast);
         return format;
     }
+
     /**
      * 获取上年最后一个月
+     *
      * @return 2017-12
      */
     public static String getLastMonthForLastYear() {
@@ -401,16 +461,49 @@ public class DateFormatUtil {
 //        Date aa = DateFormatUtil.getNextNYear(date1, 1);
 //        System.out.println("------: " + aa);
 
-        Calendar calendar = Calendar.getInstance();
-        int i = calendar.get(Calendar.YEAR);
-        calendar.set(Calendar.YEAR, i - 1);
-        calendar.set(Calendar.MONTH, 11);
-        Date currYearLast = calendar.getTime();
+//        Calendar calendar = Calendar.getInstance();
+//        int i = calendar.get(Calendar.YEAR);
+//        calendar.set(Calendar.YEAR, i - 1);
+//        calendar.set(Calendar.MONTH, 11);
+//        Date currYearLast = calendar.getTime();
+//
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
+//        String format = simpleDateFormat.format(currYearLast);
+//        System.out.println(format);
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM");
-        String format = simpleDateFormat.format(currYearLast);
-        System.out.println(format);
+//        List<String> monthBetween = getMonthBetween("2017-01", "2017-12");
+//        System.out.println(monthBetween.toString());
+        String startTime = "2017-01";
+        String[] split = startTime.split("-");
+        String firstDayOfMonth = DateFormatUtil.getFirstDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+        System.out.println(firstDayOfMonth);
 
+    }
+
+    public static List<String> getMonthBetween(String minDate, String maxDate) {
+        ArrayList<String> result = new ArrayList<String>();
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM");//格式化为年月
+
+        Calendar min = Calendar.getInstance();
+        Calendar max = Calendar.getInstance();
+
+        try {
+            min.setTime(sdf.parse(minDate));
+            min.set(min.get(Calendar.YEAR), min.get(Calendar.MONTH), 1);
+            max.setTime(sdf.parse(maxDate));
+            max.set(max.get(Calendar.YEAR), max.get(Calendar.MONTH), 2);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+
+        Calendar curr = min;
+        while (curr.before(max)) {
+            result.add(sdf.format(curr.getTime()));
+            curr.add(Calendar.MONTH, 1);
+        }
+
+        return result;
     }
 
 }

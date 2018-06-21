@@ -90,8 +90,8 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptId, Date startTime, Date endTime, Pageable pageable) {
-        return repository.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime, pageable);
+    public List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptId, Date startTime, Date endTime) {
+        return repository.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)

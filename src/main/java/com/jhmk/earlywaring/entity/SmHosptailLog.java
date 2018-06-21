@@ -5,24 +5,29 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_hosptail_log", schema = "jhmk_waring")
+@Table(name = "sm_hosptail_log", schema = "jhmk_waring", catalog = "")
 public class SmHosptailLog {
     private int id;
     private String patientId;
     private String visitId;
+    private String doctorName;
     private String doctorId;
     private String deptCode;
     private String diagnosisName;
     private String sicknessGrade;
     private String alarmLevel;
-    private String hintContent;
-    private String ruleSource;
-    private String signContent;
     private String classification;
     private String identification;
     private String warnSource;
     private Date createTime;
-    private String doctorName;
+    private String hintContent;
+    private String ruleSource;
+    private String signContent;
+    private String ruleId;
+
+    public void setCreateTime(java.sql.Date createTime) {
+        this.createTime = createTime;
+    }
 
     @Id
     @Column(name = "id", nullable = false)
@@ -40,8 +45,19 @@ public class SmHosptailLog {
         return patientId;
     }
 
+
     public void setPatientId(String patientId) {
         this.patientId = patientId;
+    }
+
+    @Basic
+    @Column(name = "rule_id", nullable = true, length = 60)
+    public String getRuleId() {
+        return ruleId;
+    }
+
+    public void setRuleId(String ruleId) {
+        this.ruleId = ruleId;
     }
 
     @Basic
@@ -52,6 +68,16 @@ public class SmHosptailLog {
 
     public void setVisitId(String visitId) {
         this.visitId = visitId;
+    }
+
+    @Basic
+    @Column(name = "doctor_name", nullable = true, length = 255)
+    public String getDoctorName() {
+        return doctorName;
+    }
+
+    public void setDoctorName(String doctorName) {
+        this.doctorName = doctorName;
     }
 
     @Basic
@@ -105,36 +131,6 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "hintContent", nullable = true, length = 255)
-    public String getHintContent() {
-        return hintContent;
-    }
-
-    public void setHintContent(String hintContent) {
-        this.hintContent = hintContent;
-    }
-
-    @Basic
-    @Column(name = "ruleSource", nullable = true, length = 255)
-    public String getRuleSource() {
-        return ruleSource;
-    }
-
-    public void setRuleSource(String ruleSource) {
-        this.ruleSource = ruleSource;
-    }
-
-    @Basic
-    @Column(name = "signContent", nullable = true, length = 255)
-    public String getSignContent() {
-        return signContent;
-    }
-
-    public void setSignContent(String signContent) {
-        this.signContent = signContent;
-    }
-
-    @Basic
     @Column(name = "classification", nullable = true, length = 8)
     public String getClassification() {
         return classification;
@@ -155,7 +151,7 @@ public class SmHosptailLog {
     }
 
     @Basic
-    @Column(name = "warn_source", nullable = true, length = 8)
+    @Column(name = "warn_source", nullable = true, length = 20)
     public String getWarnSource() {
         return warnSource;
     }
@@ -174,6 +170,36 @@ public class SmHosptailLog {
         this.createTime = createTime;
     }
 
+    @Basic
+    @Column(name = "hint_content", nullable = true, length = 255)
+    public String getHintContent() {
+        return hintContent;
+    }
+
+    public void setHintContent(String hintContent) {
+        this.hintContent = hintContent;
+    }
+
+    @Basic
+    @Column(name = "rule_source", nullable = true, length = 255)
+    public String getRuleSource() {
+        return ruleSource;
+    }
+
+    public void setRuleSource(String ruleSource) {
+        this.ruleSource = ruleSource;
+    }
+
+    @Basic
+    @Column(name = "sign_content", nullable = true, length = 255)
+    public String getSignContent() {
+        return signContent;
+    }
+
+    public void setSignContent(String signContent) {
+        this.signContent = signContent;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -182,33 +208,24 @@ public class SmHosptailLog {
         return id == that.id &&
                 Objects.equals(patientId, that.patientId) &&
                 Objects.equals(visitId, that.visitId) &&
+                Objects.equals(doctorName, that.doctorName) &&
                 Objects.equals(doctorId, that.doctorId) &&
                 Objects.equals(deptCode, that.deptCode) &&
                 Objects.equals(diagnosisName, that.diagnosisName) &&
                 Objects.equals(sicknessGrade, that.sicknessGrade) &&
                 Objects.equals(alarmLevel, that.alarmLevel) &&
-                Objects.equals(hintContent, that.hintContent) &&
-                Objects.equals(ruleSource, that.ruleSource) &&
-                Objects.equals(signContent, that.signContent) &&
                 Objects.equals(classification, that.classification) &&
                 Objects.equals(identification, that.identification) &&
                 Objects.equals(warnSource, that.warnSource) &&
-                Objects.equals(createTime, that.createTime);
+                Objects.equals(createTime, that.createTime) &&
+                Objects.equals(hintContent, that.hintContent) &&
+                Objects.equals(ruleSource, that.ruleSource) &&
+                Objects.equals(signContent, that.signContent);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, patientId, visitId, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, hintContent, ruleSource, signContent, classification, identification, warnSource, createTime);
-    }
-
-    @Basic
-    @Column(name = "doctor_name", nullable = true, length = 255)
-    public String getDoctorName() {
-        return doctorName;
-    }
-
-    public void setDoctorName(String doctorName) {
-        this.doctorName = doctorName;
+        return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent);
     }
 }

@@ -60,18 +60,16 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @PostMapping("/getCountByDate")
     @ResponseBody
     public void getCountByDate(HttpServletResponse response, @RequestBody String map) {
-        String hospital = "住院";
-        String clinic = "门诊";
         Map<String, String> paramMap = (Map) JSON.parse(map);
         String startTime = paramMap.get("startdate");
         String endTime = paramMap.get("enddate");
         String deptName = paramMap.get("department");
-        Map<String, Integer> hospitalMap = hosptailLogService.countForField(startTime, endTime, deptName, hospital);
-        Map<String, Integer> clinicMap = hosptailLogService.countForField(startTime, endTime, deptName, clinic);
+        List<LogBean> hospitalMap = hosptailLogService.countForField(startTime, endTime, deptName, BaseConstants.ALARM_CODE1);
+        List<LogBean> clinicMap = hosptailLogService.countForField(startTime, endTime, deptName, BaseConstants.ALARM_CODE2);
 
-        Map<String, Map<String, Integer>> resultMap = new HashMap<>();
-        resultMap.put(hospital, hospitalMap);
-        resultMap.put(clinic, clinicMap);
+        Map<String, List> resultMap = new HashMap<>();
+        resultMap.put("hospital", hospitalMap);
+        resultMap.put("clinic", clinicMap);
         wirte(response, resultMap);
     }
 

@@ -8,6 +8,7 @@ public class BaseConstants {
 
     public static final String USER_STATUS = "0";//用户状态 0-正常 1-异常
     public static final String CURRENT_ROLE_ID = "currentRoleId";
+    public static final String CURRENT_ROLE_RANGE = "range";
     public static final String USER_ID = "userId";
     public static final String DEPT_ID = "deptId";
     public static final String DEPT_NAME = "deptName";
@@ -44,15 +45,13 @@ public class BaseConstants {
     public static final String RUYUANJILU = "ruyuanjilu";
 
 
-
-
-
     //getVariableList获取变量列表
     public static final String getVariableList = "/med/cindecision/getVariableList.json";
     public static final String addrule = "/med/cindecision/addrule.json";
     public static final String findallnotsubmitrule = "/med/cindecision/findallnotsubmitrule.json";
     public static final String findallsubmitrule = "/med/cindecision/findallsubmitrule.json";
     public static final String findallrule = "/med/cindecision/findallrule.json";
+    public static final String findrulebycondition = "/med/cindecision/findrulebycondition.json";
     public static final String submitrule = "/med/cindecision/submitrule.json";
     public static final String matchrule = "/med/cindecision/matchrule.json";
     public static final String updaterule = "/med/cindecision/updaterule.json";
@@ -79,5 +78,14 @@ public class BaseConstants {
     public static final String getSpecialTypeByField = "/med/getSpecialTypeByField.json";
     // 获取最新列表
     public static final String getVariableListNew = "/med/getVariableListNew.json";
+
+
+    //获取疾病同义词
+    public static final String getSamilarWord = "/med/cdss/getSamilarWord.json";
+
+    //获取疾病子节点
+    public static final String getDiseaseChildrenList = "/med/cdss/getDiseaseChildrenList.json";
+    //获取疾病父节点
+    public static final String getParentList = "/med/cdss/getParentList.json";
 
 }

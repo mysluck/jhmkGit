@@ -12,20 +12,13 @@ public class LogBean {
     private int yellow;
     private int orange;
     private int red;
+    private String time;
+    private int count;
 
     public LogBean() {
     }
 
-    public LogBean(String deptId, String deptName, String doctorId, String doctorName, int blue, int yellow, int orange, int red) {
-        this.deptId = deptId;
-        this.deptName = deptName;
-        this.doctorId = doctorId;
-        this.doctorName = doctorName;
-        this.blue = blue;
-        this.yellow = yellow;
-        this.orange = orange;
-        this.red = red;
-    }
+
 
     public String getDeptId() {
         return deptId;
@@ -91,6 +84,22 @@ public class LogBean {
         this.red = red;
     }
 
+    public String getTime() {
+        return time;
+    }
+
+    public void setTime(String time) {
+        this.time = time;
+    }
+
+    public int getCount() {
+        return count;
+    }
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
     @Override
     public String toString() {
         return "LogBean{" +
@@ -102,6 +111,8 @@ public class LogBean {
                 ", yellow=" + yellow +
                 ", orange=" + orange +
                 ", red=" + red +
+                ", time='" + time + '\'' +
+                ", count=" + count +
                 '}';
     }
 }

@@ -2,39 +2,115 @@ package com.jhmk.earlywaring.entity.rule;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.jhmk.earlywaring.util.DateFormatUtil;
+import com.jhmk.earlywaring.util.MapUtil;
+import org.apache.commons.collections.map.HashedMap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 //规则匹配时，获取调用者请求信息 转化为接收规则信息
-public class ReciveRule extends BaseRule {
+public class ReciveRule {
+    @Autowired
+    RestTemplate restTemplate;
+    private String doctor_id;
+    private String doctor_name;
+    private String dept_code;
+    private String warnSource;
+    private String patient_id;
+    private String visit_id;
+    private String pageSource;
 
-    private List<Map<String, String>> binglizhenduan;
-    private List<Map<String, String>> shouyezhenduan;
+    private Map<String, String> bingchengjilu;
+    private Map<String, String> binganshouye;
+    private Map<String, String> ruyuanjilu;
     private List<Map<String, String>> jianyanbaogao;
     private List<Map<String, String>> jianchabaogao;
-    private List<Map<String, String>> yizhu;
+    private List<Zhenduan> binglizhenduan;
+    private List<Zhenduan> shouyezhenduan;
+    private List<Yizhu> yizhu;
 
-    public List<Map<String, String>> getBinglizhenduan() {
-        return binglizhenduan;
+
+
+    public String getDoctor_id() {
+        return doctor_id;
     }
 
-    public void setBinglizhenduan(List<Map<String, String>> binglizhenduan) {
-        this.binglizhenduan = binglizhenduan;
+    public void setDoctor_id(String doctor_id) {
+        this.doctor_id = doctor_id;
     }
 
-    public List<Map<String, String>> getShouyezhenduan() {
-        return shouyezhenduan;
+    public String getDoctor_name() {
+        return doctor_name;
     }
 
-    public void setShouyezhenduan(List<Map<String, String>> shouyezhenduan) {
-        this.shouyezhenduan = shouyezhenduan;
+    public void setDoctor_name(String doctor_name) {
+        this.doctor_name = doctor_name;
     }
 
-    public List<Map<String, String>> getRjianyanbaogao() {
-        return jianyanbaogao;
+    public String getDept_code() {
+        return dept_code;
+    }
+
+    public void setDept_code(String dept_code) {
+        this.dept_code = dept_code;
+    }
+
+    public String getWarnSource() {
+        return warnSource;
+    }
+
+    public void setWarnSource(String warnSource) {
+        this.warnSource = warnSource;
+    }
+
+    public String getPatient_id() {
+        return patient_id;
+    }
+
+    public void setPatient_id(String patient_id) {
+        this.patient_id = patient_id;
+    }
+
+    public String getVisit_id() {
+        return visit_id;
+    }
+
+    public void setVisit_id(String visit_id) {
+        this.visit_id = visit_id;
+    }
+
+    public String getPageSource() {
+        return pageSource;
+    }
+
+    public void setPageSource(String pageSource) {
+        this.pageSource = pageSource;
+    }
+
+    public Map<String, String> getBingchengjilu() {
+        return bingchengjilu;
+    }
+
+    public void setBingchengjilu(Map<String, String> bingchengjilu) {
+        this.bingchengjilu = bingchengjilu;
+    }
+
+    public Map<String, String> getBinganshouye() {
+        return binganshouye;
+    }
+
+    public void setBinganshouye(Map<String, String> binganshouye) {
+        this.binganshouye = binganshouye;
+    }
+
+    public Map<String, String> getRuyuanjilu() {
+        return ruyuanjilu;
+    }
+
+    public void setRuyuanjilu(Map<String, String> ruyuanjilu) {
+        this.ruyuanjilu = ruyuanjilu;
     }
 
     public List<Map<String, String>> getJianyanbaogao() {
@@ -53,120 +129,50 @@ public class ReciveRule extends BaseRule {
         this.jianchabaogao = jianchabaogao;
     }
 
-    @Override
-    public String getDept_id() {
-        return super.getDept_id();
+    public List<Zhenduan> getBinglizhenduan() {
+        return binglizhenduan;
     }
 
-    @Override
-    public void setDept_id(String dept_id) {
-        super.setDept_id(dept_id);
+    public void setBinglizhenduan(List<Zhenduan> binglizhenduan) {
+        this.binglizhenduan = binglizhenduan;
     }
 
-    @Override
-    public String getDoctor_id() {
-        return super.getDoctor_id();
+    public List<Zhenduan> getShouyezhenduan() {
+        return shouyezhenduan;
     }
 
-    @Override
-    public void setDoctor_id(String doctor_id) {
-        super.setDoctor_id(doctor_id);
+    public void setShouyezhenduan(List<Zhenduan> shouyezhenduan) {
+        this.shouyezhenduan = shouyezhenduan;
     }
 
-    @Override
-    public String getPatient_id() {
-        return super.getPatient_id();
-    }
-
-    @Override
-    public void setPatient_id(String patient_id) {
-        super.setPatient_id(patient_id);
-    }
-
-    @Override
-    public String getVisit_id() {
-        return super.getVisit_id();
-    }
-
-    @Override
-    public void setVisit_id(String visit_id) {
-        super.setVisit_id(visit_id);
-    }
-
-    @Override
-    public String getPageSource() {
-        return super.getPageSource();
-    }
-
-    @Override
-    public void setPageSource(String pageSource) {
-        super.setPageSource(pageSource);
-    }
-
-    @Override
-    public Map<String, String> getBinganshouye() {
-        return super.getBinganshouye();
-    }
-
-    @Override
-    public void setBinganshouye(Map<String, String> binganshouye) {
-        super.setBinganshouye(binganshouye);
-    }
-
-    @Override
-    public Map<String, String> getBingchengjilu() {
-        return super.getBingchengjilu();
-    }
-
-    @Override
-    public void setBingchengjilu(Map<String, String> bingchengjilu) {
-        super.setBingchengjilu(bingchengjilu);
-    }
-
-    @Override
-    public Map<String, String> getRuyuanjilu() {
-        return super.getRuyuanjilu();
-    }
-
-    @Override
-    public void setRuyuanjilu(Map<String, String> ruyuanjilu) {
-        super.setRuyuanjilu(ruyuanjilu);
-    }
-
-    @Override
-    public Map<String, String> getPhysicalSign() {
-        return super.getPhysicalSign();
-    }
-
-    @Override
-    public void setPhysicalSign(Map<String, String> physicalSign) {
-        super.setPhysicalSign(physicalSign);
-    }
-
-
-    public List<Map<String, String>> getYizhu() {
+    public List<Yizhu> getYizhu() {
         return yizhu;
     }
 
-    public void setYizhu(List<Map<String, String>> yizhu) {
+    public void setYizhu(List<Yizhu> yizhu) {
         this.yizhu = yizhu;
     }
-
 
     public static ReciveRule fill(JSONObject jo) {
         ReciveRule o = new ReciveRule();
 
         if (jo.containsKey("doctor_id")) {
-            o.setPatient_id(jo.getString("doctor_id"));
+            o.setDoctor_id(jo.getString("doctor_id"));
         }
-        if (jo.containsKey("dept_id")) {
-            o.setPatient_id(jo.getString("dept_id"));
+        if (jo.containsKey("doctor_name")) {
+            o.setDoctor_name(jo.getString("doctor_name"));
+        }
+        if (jo.containsKey("dept_code")) {
+            o.setDept_code(jo.getString("dept_code"));
         }
         if (jo.containsKey("patient_id")) {
             o.setPatient_id(jo.getString("patient_id"));
         }
         if (jo.containsKey("visit_id")) {
             o.setVisit_id(jo.getString("visit_id"));
+        }
+        if (jo.containsKey("warnSource")) {
+            o.setWarnSource(jo.getString("warnSource"));
         }
         if (jo.containsKey("pageSource")) {
             o.setPageSource(jo.getString("pageSource"));
@@ -178,29 +184,111 @@ public class ReciveRule extends BaseRule {
         if (jo.containsKey("bingchengjilu")) {
             o.setBingchengjilu((Map<String, String>) jo.get("bingchengjilu"));
         }
-        if (jo.containsKey("binglizhenduan")) {
-            List<Map<String, String>> maps = updataFieldValue(jo, "binglizhenduan", "diagnosis_type_name", "初步诊断");
-            o.setBinglizhenduan(maps);
-        }
-        if (jo.containsKey("shouyezhenduan")) {
-            o.setShouyezhenduan((List<Map<String, String>>) jo.get("shouyezhenduan"));
-        }
+
         if (jo.containsKey("ruyuanjilu")) {
             o.setRuyuanjilu((Map<String, String>) jo.get("ruyuanjilu"));
         }
-        if (jo.containsKey("physicalSign")) {
-            o.setPhysicalSign((Map<String, String>) jo.get("physicalSign"));
-        }
         if (jo.containsKey("jianyanbaogao")) {
-            o.setJianyanbaogao((List<Map<String, String>>) jo.get("jianyanbaogao"));
+            List<Map<String, String>> jianyanbaogao = (List<Map<String, String>>) jo.get("jianyanbaogao");
+            List<Map<String, String>> maps = deleteRepetitionField(jianyanbaogao, "lab_sub_item_name", "report_time");
+            o.setJianyanbaogao(maps);
         }
         if (jo.containsKey("jianchabaogao")) {
-            o.setJianchabaogao((List<Map<String, String>>) jo.get("jianchabaogao"));
+            List<Map<String, String>> jianchabaogao = (List<Map<String, String>>) jo.get("jianchabaogao");
+            List<Map<String, String>> maps = deleteRepetitionField(jianchabaogao, "exam_item_name", "exam_time");
+            o.setJianchabaogao(maps);
+        }
+        if (jo.containsKey("binglizhenduan")) {
+            List<Zhenduan> beanList = new ArrayList<>();
+            List<Map<String, String>> binglizhenduans = (List<Map<String, String>>) jo.get("binglizhenduan");
+            for (Map<String, String> m : binglizhenduans) {
+                Zhenduan bean = MapUtil.map2Bean(m, Zhenduan.class);
+                beanList.add(bean);
+            }
+            o.setBinglizhenduan(beanList);
+        }
+        if (jo.containsKey("shouyezhenduan")) {
+            List<Zhenduan> beanList = new ArrayList<>();
+            List<Map<String, String>> shouyezhenduans = (List<Map<String, String>>) jo.get("shouyezhenduan");
+            for (Map<String, String> m : shouyezhenduans) {
+                Zhenduan bean = MapUtil.map2Bean(m, Zhenduan.class);
+                beanList.add(bean);
+            }
+            o.setShouyezhenduan(beanList);
         }
         if (jo.containsKey("yizhu")) {
-            o.setYizhu((List<Map<String, String>>) jo.get("yizhu"));
+            List<Yizhu> beanList = new ArrayList<>();
+            List<Map<String, String>> yizhus = (List<Map<String, String>>) jo.get("yizhu");
+            List<Map<String, String>> tempMaps = deleteRepetitionFieldByMap(yizhus, "order_item_name", "order_begin_time");
+
+
+            for (Map<String, String> m : tempMaps) {
+                Yizhu bean = MapUtil.map2Bean(m, Yizhu.class);
+                beanList.add(bean);
+            }
+            o.setYizhu(beanList);
         }
         return o;
+    }
+
+    public static void main(String[] args) {
+        String s = "2017-05-02 11:12:12";
+        String s1 = "2017-05-02 10:12:12";
+        System.out.println(s.compareTo(s1));
+    }
+
+    /**
+     * //去除重复字段 保留时间最大的
+     *
+     * @param list   对象
+     * @param field1 去除重复字段
+     * @param field2 判断字段大小
+     * @return
+     */
+    private static List<Map<String, String>> deleteRepetitionField(List<Map<String, String>> list, String
+            field1, String field2) {
+        for (int i = 0; i < list.size(); i++) {
+            Map m1 = list.get(i);
+            for (int j = i + 1; j < list.size(); j++) {
+                Map m2 = list.get(j);
+                if (m1.get(field1).equals(m2.get(field1))) {
+                    Object time1 = m1.get(field2);
+                    Object time2 = m2.get(field2);
+                    if (time1.toString().compareTo(time2.toString()) > 1) {
+                        list.remove(j);
+                    } else {
+                        list.remove(i);
+                    }
+                    continue;
+                }
+            }
+        }
+
+        return list;
+    }
+
+    private static List<Map<String, String>> deleteRepetitionFieldByMap(List<Map<String, String>> list, String
+            field1, String field2) {
+        Map<String, Map<String, String>> tempMap = new HashedMap();
+        for (int i = 0; i < list.size(); i++) {
+            Map<String, String> map = list.get(i);
+            String fName = map.get(field1);
+            if (tempMap.containsKey(fName)) {
+                //已存map
+                Map<String, String> tmap = tempMap.get(fName);
+                if (tmap.get(field2).compareTo(map.get(field2)) == -1) {
+                    tempMap.put(fName, map);
+                }
+            } else {
+                tempMap.put(fName, map);
+            }
+        }
+        List<Map<String, String>> endList = new ArrayList<>();
+        Iterator<Map.Entry<String, Map<String, String>>> iterator = tempMap.entrySet().iterator();
+        while (iterator.hasNext()) {
+            endList.add(iterator.next().getValue());
+        }
+        return endList;
     }
 
     /**
@@ -209,7 +297,8 @@ public class ReciveRule extends BaseRule {
      * @param field2 2级字段名
      * @param value  修改的值
      */
-    public static  List<Map<String, String>> updataFieldValue(JSONObject jo, String field1, String field2, String value) {
+    public static List<Map<String, String>> updataFieldValue(JSONObject jo, String field1, String field2, String
+            value) {
         List<Map<String, String>> resultMap = new ArrayList<>();
         List<Map<String, String>> shouyezhenduan = (List<Map<String, String>>) jo.get(field1);
         Iterator<Map<String, String>> iterator = shouyezhenduan.iterator();

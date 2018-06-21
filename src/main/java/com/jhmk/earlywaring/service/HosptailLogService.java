@@ -7,33 +7,24 @@ import com.jhmk.earlywaring.base.BaseRepService;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.config.UrlConfig;
 import com.jhmk.earlywaring.controller.HosptailLogController;
-import com.jhmk.earlywaring.entity.LogBean;
-import com.jhmk.earlywaring.entity.SmDepts;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.*;
 import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.repository.SmHosptailLogRepository;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
-import com.jhmk.earlywaring.model.AtResponse;
-import com.jhmk.earlywaring.model.ResponseCode;
+import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.WebPage;
+import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.DateFormatUtil;
-import com.jhmk.earlywaring.util.HttpHeadersUtils;
 import com.jhmk.earlywaring.util.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
 import org.apache.poi.ss.formula.functions.T;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -45,13 +36,16 @@ import java.util.*;
 @Service
 public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
 
-    Logger logger = Logger.getLogger(SmHosptailLog.class);
+    static final Logger logger = LoggerFactory.getLogger(SmHosptailLog.class);
+
 
     @Autowired
     SmHosptailLogRepService smHosptailLogRepService;
     @Autowired
     SmDeptsRepService smDeptRepService;
 
+    @Autowired
+    SmUsersRepService smUsersRepService;
     @Autowired
     RestTemplate restTemplate;
     @Autowired
@@ -103,14 +97,15 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         Date startTime = DateFormatUtil.getYearFirst(year);
         Date endTime = DateFormatUtil.getYearLast(year);
         //用于分页  相当于limit（0,10）
-        Pageable pageable = new PageRequest(0, 10);
-        List<Object[]> list = smHosptailLogRepService.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime, pageable);
+        List<Object[]> list = smHosptailLogRepService.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime);
         Map<String, Integer> map = new LinkedHashMap<>();
         for (int i = 0; i < list.size(); i++) {
             Object[] objects = list.get(i);
             map.put(objects[0].toString(), Integer.valueOf(objects[1].toString()));
         }
-        return map;
+        Map<String, Integer> map1 = CompareUtil.compareMapValue(map);
+
+        return map1;
 
     }
 
@@ -133,6 +128,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                 } else {
                     logger.info("此规则无预警等级" + smHosptailLog.toString());
                 }
+                bean.setCount(bean.getCount() + 1);
                 map.put(smHosptailLog.getDeptCode(), bean);
             } else {
                 LogBean bean = new LogBean();
@@ -150,6 +146,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                 } else {
                     logger.info("此规则无预警等级" + smHosptailLog.toString());
                 }
+                bean.setCount(bean.getCount() + 1);
                 map.put(smHosptailLog.getDeptCode(), bean);
             }
         }
@@ -157,6 +154,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
         for (Map.Entry<String, LogBean> entry : map.entrySet()) {
             resultList.add(entry.getValue());
         }
+        Collections.sort(resultList, CompareUtil.createComparator(-1, "count"));
 
         return resultList;
     }
@@ -185,6 +183,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                 } else {
                     logger.info("此规则无预警等级" + smHosptailLog.toString());
                 }
+                bean.setCount(bean.getCount() + 1);
                 map.put(smHosptailLog.getDoctorId(), bean);
             } else {
                 LogBean bean = new LogBean();
@@ -202,14 +201,15 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                 } else {
                     logger.info("此规则无预警等级" + smHosptailLog.toString());
                 }
+                bean.setCount(bean.getCount() + 1);
                 map.put(smHosptailLog.getDoctorId(), bean);
             }
         }
         List<LogBean> resultList = new ArrayList<>();
         for (Map.Entry<String, LogBean> entry : map.entrySet()) {
             resultList.add(entry.getValue());
-
         }
+        Collections.sort(resultList, CompareUtil.createComparator(-1, "count"));
 
         return resultList;
     }
@@ -237,28 +237,53 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
     }
 
     //住院预警次数
-    public Map<String, Integer> countForField(String startTime, String endTime, String deptName, String field) {
+    public List<LogBean> countForField(String startTime, String endTime, String deptName, String field) {
         Map<String, Object> params = new HashMap<>();
         if (deptName != null) {
             params.put("deptCode", deptName);
         }
         params.put("warnSource", field);
+
         //发送
         Specification sf = getWhereClause(startTime, endTime, params);
 
         List<SmHosptailLog> all = smHosptailLogRepService.findAll(sf);
+        List<String> monthBetween = DateFormatUtil.getMonthBetween(startTime, endTime);
+
         Map<String, Integer> map = new HashMap<>();
+        for (String s : monthBetween) {
+            map.put(s, 0);
+        }
         for (SmHosptailLog smHosptailLog : all) {
             Date createTime = smHosptailLog.getCreateTime();
             String format = DateFormatUtil.format(createTime, "yyyy-MM");
             if (map.containsKey(format)) {
                 map.put(format, map.get(format) + 1);
-            } else {
-                map.put(format, 1);
-
             }
         }
-        return map;
+
+        List<LogBean> beanList = new LinkedList<>();
+        for (Map.Entry<String, Integer> entry : map.entrySet()) {
+            LogBean logBean = new LogBean();
+            logBean.setTime(entry.getKey());
+            logBean.setCount(entry.getValue());
+            beanList.add(logBean);
+        }
+        Collections.sort(beanList, new Comparator<LogBean>() {
+            @Override
+            public int compare(LogBean o1, LogBean o2) {
+                String time1 = o1.getTime();
+                String time2 = o2.getTime();
+                Date date1 = DateFormatUtil.parseDateBySdf(time1, DateFormatUtil.DATE_PATTERN_MM);
+                Date date2 = DateFormatUtil.parseDateBySdf(time2, DateFormatUtil.DATE_PATTERN_MM);
+                if (date1.getTime() > date2.getTime()) {
+                    return 1;
+                } else {
+                    return -1;
+                }
+            }
+        });
+        return beanList;
 
     }
 
@@ -287,14 +312,20 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                 List<Predicate> list = new ArrayList<Predicate>();
 
                 if (startTime != null) {
-                    list.add(cb.greaterThan(root.get("createTime").as(Date.class), DateFormatUtil.parseDate(startTime, "yyyy-MM-dd")));
+                    String[] split = startTime.split("-");
+                    String firstDayOfMonth = DateFormatUtil.getFirstDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+                    Date strarDate = DateFormatUtil.parseDate(firstDayOfMonth, DateFormatUtil.DATE_PATTERN_S);
+                    list.add(cb.greaterThanOrEqualTo(root.get("createTime").as(Date.class), strarDate));
 
                 }
                 if (endTime != null) {
-                    list.add(cb.lessThan(root.get("createTime").as(Date.class), DateFormatUtil.parseDate(endTime, "yyyy-MM-dd")));
+                    String[] split = endTime.split("-");
+                    String lastDayOfMonth = DateFormatUtil.getLastDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+                    Date endDate = DateFormatUtil.parseDate(lastDayOfMonth, DateFormatUtil.DATE_PATTERN_S);
+                    list.add(cb.lessThanOrEqualTo(root.get("createTime").as(Date.class), endDate));
 
                 }
-                //拼接传入参数
+//                //拼接传入参数
                 if (params != null) {
                     for (String key : params.keySet()) {
                         if (WebPage.PAGE_NUM.equals(key)) {
@@ -319,15 +350,21 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
     public SmHosptailLog addLog(String map) {
         SmHosptailLog smHosptailLog = new SmHosptailLog();
         Map<String, Object> jsonObject = (Map) JSON.parseObject(map);
+
         Object doctor_id = jsonObject.get("doctor_id");
         smHosptailLog.setDoctorId(ObjectUtils.flagObj(doctor_id));
-        Object dept_id = jsonObject.get("dept_code");
-        smHosptailLog.setDeptCode(ObjectUtils.flagObj(dept_id));
+        Object doctorName = jsonObject.get("doctor_name");
+        smHosptailLog.setDoctorName(ObjectUtils.flagObj(doctorName));
+
+        Object deptName = jsonObject.get("dept_code");
+        smHosptailLog.setDeptCode(ObjectUtils.flagObj(deptName));
         //病人id
         Object patient_id = jsonObject.get("patient_id");
         smHosptailLog.setPatientId(ObjectUtils.flagObj(patient_id));
         Object visit_id = jsonObject.get("visit_id");
         smHosptailLog.setVisitId(ObjectUtils.flagObj(visit_id));
+        Object warnSource = jsonObject.get("warnSource");
+        smHosptailLog.setWarnSource(ObjectUtils.flagObj(warnSource));
         Object shouyezhenduan = jsonObject.get("shouyezhenduan");
         //主诊断
         String affirmSickness = "";
@@ -357,6 +394,8 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
                         Map<String, String> next = (Map) iterator.next();
                         if (next.get("diagnosis_num").equals("1")) {
                             affirmSickness = next.get("diagnosis_name").trim();
+
+                            smHosptailLog.setCreateTime(DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
                         }
 
                     }
@@ -367,7 +406,7 @@ public class HosptailLogService extends BaseRepService<SmHosptailLog, Integer> {
             }
             smHosptailLog.setDiagnosisName(affirmSickness);
         }
-        smHosptailLog.setCreateTime(new Date());
+//        smHosptailLog.setCreateTime(new Date());
         return smHosptailLog;
 
     }

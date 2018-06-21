@@ -5,7 +5,7 @@ import java.sql.Timestamp;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_role")
+@Table(name = "sm_role", schema = "jhmk_waring", catalog = "")
 public class SmRole {
     private String roleId;
     private String roleName;
@@ -18,6 +18,7 @@ public class SmRole {
     private Long roleLevel;
     private String bizRoleFlag;
     private String orgId;
+    private String ruleRange;
 
     public SmRole() {
     }
@@ -161,7 +162,6 @@ public class SmRole {
         return Objects.hash(roleId, roleName, roleIsvalid, roleDesc, roleUpdatedtime, roleUpdatedby, roleNameLocal, roleDescLocal, roleLevel, bizRoleFlag, orgId);
     }
 
-
     @Override
     public String toString() {
         return "SmRole{" +
@@ -177,5 +177,15 @@ public class SmRole {
                 ", bizRoleFlag='" + bizRoleFlag + '\'' +
                 ", orgId='" + orgId + '\'' +
                 '}';
+    }
+
+    @Basic
+    @Column(name = "rule_range", nullable = true, length = 1)
+    public String getRuleRange() {
+        return ruleRange;
+    }
+
+    public void setRuleRange(String ruleRange) {
+        this.ruleRange = ruleRange;
     }
 }

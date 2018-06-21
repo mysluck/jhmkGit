@@ -5,16 +5,22 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.jhmk.earlywaring.config.BaseConstants;
+import com.jhmk.earlywaring.config.UrlConfig;
+import com.jhmk.earlywaring.controller.RuleController;
+import com.jhmk.earlywaring.entity.SmHosptailLog;
 import com.jhmk.earlywaring.entity.UserDataModelMapping;
 import com.jhmk.earlywaring.entity.UserModel;
+import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.UserDataModelMappingRepService;
 import com.jhmk.earlywaring.entity.repository.service.UserModelRepService;
-import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
-import com.jhmk.earlywaring.entity.rule.FormatRule;
-import com.jhmk.earlywaring.entity.rule.ReciveRule;
+import com.jhmk.earlywaring.entity.rule.*;
+import com.jhmk.earlywaring.model.AtResponse;
+import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
 import com.jhmk.earlywaring.util.MapUtil;
-import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -24,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.nio.charset.Charset;
 import java.util.*;
+import java.util.concurrent.*;
 
 @Service
 public class RuleService {
@@ -36,168 +43,17 @@ public class RuleService {
     UserModelService userModelService;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    UrlConfig urlConfig;
+    @Autowired
+    HosptailLogService hosptailLogService;
+    @Autowired
+    SmHosptailLogRepService smHosptailLogRepService;
+
+    private static final Logger logger = LoggerFactory.getLogger(RuleService.class);
 
 
-    //添加规则（未提交）
-    private static final String UNSUBMITRULE = "";
-    //提交规则
-    private static final String SUBMITRULE = "";
-    //审核通过规则
-    private static final String DEPTCOUNT = "";
-    private static final String URL3 = null;
-
-    private HttpHeaders getHeader() {
-        MediaType type = MediaType.parseMediaType("application/json; charset=UTF-8");
-        HttpHeaders headers = HttpHeadersUtils.getHttpHeadersByCharsAndMed(Collections.singletonList(Charset.forName("UTF-8")),
-                Collections.singletonList(MediaType.ALL));
-        headers.setContentType(type);
-        return headers;
-    }
-
-    /**
-     * 獲取医生已添加未提交的规则集合
-     *
-     * @param userId
-     * @return
-     */
-    public List<Map<String, Object>> getUnSubmitRule(String userId) {
-        HttpHeaders headers = getHeader();
-        Map<String, String> postParameters = new HashMap<>();
-        postParameters.put("department", userId);
-        postParameters.put("hospitalname", "测试医院");
-        postParameters.put("flag", "patient");
-        HttpEntity<String> r = new HttpEntity(postParameters, headers);
-        //发送
-        String json = restTemplate.postForObject(UNSUBMITRULE, r, String.class);
-
-        JSONObject jsonObject = JSONObject.parseObject(json);
-        String code = (String) jsonObject.get("code");
-        String message = (String) jsonObject.get("message");
-        List<Map<String, Object>> result = null;
-//        if (BaseConstants.OK.equals(code) && BaseConstants.SUCCESS.equals(message)) {
-        result = (List) jsonObject.get("result");
-        return result;
-
-    }
-
-    /**
-     * 添加规则
-     *
-     * @param rule
-     * @return
-     */
-
-    static String s = "{\n" +
-            "  \"code\": \"200\",\n" +
-            "  \"message\": \"success\",\n" +
-            "  \"result\": {\n" +
-            "    \"id\": \"4a2c83e0bffe421b93bc262212c8eaad\",\n" +
-            "    \"doctorId\": \"10401\",\n" +
-            "    \"createTime\": \"2018-05-30\",\n" +
-            "    \"ruleConditions\": [\n" +
-            "      {\n" +
-            "        \"field\": \"住院医嘱_医嘱项名称\",\n" +
-            "        \"value\": [\n" +
-            "          \"啦啦12\"\n" +
-            "        ],\n" +
-            "        \"exp\": \"包含\"\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"field\": \"住院病案首页_就诊信息_年龄值\",\n" +
-            "        \"value\": [\n" +
-            "          \"77岁\"\n" +
-            "        ],\n" +
-            "        \"exp\": \"等于\"\n" +
-            "      },\n" +
-            "      {\n" +
-            "        \"field\": \"住院医嘱_医嘱项编码\",\n" +
-            "        \"value\": [\n" +
-            "          \" 啦啦\"\n" +
-            "        ],\n" +
-            "        \"exp\": \"等于\"\n" +
-            "      }\n" +
-            "    ],\n" +
-            "    \"ruleCondition\": \"(住院医嘱_医嘱项名称包含啦啦12and住院病案首页_就诊信息_年龄值等于77岁and住院医嘱_医嘱项编码等于 啦啦)\",\n" +
-            "    \"hintContent\": \"提示内容\",\n" +
-            "    \"signContent\": \"规则出处\",\n" +
-            "    \"ruleSource\": \"规则出处\",\n" +
-            "    \"isSubmit\": false,\n" +
-            "    \"sts\": \"A\"\n" +
-            "  }\n" +
-            "}";
-
-    public String addRule(String rule) {
-        Object parse = JSONObject.parse(s);
-
-        return "ok";
-    }
-
-    public static void main(String[] args) {
-        JSONObject jsonObject = JSONObject.parseObject(s);
-        String code = jsonObject.getString("code");
-        if (BaseConstants.OK.equals(code)) {
-            Object result = jsonObject.get("result");
-            if (result != null) {
-                Map<String, String> map = (Map) result;
-                String id = map.get("id");
-
-                System.out.println(result);
-            }
-        }
-
-    }
-
-    /**
-     * 删除规则
-     *
-     * @param ruleId
-     * @return
-     */
-
-    public String delRule(String ruleId) {
-        return "ok";
-    }
-
-    /**
-     * 提交规则  修改状态
-     *
-     * @param id 规则唯一标识
-     * @return
-     */
-
-    public void subRule(String id) {
-
-    }
-
-    /**
-     * 获取提交的规则
-     *
-     * @param id
-     */
-    public void getSubmitRule(String id) {
-
-    }
-
-    /**
-     * 修改规则
-     *
-     * @param id
-     */
-    public void updataSubmitRule(String id) {
-
-    }
-
-
-    /**
-     * 规则匹配
-     *
-     * @param mes
-     */
-    public ReciveRule ruleMatch(String mes) {
-        JSONObject object = JSON.parseObject(mes);
-        ReciveRule fill = ReciveRule.fill(object);
-        return fill;
-    }
+    ExecutorService exec = Executors.newFixedThreadPool(32);
 
 
     /**
@@ -239,6 +95,10 @@ public class RuleService {
         Map<String, Object> thisMap = (Map) recieveOldData;
         Object all_page = thisMap.get("all_page");
         map.put("all_page", all_page);
+        Object count = thisMap.get("count");
+        if (count != null) {
+            map.put("count", count);
+        }
         Object decisions = thisMap.get("decisions");
         JSONArray oldData = (JSONArray) decisions;
         int size = oldData.size();
@@ -249,7 +109,13 @@ public class RuleService {
                 String ruleCondition = obj.get("ruleCondition");
                 formatRule = MapUtil.map2Bean(obj, FormatRule.class);
                 // 解析"ruleCondition" -> "(门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)"
-                String condition = disposeRule(ruleCondition);
+//                String condition = disposeRule(ruleCondition);
+                String condition = "";
+                if (ruleCondition.contains(")and(")) {
+                    condition = disposeRuleList(ruleCondition);
+                } else {
+                    condition = disposeRule(ruleCondition);
+                }
                 formatRule.setRuleCondition(condition);
                 list.add(formatRule);
             }
@@ -267,16 +133,42 @@ public class RuleService {
 
         String s = ruleCondition.replaceAll("\\(|\\)", "");
         s = s.trim();
-        System.out.println(s);
         String[] ands = s.split("and");
         StringBuffer sb = new StringBuffer();
         ;
         for (int i = 0; i < ands.length; i++) {
             String condition = ands[i];
+
             String substring = condition.substring(condition.lastIndexOf("_") + 1);
+            if (condition.contains("入院记录_")) {
+                sb.append("(入院记录)");
+            }
             sb.append(substring);
+
             if (i != ands.length - 1) {
                 sb.append("&");
+            }
+        }
+        return sb.toString();
+    }
+
+    private String disposeRuleList(String ruleConditions) {
+        //切割 根据and连接符  原始：(门诊病历_主诉_症状名称等于高血压and医嘱_医嘱_医嘱项编码等于aaa)
+
+        String[] ands = ruleConditions.split("\\)and\\(");
+
+        List<String> list = new ArrayList<>();
+        for (int i = 0; i < ands.length; i++) {
+            String condition = ands[i];
+            String s = disposeRule(condition);
+            list.add(s);
+        }
+        StringBuffer sb = new StringBuffer();
+        for (int i = 0; i < list.size(); i++) {
+
+            sb.append("(").append(list.get(i)).append(")");
+            if (i != list.size() - 1) {
+                sb.append("and");
             }
         }
         return sb.toString();
@@ -330,4 +222,135 @@ public class RuleService {
         }
         return "";
     }
+
+    /**
+     * @param map        规则信息
+     * @param fromSource 规则来源
+     * @return
+     */
+    public AtResponse ruleMatch(String map, String fromSource) {
+        Callable<AtResponse> callable = null;
+        callable = new Callable<AtResponse>() {
+            @Override
+            public AtResponse call() throws Exception {
+                String s2 = map.replaceAll("\\(", "（").replaceAll("\\)", "）");
+                JSONObject parse = JSONObject.parseObject(s2);
+                ReciveRule fill = ReciveRule.fill(parse);
+
+                List<Zhenduan> binglizhenduan = fill.getBinglizhenduan();
+                if (binglizhenduan != null) {
+                    Set<Zhenduan> set = new HashSet<>();
+                    List<Zhenduan> zhenduans = new ArrayList<>();
+                    for (Zhenduan b : binglizhenduan) {
+                        List<Zhenduan> zhenduan = getZhenduan(b);
+                        set.addAll(zhenduan);
+                    }
+                    zhenduans.addAll(set);
+                    fill.setBinglizhenduan(zhenduans);
+                }
+
+                Object o = JSONObject.parse(JSONObject.toJSONString(fill));
+                AtResponse resp = new AtResponse();
+                String data = "";
+                try {
+                    data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
+                    Map<String, Object> result = (Map<String, Object>) JSON.parseObject(data);
+                    if ("200".equals(result.get("code")) && !"[]".equals(result.get("result"))) {
+                        JSONArray array = (JSONArray) result.get("result");
+                        if (result.get("result") != null && array.size() > 0) {
+                            resp.setMessage(BaseConstants.SUCCESS);
+                            resp.setData(result.get("result"));
+                            if (result.get("result") != null) {
+                                //todo 预警等级需要返回
+                                Object resultData = result.get("result");
+                                JSONArray ja = (JSONArray) resultData;
+                                if (ja.size() > 0) {
+                                    SmHosptailLog smHosptailLog = hosptailLogService.addLog(s2);
+                                    Iterator<Object> iterator = ja.iterator();
+                                    while (iterator.hasNext()) {
+                                        Object next = iterator.next();
+                                        Map<String, String> datamap = (Map) next;
+                                        //预警等级
+                                        String warninglevel = datamap.get("warninglevel");
+                                        smHosptailLog.setAlarmLevel(warninglevel);
+                                        //释义
+                                        smHosptailLog.setHintContent(datamap.get("hintContent"));
+                                        smHosptailLog.setSignContent(datamap.get("signContent"));
+                                        smHosptailLog.setRuleSource(datamap.get("ruleSource"));
+                                        //获取触发的规则id
+                                        smHosptailLog.setRuleId(datamap.get("_id"));
+                                        smHosptailLogRepService.save(smHosptailLog);
+                                    }
+                                }
+
+                            }
+
+                        } else {
+                            logger.info("没有匹配到规则！");
+                        }
+                        resp.setResponseCode(ResponseCode.OK);
+                    } else {
+                        logger.info("规则匹配失败！" + data);
+                        logger.info("原始数据：" + o.toString());
+                        resp.setResponseCode(ResponseCode.INERERROR4);
+                    }
+                } catch (Exception e) {
+                    logger.info("cdss服务器规则匹配失败！" + e.getMessage());
+                    logger.info("原始数据：" + o.toString());
+                    resp.setResponseCode(ResponseCode.INERERROR4);
+                }
+                return resp;
+            }
+        };
+        Future<AtResponse> submit = exec.submit(callable);
+        AtResponse s = null;
+        try {
+            s = submit.get();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (ExecutionException e) {
+            e.printStackTrace();
+        }
+        return s;
+    }
+
+    public List<Zhenduan> getZhenduan(Zhenduan b) {
+        Set<Zhenduan> binglizhenduanSet = new HashSet<>();
+        Map<String, String> param = new HashMap<>();
+        param.put("diseaseName", b.getDiagnosis_name());
+        Object parse1 = JSONObject.toJSON(param);
+        String sames = restTemplate.postForObject(urlConfig.getMed() + BaseConstants.getSamilarWord, parse1, String.class);
+        if (sames != null && !"[]".equals(sames.trim())) {
+            JSONArray objects = JSONArray.parseArray(sames);
+            Iterator<Object> iterator = objects.iterator();
+            while (iterator.hasNext()) {
+                Object next = iterator.next();
+                Zhenduan newBlzd = new Zhenduan();
+                BeanUtils.copyProperties(b, newBlzd);
+                newBlzd.setDiagnosis_name(next.toString());
+                binglizhenduanSet.add(newBlzd);
+            }
+        }
+        if (b.getDiagnosis_name() != null && !"".equals(b.getDiagnosis_name().trim())) {
+            Zhenduan newBlzd = new Zhenduan();
+            BeanUtils.copyProperties(b, newBlzd);
+            binglizhenduanSet.add(newBlzd);
+        }
+        //发送 获取疾病父类
+//        String parentList = restTemplate.postForObject(urlConfig.getMed() + BaseConstants.getParentList, parse1, String.class);
+//        if (parentList != null && !"[]".equals(parentList)) {
+//            JSONArray objects = JSONArray.parseArray(parentList);
+//            Iterator<Object> iterator = objects.iterator();
+//            while (iterator.hasNext()) {
+//                Object next = iterator.next();
+//                Zhenduan newBlzd = new Zhenduan();
+//                BeanUtils.copyProperties(b, newBlzd);
+//                newBlzd.setDiagnosis_name(next.toString());
+//                binglizhenduanSet.add(newBlzd);
+//            }
+//        }
+        List<Zhenduan> list = new ArrayList<Zhenduan>(binglizhenduanSet);
+        return list;
+    }
+
 }
