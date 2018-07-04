@@ -15,11 +15,8 @@ spring:
     show-sql: true
 
 url:
-  #cdss url
-  cdssurl : http://192.168.8.20:8010
-#  cdssurl : http://192.168.132.13:9900
-  #  或者疾病相似
-#  med : http://192.168.8.20:8010
+#  cdssurl : http://192.168.8.20:8010
+  cdssurl : http://192.168.132.13:9900
 
   #医院数据库
 hospitalName: chaoyang  #chaoyang nzz zl  bysy gyey
