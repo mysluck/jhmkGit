@@ -6,7 +6,6 @@ import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.SmRoleRepository;
 import com.jhmk.earlywaring.entity.repository.service.SmRoleRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
-import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

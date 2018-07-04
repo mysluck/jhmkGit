@@ -1,6 +1,6 @@
 package com.jhmk.earlywaring.entity.repository;
 
-import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.SmHospitalLog;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -10,12 +10,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHosptailLog, Integer>, JpaSpecificationExecutor<SmHosptailLog> {
+public interface SmHospitalLogRepository extends PagingAndSortingRepository<SmHospitalLog, Integer>, JpaSpecificationExecutor<SmHospitalLog> {
 
 
 
 
-    @Query("select distinct (d.doctorId)from SmHosptailLog d ")
+    @Query("select distinct (d.doctorId)from SmHospitalLog d ")
     long getDistinctDoctorIdCount();
 
 
@@ -31,8 +31,8 @@ public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHo
      * @param endTime
      * @return
      */
-    @Query("select l from  SmHosptailLog l  where l.deptCode=?1 and l.createTime>=?2 and l.createTime<=?3 ")
-    List<SmHosptailLog> getAllByDeptAndYear(String deptCode, Date startTime, Date endTime);
+    @Query("select l from  SmHospitalLog l  where l.deptCode=?1 and l.createTime>=?2 and l.createTime<=?3 ")
+    List<SmHospitalLog> getAllByDeptAndYear(String deptCode, Date startTime, Date endTime);
 
     /**
      * 查询部门疾病触发统计
@@ -42,7 +42,7 @@ public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHo
      * @param endTime
      * @return
      */
-    @Query("select l.diagnosisName,count(1) from  SmHosptailLog l  where l.deptCode=?1  and l.createTime>=?2 and l.createTime<=?3 group by l.diagnosisName ")
+    @Query("select l.diagnosisName,count(1) from  SmHospitalLog l  where l.deptCode=?1  and l.createTime>=?2 and l.createTime<=?3 group by l.diagnosisName ")
 // limit 10
     List<Object[]> getCountByDiagnosisNameAndDeptCode(String deptCode, Date startTime, Date endTime);
 
@@ -54,16 +54,16 @@ public interface SmHosptailLogRepository extends PagingAndSortingRepository<SmHo
      * @param endTime
      * @return
      */
-    @Query("select l from  SmHosptailLog l  where l.createTime>=?1 and l.createTime<=?2 ")
-    List<SmHosptailLog> getDeptCountByYear(Date startTime, Date endTime);
+    @Query("select l from  SmHospitalLog l  where l.createTime>=?1 and l.createTime<=?2 ")
+    List<SmHospitalLog> getDeptCountByYear(Date startTime, Date endTime);
 
 
-    @Query("select distinct (d.deptCode)from SmHosptailLog d ")
+    @Query("select distinct (d.deptCode)from SmHospitalLog d ")
     List<String> getCountByDistinctDeptCode();
 
 
-    @Query("select distinct (d.doctorId),d.doctorName from SmHosptailLog d ")
-    List<SmHosptailLog> getCountByDistinctDoctorId();
+    @Query("select distinct (d.doctorId),d.doctorName from SmHospitalLog d ")
+    List<SmHospitalLog> getCountByDistinctDoctorId();
 
 
 }

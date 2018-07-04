@@ -1,11 +1,13 @@
 package com.jhmk.earlywaring.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.config.UrlConfig;
+import com.jhmk.earlywaring.entity.HospitalLog;
 import com.jhmk.earlywaring.entity.LogBean;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.repository.service.*;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
@@ -13,6 +15,7 @@ import com.jhmk.earlywaring.service.HosptailLogService;
 import com.jhmk.earlywaring.service.RuleService;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +31,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/warn/smHosptailLog")
-public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
+public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
 
 
     private static final Logger logger = LoggerFactory.getLogger(HosptailLogController.class);
@@ -36,7 +39,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @Autowired
     HosptailLogService hosptailLogService;
     @Autowired
-    SmHosptailLogRepService smHosptailLogRepService;
+    SmHospitalLogRepService SmHospitalLogRepService;
     @Autowired
     SmDeptsRepService smDeptRepService;
     @Autowired
@@ -83,8 +86,8 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @ResponseBody
     public void getAlartCount(HttpServletResponse response) {
         AtResponse<Map<String, Long>> resp = new AtResponse();
-        long dept = smHosptailLogRepService.countByWarnSource(BaseConstants.ALARM_CODE1);
-        long mz = smHosptailLogRepService.countByWarnSource(BaseConstants.ALARM_CODE2);
+        long dept = SmHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE1);
+        long mz = SmHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE2);
         //总预警
         long allCount = dept + mz;
         Map<String, Long> data = new HashMap<>();
@@ -147,7 +150,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
         //获取总科室（心内科 ）
 //        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
         // 获取单科室 如心内科1 心内科2 (日志表中有数量的)
-        List<String> distinctByDeptCode = smHosptailLogRepService.getCountByDistinctDeptCode();
+        List<String> distinctByDeptCode = SmHospitalLogRepService.getCountByDistinctDeptCode();
         resp.setData(distinctByDeptCode);
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);
@@ -161,7 +164,7 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
     @ResponseBody
     public void getDoctors(HttpServletResponse response) {
         AtResponse atResponse = new AtResponse(System.currentTimeMillis());
-        List<SmHosptailLog> countByDistinctDoctorId = smHosptailLogRepService.getCountByDistinctDoctorId();
+        List<SmHospitalLog> countByDistinctDoctorId = SmHospitalLogRepService.getCountByDistinctDoctorId();
         atResponse.setData(countByDistinctDoctorId);
         atResponse.setResponseCode(ResponseCode.OK);
         wirte(response, atResponse);
@@ -224,6 +227,40 @@ public class HosptailLogController extends BaseEntityController<SmHosptailLog> {
         atResponse.setResponseCode(ResponseCode.OK);
         atResponse.setData(countByDeptAndSickness);
         wirte(response, atResponse);
+    }
+
+    /**
+     * 根据条件查询触发的规则详细信息（pid、vid、规则id）
+     *
+     * @param response
+     * @param map
+     */
+    @PostMapping(value = "/getDataByCondition")
+    @ResponseBody
+    public void getDataByCondition(HttpServletResponse response, @RequestBody(required = false) String map) {
+        AtResponse atsp = new AtResponse();
+        Map<String, String> params = (Map) JSONObject.parse(map);
+        Map<String, String> condMap = new HashMap<>();
+        Date yearFirst = null;
+        Date yearLast = null;
+        if (StringUtils.isNotBlank(params.get("year"))) {
+            Integer year = Integer.valueOf(params.get("year"));
+            yearFirst = DateFormatUtil.getYearFirst(year);
+            yearLast = DateFormatUtil.getYearLast(year);
+        }
+        if (StringUtils.isNotBlank(params.get("deptCode"))) {
+            condMap.put("deptCode", params.get("deptCode"));
+        }
+        if (StringUtils.isNotBlank(params.get("doctorId"))) {
+            condMap.put("doctorId", params.get("doctorId"));
+        }
+        if (StringUtils.isNotBlank(params.get("doctorName"))) {
+            condMap.put("doctorName", params.get("doctorName"));
+        }
+        List<HospitalLog> dataByCondition = hosptailLogService.getDataByCondition(yearFirst, yearLast, condMap);
+        atsp.setResponseCode(ResponseCode.OK);
+        atsp.setData(dataByCondition);
+        wirte(response, atsp);
     }
 
 }

@@ -10,7 +10,7 @@ import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.SmUserService;
 import org.apache.commons.beanutils.BeanUtils;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

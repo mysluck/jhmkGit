@@ -5,8 +5,8 @@ import java.util.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_hosptail_log", schema = "jhmk_waring", catalog = "")
-public class SmHosptailLog {
+@Table(name = "sm_hospital_log", schema = "jhmk_waring", catalog = "")
+public class SmHospitalLog {
     private int id;
     private String patientId;
     private String visitId;
@@ -25,12 +25,9 @@ public class SmHosptailLog {
     private String signContent;
     private String ruleId;
 
-    public void setCreateTime(java.sql.Date createTime) {
-        this.createTime = createTime;
-    }
-
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }
@@ -45,19 +42,8 @@ public class SmHosptailLog {
         return patientId;
     }
 
-
     public void setPatientId(String patientId) {
         this.patientId = patientId;
-    }
-
-    @Basic
-    @Column(name = "rule_id", nullable = true, length = 60)
-    public String getRuleId() {
-        return ruleId;
-    }
-
-    public void setRuleId(String ruleId) {
-        this.ruleId = ruleId;
     }
 
     @Basic
@@ -200,11 +186,21 @@ public class SmHosptailLog {
         this.signContent = signContent;
     }
 
+    @Basic
+    @Column(name = "rule_id", nullable = true, length = 60)
+    public String getRuleId() {
+        return ruleId;
+    }
+
+    public void setRuleId(String ruleId) {
+        this.ruleId = ruleId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SmHosptailLog that = (SmHosptailLog) o;
+        SmHospitalLog that = (SmHospitalLog) o;
         return id == that.id &&
                 Objects.equals(patientId, that.patientId) &&
                 Objects.equals(visitId, that.visitId) &&
@@ -220,12 +216,13 @@ public class SmHosptailLog {
                 Objects.equals(createTime, that.createTime) &&
                 Objects.equals(hintContent, that.hintContent) &&
                 Objects.equals(ruleSource, that.ruleSource) &&
-                Objects.equals(signContent, that.signContent);
+                Objects.equals(signContent, that.signContent) &&
+                Objects.equals(ruleId, that.ruleId);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent);
+        return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent, ruleId);
     }
 }

@@ -3,7 +3,8 @@ server:
 spring:
   datasource:
 #    url: jdbc:mysql://localhost:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
-    url: jdbc:mysql://192.168.8.22:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+#    url: jdbc:mysql://192.168.8.22:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+    url: jdbc:mysql://192.168.132.4:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
 #    password: root
@@ -14,10 +15,11 @@ spring:
     show-sql: true
 
 url:
-  #医问道接口url
-  ywdurl : http://192.168.8.31:8833
   #cdss url
   cdssurl : http://192.168.8.20:8010
+#  cdssurl : http://192.168.132.13:9900
+  #  或者疾病相似
+#  med : http://192.168.8.20:8010
 
   #医院数据库
 hospitalName: chaoyang  #chaoyang nzz zl  bysy gyey

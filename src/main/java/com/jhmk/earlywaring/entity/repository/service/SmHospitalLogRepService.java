@@ -1,8 +1,8 @@
 package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
-import com.jhmk.earlywaring.entity.repository.SmHosptailLogRepository;
+import com.jhmk.earlywaring.entity.SmHospitalLog;
+import com.jhmk.earlywaring.entity.repository.SmHospitalLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,20 +15,20 @@ import java.util.Date;
 import java.util.List;
 
 @Service
-public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integer> {
+public class SmHospitalLogRepService extends BaseRepService<SmHospitalLog, Integer> {
 
 
     @Autowired
-    SmHosptailLogRepository repository;
+    SmHospitalLogRepository repository;
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public SmHosptailLog save(SmHosptailLog smHosptailLog) {
-        return repository.save(smHosptailLog);
+    public SmHospitalLog save(SmHospitalLog SmHospitalLog) {
+        return repository.save(SmHospitalLog);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Iterable<SmHosptailLog> save(List<SmHosptailLog> list) {
+    public Iterable<SmHospitalLog> save(List<SmHospitalLog> list) {
         return repository.save(list);
     }
 
@@ -39,31 +39,31 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(SmHosptailLog smHosptailLog) {
-        repository.delete(smHosptailLog);
+    public void delete(SmHospitalLog SmHospitalLog) {
+        repository.delete(SmHospitalLog);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(List<SmHosptailLog> list) {
+    public void delete(List<SmHospitalLog> list) {
         repository.delete(list);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmHosptailLog findOne(Integer id) {
+    public SmHospitalLog findOne(Integer id) {
         return repository.findOne(id);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Iterable<SmHosptailLog> findAll() {
+    public Iterable<SmHospitalLog> findAll() {
         return repository.findAll();
     }
 
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<SmHosptailLog> findAll(Pageable pageable) {
+    public Page<SmHospitalLog> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
@@ -71,20 +71,20 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
     //筛选列表
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<SmHosptailLog> findAll(Specification<SmHosptailLog> specification, Pageable pageable) {
+    public Page<SmHospitalLog> findAll(Specification<SmHospitalLog> specification, Pageable pageable) {
         return repository.findAll(specification, pageable);
     }
 
     //筛选列表
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> findAll(Specification specification) {
+    public List<SmHospitalLog> findAll(Specification specification) {
         return repository.findAll(specification);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getAllByDeptAndYear(String deptId, Date startTime, Date endTime) {
+    public List<SmHospitalLog> getAllByDeptAndYear(String deptId, Date startTime, Date endTime) {
         return repository.getAllByDeptAndYear(deptId, startTime, endTime);
     }
 
@@ -95,7 +95,7 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getDeptCountByYear(Date startTime, Date endTime) {
+    public List<SmHospitalLog> getDeptCountByYear(Date startTime, Date endTime) {
         return repository.getDeptCountByYear(startTime, endTime);
     }
 
@@ -111,7 +111,7 @@ public class SmHosptailLogRepService extends BaseRepService<SmHosptailLog, Integ
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmHosptailLog> getCountByDistinctDoctorId() {
+    public List<SmHospitalLog> getCountByDistinctDoctorId() {
         return repository.getCountByDistinctDoctorId();
     }
 

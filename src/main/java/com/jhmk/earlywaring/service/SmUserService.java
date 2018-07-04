@@ -1,14 +1,14 @@
 package com.jhmk.earlywaring.service;
 
 import com.jhmk.earlywaring.entity.SmDepts;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
-import com.jhmk.earlywaring.entity.repository.service.SmHosptailLogRepService;
+import com.jhmk.earlywaring.entity.repository.service.SmHospitalLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.model.WebPage;
 import com.jhmk.earlywaring.entity.repository.SmRoleRepository;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -32,7 +32,7 @@ public class SmUserService {
     @Autowired
     SmRoleRepository roleRepository;
     @Autowired
-    SmHosptailLogRepService smHosptailLogRepService;
+    SmHospitalLogRepService SmHospitalLogRepService;
 
     @Autowired
     SmDeptsRepService smDeptsRepService;
@@ -144,7 +144,7 @@ public class SmUserService {
 
 
     public void updateDept() {
-        Iterable<SmHosptailLog> all = smHosptailLogRepService.findAll();
+        Iterable<SmHospitalLog> all = SmHospitalLogRepService.findAll();
         Iterable<SmUsers> depts = smUsersRepService.findAll();
         Iterator<SmUsers> deptsIterator = depts.iterator();
         Map<String, String> deptMap = new HashMap<>();
@@ -153,12 +153,12 @@ public class SmUserService {
             deptMap.put(next.getUserName(), next.getUserId());
         }
 
-        Iterator<SmHosptailLog> iterator = all.iterator();
+        Iterator<SmHospitalLog> iterator = all.iterator();
         while (iterator.hasNext()) {
-            SmHosptailLog next = iterator.next();
+            SmHospitalLog next = iterator.next();
             if (deptMap.get(next.getDoctorName()) != null) {
                 next.setDoctorId(deptMap.get(next.getDoctorName()));
-                smHosptailLogRepService.save(next);
+                SmHospitalLogRepService.save(next);
             }
 
         }

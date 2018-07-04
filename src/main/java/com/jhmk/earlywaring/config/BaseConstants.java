@@ -38,13 +38,6 @@ public class BaseConstants {
     public static final String SUCCESS = "success";
     public static final String FALSE = "false";
 
-    public static final String DATASOURCES = "BYSYDATA";
-    public static final String BINGANSHOUYE = "binganshouye";
-    public static final String BINGLIZHENDUAN = "binglizhenduan";
-    public static final String SHOUYEZHENDUAN = "shouyezhenduan";
-    public static final String RUYUANJILU = "ruyuanjilu";
-
-
     //getVariableList获取变量列表
     public static final String getVariableList = "/med/cindecision/getVariableList.json";
     public static final String addrule = "/med/cindecision/addrule.json";
@@ -55,6 +48,7 @@ public class BaseConstants {
     public static final String submitrule = "/med/cindecision/submitrule.json";
     public static final String matchrule = "/med/cindecision/matchrule.json";
     public static final String updaterule = "/med/cindecision/updaterule.json";
+    public static final String getruleforid = "/med/cindecision/getruleforid.json";
 
     //改变预警等级
     public static final String changewarninglevel = "/med/cindecision/changewarninglevel.json";
@@ -66,18 +60,26 @@ public class BaseConstants {
     public static final String changeIdentification = "/med/cindecision/changeIdentification.json";
     public static final String deleterule = "/med/cindecision/deleterule.json";
 
+    public static final String statisticsrulercount = "/med/cindecision/statisticsrulercount.json";// 统计规则数目
+    public static final String groupbyclassification = "/med/cindecision/groupbyclassification.json"; // 分组统计规则分类得数据
+    public static final String groupbywarninglevel = "/med/cindecision/groupbywarninglevel.json"; // 分组统计预警等级数据
+    public static final String groupbyidentification = "/med/cindecision/groupbyidentification.json";//  分组统计专科标识数据
+    public static final String groupbycreatetime = "/med/cindecision/groupbycreatetime.json";// 传入 startDate  endDate 两个参数  按时间分组统计规则
+
 
     //医问道接口
     //3.高级检索值域变量（post）
-    public static final String getfieldbyid = "/med/getfieldbyid.json";
+    public static final String getfieldbyid = "/med/kninterface/getfieldbyid.json";
     //高级检索单位变量（post）
-    public static final String getunitsbyid = "/med/getunitsbyid.json";
+    public static final String getunitsbyid = "/med/kninterface/getunitsbyid.json";
     //5.高级检索根据关键字检索 拼音or汉字（post）
     public static final String searchbyvariablename = "/med/searchbyvariablename.json";
     //接口：获取字段的特殊类型
     public static final String getSpecialTypeByField = "/med/getSpecialTypeByField.json";
     // 获取最新列表
     public static final String getVariableListNew = "/med/getVariableListNew.json";
+    //获取诊疗提醒
+    public static final String getTipList = "/med/cdss/getTipList.json";
 
 
     //获取疾病同义词

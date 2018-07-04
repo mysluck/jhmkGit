@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.SmDepts;
-import com.jhmk.earlywaring.entity.SmHosptailLog;
+import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.SmRole;
 import com.jhmk.earlywaring.entity.SmUsers;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;

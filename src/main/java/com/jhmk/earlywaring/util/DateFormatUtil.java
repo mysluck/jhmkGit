@@ -391,12 +391,12 @@ public class DateFormatUtil {
     public static Date getYearLast(int year) {
         Calendar calendar = Calendar.getInstance();
         calendar.clear();
-        calendar.set(Calendar.YEAR, year);
-        calendar.roll(Calendar.DAY_OF_YEAR, -1);
+        calendar.set(Calendar.YEAR, year+1);
         Date currYearLast = calendar.getTime();
 
         return currYearLast;
     }
+
 
 
     public static Date getLastYear() {
@@ -473,11 +473,13 @@ public class DateFormatUtil {
 
 //        List<String> monthBetween = getMonthBetween("2017-01", "2017-12");
 //        System.out.println(monthBetween.toString());
-        String startTime = "2017-01";
-        String[] split = startTime.split("-");
-        String firstDayOfMonth = DateFormatUtil.getFirstDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
-        System.out.println(firstDayOfMonth);
+//        String startTime = "2017-01";
+//        String[] split = startTime.split("-");
+//        String firstDayOfMonth = DateFormatUtil.getFirstDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
+//        System.out.println(firstDayOfMonth);
 
+        Date yearFirst = getYearFirst(2018);
+        Date yearLast = getYearLast(2018);
     }
 
     public static List<String> getMonthBetween(String minDate, String maxDate) {

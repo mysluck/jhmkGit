@@ -81,7 +81,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
             Object o = JSON.toJSON(map);
             String data = "";
             try {
-                data = restTemplate.postForObject(urlConfig.getYwdurl() + BaseConstants.getfieldbyid, o, String.class);
+                data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getfieldbyid, o, String.class);
                 Map<String, Object> parse = (Map<String, Object>) JSON.parse(data);
 //                resp.setResponseCode(ResponseCode.OK);
 //                resp.setData(data);
@@ -114,10 +114,7 @@ public class UserModelController extends BaseEntityController<UserModel> {
             String data = "";
             try {
 
-                data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.getunitsbyid, o, String.class);
-//                JSONObject list=JSON.parseObject(data);
-//                Object o1 = list.get(0);
-//                JSONArray objects = JSONArray.parseArray(data);
+                data = restTemplate.postForObject(urlConfig.getCdssurl() +BaseConstants.getunitsbyid, o, String.class);
                 resp.setData(data);
                 resp.setResponseCode(ResponseCode.OK);
             } catch (Exception e) {
@@ -131,64 +128,38 @@ public class UserModelController extends BaseEntityController<UserModel> {
 
     }
 
-    /**
-     * 高级检索根据关键字检索 拼音or汉字（post）
-     *
-     * @param response
-     * @param param
-     */
-//    @RequestMapping(value = "/searchbyvariablename")
-//    @ResponseBody
-//    public void searchbyvariablename(HttpServletResponse response, @RequestBody String param) {
-//        AtResponse resp = new AtResponse();
-//        Map<String, String> map = (Map) JSON.parse(param);
-//        String fieldname = map.get("fieldname");
-//        map.put("fieldname", fieldname);
-//        Object o = JSON.toJSON(map);
-//        String data = "";
-//        try {
 //
-//            data = restTemplate.postForObject(urlConfig.getYwdurl() +BaseConstants.searchbyvariablename, o, String.class);
-//            resp.setResponseCode(ResponseCode.OK);
-//            resp.setData(data);
-//        } catch (Exception e) {
-//            logger.info("高级检索根据关键字检索接口服务器匹配异常!" + fieldname);
-//            resp.setResponseCode(ResponseCode.INERERROR);
+//    //    接口：获取字段的特殊类型
+//    @RequestMapping(value = "/getSpecialTypeByField")
+//    @ResponseBody
+//    public void getSpecialTypeByField(HttpServletResponse response, @RequestBody String param) {
+//        Map<String, String> map = (Map) JSON.parse(param);
+//        String s = map.get("variableid");
+//        AtResponse<String> resp = new AtResponse();
+//        UserDataModelMapping mapping = userDataModelMappingRepService.findByUmNamePath(s);
+//        LinkedMultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap();
+//        if (mapping != null) {
+//
+//            multiValueMap.add("variableid", mapping.getDmNamePath());
+//            HttpHeaders headers = new HttpHeaders();
+//            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+//            HttpEntity<LinkedMultiValueMap> entity = new HttpEntity<LinkedMultiValueMap>(multiValueMap, headers);
+//            ResponseEntity<String> data = null;
+//            String body = "";
+//
+//            try {
+//                data = restTemplate.postForEntity(urlConfig.getYwdurl() +BaseConstants.getSpecialTypeByField, entity, String.class);
+//                body = data.getBody();
+//                resp.setResponseCode(ResponseCode.OK);
+//            } catch (Exception e) {
+//                logger.info("获取字段的特殊类型接口服务器匹配异常!" + s);
+//                resp.setResponseCode(ResponseCode.INERERROR);
+//            } finally {
+//                resp.setData(body);
+//                wirte(response, resp);
+//            }
 //        }
-//        wirte(response, data);
 //    }
-
-    //    接口：获取字段的特殊类型
-    @RequestMapping(value = "/getSpecialTypeByField")
-    @ResponseBody
-    public void getSpecialTypeByField(HttpServletResponse response, @RequestBody String param) {
-        Map<String, String> map = (Map) JSON.parse(param);
-        String s = map.get("variableid");
-        AtResponse<String> resp = new AtResponse();
-        UserDataModelMapping mapping = userDataModelMappingRepService.findByUmNamePath(s);
-        LinkedMultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap();
-        if (mapping != null) {
-
-            multiValueMap.add("variableid", mapping.getDmNamePath());
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-            HttpEntity<LinkedMultiValueMap> entity = new HttpEntity<LinkedMultiValueMap>(multiValueMap, headers);
-            ResponseEntity<String> data = null;
-            String body = "";
-
-            try {
-                data = restTemplate.postForEntity(urlConfig.getYwdurl() +BaseConstants.getSpecialTypeByField, entity, String.class);
-                body = data.getBody();
-                resp.setResponseCode(ResponseCode.OK);
-            } catch (Exception e) {
-                logger.info("获取字段的特殊类型接口服务器匹配异常!" + s);
-                resp.setResponseCode(ResponseCode.INERERROR);
-            } finally {
-                resp.setData(body);
-                wirte(response, resp);
-            }
-        }
-    }
 
 }
 

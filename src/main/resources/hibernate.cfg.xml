@@ -4,23 +4,25 @@
     "http://www.hibernate.org/dtd/hibernate-configuration-3.0.dtd">
 <hibernate-configuration>
   <session-factory>
-    <property name="connection.url">jdbc:mysql://localhost:3306/jhmk_waring</property>
+    <property name="connection.url">jdbc:mysql://192.168.8.22:3306/jhmk_waring</property>
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-      <mapping class="com.jhmk.earlywaring.entity.SmComponent"/>
     <mapping class="com.jhmk.earlywaring.entity.SmModule"/>
     <mapping class="com.jhmk.earlywaring.entity.SmRole"/>
-    <mapping class="com.jhmk.earlywaring.entity.SmRoleUser"/>
-    <mapping class="com.jhmk.earlywaring.entity.SmUser"/>
-      <mapping class="com.jhmk.earlywaring.entity.SmDept"/>
       <mapping class="com.jhmk.earlywaring.entity.SmEvaluate"/>
-      <mapping class="com.jhmk.earlywaring.entity.SmHosptailLog"/>
-      <mapping class="com.jhmk.earlywaring.entity.SmHosptailLog"/>
-    <mapping class="com.jhmk.earlywaring.entity.SmHosptailLog"/>
-    <mapping class="com.jhmk.earlywaring.entity.SmHosptailLog"/>
+      <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>
+      <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>
+    <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>
+    <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>
       <mapping class="com.jhmk.earlywaring.entity.SmDepts"/>
       <mapping class="com.jhmk.earlywaring.entity.SmUsers"/>
       <mapping class="com.jhmk.earlywaring.entity.DeptRel"/>
       <mapping class="com.jhmk.earlywaring.entity.SmRoleModule"/>
+      <mapping class="com.jhmk.earlywaring.entity.NonExistentUserlog"/>
+      <mapping class="com.jhmk.earlywaring.entity.UserDataModelMapping"/>
+      <mapping class="com.jhmk.earlywaring.entity.UserModel"/>
+      <mapping class="com.jhmk.earlywaring.entity.OriRule"/>
+      <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>
+      <mapping class="com.jhmk.earlywaring.entity.SmShowLog"/>
       <!-- <property name="connection.username"/> -->
     <!-- <property name="connection.password"/> -->
 

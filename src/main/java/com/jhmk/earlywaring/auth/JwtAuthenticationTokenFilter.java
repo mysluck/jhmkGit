@@ -52,7 +52,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             if (requestURI.equals("/warn/rule/ruleMatch")
                     || requestURI.contains("warn/rule/match")
                     || requestURI.contains("warn/users")
-                    || requestURI.contains("warn/dept") || requestURI.contains("warn/login")
+                    || requestURI.contains("warn/dept")
+                    || requestURI.contains("warn/login")
+                    || requestURI.contains("/getShowLog")
+                    || requestURI.contains("/updateShowLog")
                     ) {
                 chain.doFilter(request, response);
             } else {
