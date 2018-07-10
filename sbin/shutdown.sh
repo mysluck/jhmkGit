@@ -8,8 +8,8 @@
 Project_HOME=$(echo `pwd` | sed 's/\/sbin//')
 
 #LOG_DIR=$Project_HOME/logs
-#LOG_DIR=/home/dev/waring/earingwaringPro/logs
-LOG_DIR=/data/1/CDSS/logs
+LOG_DIR=/home/dev/waring/earingwaringPro/logs
+#LOG_DIR=/data/1/CDSS/logs
 APPLICATION_MAIN=com.jhmk.earlywaring.EarlywaringApplication
 CLASSPATH=$Project_HOME/classes
 
