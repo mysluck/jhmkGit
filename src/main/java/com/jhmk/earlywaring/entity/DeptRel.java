@@ -87,8 +87,12 @@ public class DeptRel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         DeptRel deptRel = (DeptRel) o;
         return Objects.equals(serialNo, deptRel.serialNo) &&
                 Objects.equals(wardCode, deptRel.wardCode) &&

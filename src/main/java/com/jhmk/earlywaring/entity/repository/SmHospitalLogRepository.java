@@ -19,6 +19,7 @@ public interface SmHospitalLogRepository extends PagingAndSortingRepository<SmHo
     long getDistinctDoctorIdCount();
 
 
+    @Override
     long count();
 
     long countByWarnSource(String warnSource);

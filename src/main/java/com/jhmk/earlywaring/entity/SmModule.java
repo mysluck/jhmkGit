@@ -144,8 +144,12 @@ public class SmModule {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmModule smModule = (SmModule) o;
         return Objects.equals(modCode, smModule.modCode) &&
                 Objects.equals(modName, smModule.modName) &&

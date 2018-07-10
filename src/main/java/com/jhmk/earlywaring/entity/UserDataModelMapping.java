@@ -53,8 +53,12 @@ public class UserDataModelMapping {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserDataModelMapping that = (UserDataModelMapping) o;
         return udmmId == that.udmmId &&
                 Objects.equals(umNamePath, that.umNamePath) &&

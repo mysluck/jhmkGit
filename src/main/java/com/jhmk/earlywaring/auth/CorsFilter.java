@@ -19,7 +19,7 @@ public class CorsFilter implements javax.servlet.Filter {
     // Just REPLY OK if request method is OPTIONS for CORS (pre-flight)
     String method = req.getMethod();
     System.out.println(method);
-    if (req.getMethod().equals("OPTIONS")) {
+    if ("OPTIONS".equals(req.getMethod())) {
       res.setStatus(HttpServletResponse.SC_OK);
       return;
     }

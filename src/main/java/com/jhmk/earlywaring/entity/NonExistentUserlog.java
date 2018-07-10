@@ -32,8 +32,12 @@ public class NonExistentUserlog {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         NonExistentUserlog that = (NonExistentUserlog) o;
         return id == that.id &&
                 Objects.equals(userId, that.userId);

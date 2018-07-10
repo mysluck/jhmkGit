@@ -221,8 +221,12 @@ public class UserModel {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         UserModel userModel = (UserModel) o;
         return umId == userModel.umId &&
                 Objects.equals(umTextId, userModel.umTextId) &&

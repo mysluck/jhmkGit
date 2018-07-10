@@ -130,8 +130,12 @@ public class SmShowLog {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmShowLog smShowLog = (SmShowLog) o;
         return id == smShowLog.id &&
                 Objects.equals(doctorId, smShowLog.doctorId) &&

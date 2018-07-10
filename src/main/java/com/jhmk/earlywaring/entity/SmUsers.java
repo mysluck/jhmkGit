@@ -571,8 +571,12 @@ public class SmUsers {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmUsers smUsers = (SmUsers) o;
         return Objects.equals(userId, smUsers.userId) &&
                 Objects.equals(userName, smUsers.userName) &&

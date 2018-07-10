@@ -75,18 +75,14 @@ public class UserModelRepService extends BaseRepService<UserModel, Integer> {
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<UserModel>findByUmParentIdAndUmHospitalName(Integer pid,String hname){
-        return repository.findByUmParentIdAndUmHospitalName(pid,hname);
+    public List<UserModel>findByUmParentId(Integer pid){
+        return repository.findByUmParentId(pid);
     }
 
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<UserModel>findByUmHospitalName(String hname){
-        return repository.findByUmHospitalName(hname);
-    }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public  UserModel findByUmNameAndUmHospitalName(String umname,String hname){
-        return repository.findByUmNameAndUmHospitalName(umname,hname);
+    public  UserModel findByUmName(String umname){
+        return repository.findByUmName(umname);
     }
 
 }

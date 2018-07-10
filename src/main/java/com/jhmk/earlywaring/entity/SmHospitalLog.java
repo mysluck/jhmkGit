@@ -1,12 +1,13 @@
 package com.jhmk.earlywaring.entity;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
 @Entity
 @Table(name = "sm_hospital_log", schema = "jhmk_waring", catalog = "")
-public class SmHospitalLog {
+public class SmHospitalLog implements Serializable {
     private int id;
     private String patientId;
     private String visitId;
@@ -198,8 +199,12 @@ public class SmHospitalLog {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmHospitalLog that = (SmHospitalLog) o;
         return id == that.id &&
                 Objects.equals(patientId, that.patientId) &&
@@ -224,5 +229,27 @@ public class SmHospitalLog {
     public int hashCode() {
 
         return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent, ruleId);
+    }
+
+    @Override
+    public String toString() {
+        return "SmHospitalLog{" +
+                "id=" + id +
+                ", patientId='" + patientId + '\'' +
+                ", visitId='" + visitId + '\'' +
+                ", doctorName='" + doctorName + '\'' +
+                ", doctorId='" + doctorId + '\'' +
+                ", deptCode='" + deptCode + '\'' +
+                ", diagnosisName='" + diagnosisName + '\'' +
+                ", alarmLevel='" + alarmLevel + '\'' +
+                ", classification='" + classification + '\'' +
+                ", identification='" + identification + '\'' +
+                ", warnSource='" + warnSource + '\'' +
+                ", createTime=" + createTime +
+                ", hintContent='" + hintContent + '\'' +
+                ", ruleSource='" + ruleSource + '\'' +
+                ", signContent='" + signContent + '\'' +
+                ", ruleId='" + ruleId + '\'' +
+                '}';
     }
 }

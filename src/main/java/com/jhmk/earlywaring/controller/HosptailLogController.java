@@ -27,6 +27,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.*;
 
 @Controller
@@ -39,7 +43,7 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
     @Autowired
     HosptailLogService hosptailLogService;
     @Autowired
-    SmHospitalLogRepService SmHospitalLogRepService;
+    SmHospitalLogRepService smHospitalLogRepService;
     @Autowired
     SmDeptsRepService smDeptRepService;
     @Autowired
@@ -86,8 +90,8 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
     @ResponseBody
     public void getAlartCount(HttpServletResponse response) {
         AtResponse<Map<String, Long>> resp = new AtResponse();
-        long dept = SmHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE1);
-        long mz = SmHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE2);
+        long dept = smHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE1);
+        long mz = smHospitalLogRepService.countByWarnSource(BaseConstants.ALARM_CODE2);
         //总预警
         long allCount = dept + mz;
         Map<String, Long> data = new HashMap<>();
@@ -150,7 +154,7 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
         //获取总科室（心内科 ）
 //        List<DeptRel> distinctByDeptCode = deptRelRepService.findDistinctByDeptCode();
         // 获取单科室 如心内科1 心内科2 (日志表中有数量的)
-        List<String> distinctByDeptCode = SmHospitalLogRepService.getCountByDistinctDeptCode();
+        List<String> distinctByDeptCode = smHospitalLogRepService.getCountByDistinctDeptCode();
         resp.setData(distinctByDeptCode);
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);
@@ -164,7 +168,7 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
     @ResponseBody
     public void getDoctors(HttpServletResponse response) {
         AtResponse atResponse = new AtResponse(System.currentTimeMillis());
-        List<SmHospitalLog> countByDistinctDoctorId = SmHospitalLogRepService.getCountByDistinctDoctorId();
+        List<SmHospitalLog> countByDistinctDoctorId = smHospitalLogRepService.getCountByDistinctDoctorId();
         atResponse.setData(countByDistinctDoctorId);
         atResponse.setResponseCode(ResponseCode.OK);
         wirte(response, atResponse);
@@ -261,6 +265,55 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
         atsp.setResponseCode(ResponseCode.OK);
         atsp.setData(dataByCondition);
         wirte(response, atsp);
+    }
+
+    /**
+     *
+     */
+    @PostMapping(value = "/getLogFile")
+    public void getLogFile(HttpServletResponse response) {
+        String fileName = "/data/1/CDSS/demo.txt";
+//        String fileName = "C:/嘉和美康文档/demo.txt";
+        File file = new File(fileName);
+        BufferedWriter br = null;
+        if (!file.exists()) {
+            try {
+                file.createNewFile();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        try {
+            br = new BufferedWriter(new FileWriter(file));
+            Iterable<SmHospitalLog> all = smHospitalLogRepService.findAll();
+            Iterator<SmHospitalLog> iterator = all.iterator();
+            while (iterator.hasNext()) {
+                SmHospitalLog next = iterator.next();
+                StringBuffer sb = new StringBuffer();
+                sb.append(next.getId()).append(",")
+                        .append(next.getDoctorId()).append(",")
+                        .append(next.getDoctorName()).append(",")
+                        .append(next.getPatientId()).append(",")
+                        .append(next.getDeptCode()).append(",")
+                        .append(next.getRuleId()).append(",")
+                        .append(next.getDiagnosisName()).append(",")
+                        .append(next.getHintContent()).append(",")
+                        .append(next.getRuleSource()).append(",")
+                        .append(next.getSignContent()).append(",")
+                        .append(next.getCreateTime());
+                br.write(sb.toString());
+                br.newLine();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                br.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+        }
     }
 
 }

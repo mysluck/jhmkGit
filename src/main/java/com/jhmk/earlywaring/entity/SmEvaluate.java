@@ -80,8 +80,12 @@ public class SmEvaluate implements Serializable{
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmEvaluate that = (SmEvaluate) o;
         return id == that.id &&
                 Objects.equals(userId, that.userId) &&

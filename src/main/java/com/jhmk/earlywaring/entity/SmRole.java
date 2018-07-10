@@ -140,8 +140,12 @@ public class SmRole {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         SmRole that = (SmRole) o;
         return Objects.equals(roleId, that.roleId) &&
                 Objects.equals(roleName, that.roleName) &&

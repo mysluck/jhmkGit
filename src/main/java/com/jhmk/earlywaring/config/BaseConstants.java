@@ -48,7 +48,7 @@ public class BaseConstants {
     public static final String submitrule = "/med/cindecision/submitrule.json";
     public static final String matchrule = "/med/cindecision/matchrule.json";
     public static final String updaterule = "/med/cindecision/updaterule.json";
-    public static final String getruleforid = "/med/cindecision/getruleforid.json";
+    public static final String getruleforid = "/med/cindecision/getruleforid.json";//查询单条规则
 
     //改变预警等级
     public static final String changewarninglevel = "/med/cindecision/changewarninglevel.json";

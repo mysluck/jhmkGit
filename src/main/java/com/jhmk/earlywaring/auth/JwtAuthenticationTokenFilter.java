@@ -49,13 +49,14 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         if (token == null) {
             String requestURI = request.getRequestURI();
 //            System.out.println(requestURI);
-            if (requestURI.equals("/warn/rule/ruleMatch")
+            if ("/warn/rule/ruleMatch".equals(requestURI)
                     || requestURI.contains("warn/rule/match")
                     || requestURI.contains("warn/users")
                     || requestURI.contains("warn/dept")
                     || requestURI.contains("warn/login")
                     || requestURI.contains("/getShowLog")
                     || requestURI.contains("/updateShowLog")
+                    || requestURI.contains("/getLogFile")
                     ) {
                 chain.doFilter(request, response);
             } else {
@@ -63,40 +64,25 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
                 response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                 resp.setResponseCode(ResponseCode.INERERROR3);
                 resp.setMessage("用户未登录，请重新登陆");
-                writer.print(resp);
-                writer.flush();
-                writer.close();
             }
         } else {
-            String username = null;
-            String userPwd = null;
-                if (sessionToken == null) {
-                    logger.info("用户登录过期，请重新登陆");
-                    resp.setResponseCode(ResponseCode.INERERROR5);
-                    writer.print(resp);
-                    writer.flush();
-                    writer.close();
+            if (sessionToken == null) {
+                logger.info("用户登录过期，请重新登陆");
+                resp.setResponseCode(ResponseCode.INERERROR5);
+            } else {
+                if (token.equals(sessionToken)) {
+                    request.getSession().setMaxInactiveInterval(2 * 60 * 60);
+                    chain.doFilter(request, response);
                 } else {
-//                    Claims claims = JWTUtil.parseJWT(token);
-                    if (token.equals(sessionToken)) {
-//                        Map map = claims;
-//                        username = (String) map.get("jti");
-//                        userPwd = (String) map.get("sub");
-//                        SmUsers one = smUsersRepService.findByUserIdAndUserPwd(username, userPwd);
-//                        if (one != null) {
-//                        request.getSession().setMaxInactiveInterval(15);
-                        request.getSession().setMaxInactiveInterval(2 * 60 * 60);
-                        chain.doFilter(request, response);
-                    } else {
-                        logger.info("无效token" + token);
-                        resp.setResponseCode(ResponseCode.INERERROR5);
-                        writer.print(resp);
-                        writer.flush();
-                        writer.close();
-                    }
+                    logger.info("无效token" + token);
+                    resp.setResponseCode(ResponseCode.INERERROR5);
+                }
             }
-        }
 
+        }
+        writer.print(resp);
+        writer.flush();
+        writer.close();
     }
 
 }

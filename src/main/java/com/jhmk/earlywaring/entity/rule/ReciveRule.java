@@ -32,7 +32,6 @@ public class ReciveRule {
     private List<Yizhu> yizhu;
 
 
-
     public String getDoctor_id() {
         return doctor_id;
     }
@@ -246,11 +245,14 @@ public class ReciveRule {
      * @return
      */
     private static List<Map<String, String>> deleteRepetitionField(List<Map<String, String>> list, String
-            field1, String field2) {
+            field1, String field2) throws NullPointerException {
         for (int i = 0; i < list.size(); i++) {
             Map m1 = list.get(i);
             for (int j = i + 1; j < list.size(); j++) {
                 Map m2 = list.get(j);
+                if (!m1.containsKey(field2) || !m2.containsKey(field2)||!m1.containsKey(field1)||!m2.containsKey(field2)) {
+                    continue;
+                }
                 if (m1.get(field1).equals(m2.get(field1))) {
                     Object time1 = m1.get(field2);
                     Object time2 = m2.get(field2);
@@ -271,6 +273,7 @@ public class ReciveRule {
             field1, String field2) {
         Map<String, Map<String, String>> tempMap = new HashedMap();
         for (int i = 0; i < list.size(); i++) {
+
             Map<String, String> map = list.get(i);
             String fName = map.get(field1);
             if (tempMap.containsKey(fName)) {
@@ -311,8 +314,9 @@ public class ReciveRule {
     }
 
     public static List<ReciveRule> fillList(JSONArray ja) {
-        if (ja == null || ja.size() == 0)
+        if (ja == null || ja.size() == 0) {
             return null;
+        }
         List<ReciveRule> sqs = new ArrayList<ReciveRule>();
         for (int i = 0; i < ja.size(); i++) {
             sqs.add(fill(ja.getJSONObject(i)));

@@ -1,5 +1,7 @@
 package com.jhmk.earlywaring.entity.rule;
 
+import java.util.Objects;
+
 public class Zhenduan {
 
     private String diagnosis_name;
@@ -37,5 +39,26 @@ public class Zhenduan {
 
     public void setDiagnosis_type_name(String diagnosis_type_name) {
         this.diagnosis_type_name = diagnosis_type_name;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        Zhenduan zhenduan = (Zhenduan) o;
+        return Objects.equals(diagnosis_name, zhenduan.diagnosis_name) &&
+                Objects.equals(diagnosis_time, zhenduan.diagnosis_time) &&
+                Objects.equals(diagnosis_num, zhenduan.diagnosis_num) &&
+                Objects.equals(diagnosis_type_name, zhenduan.diagnosis_type_name);
+    }
+
+    @Override
+    public int hashCode() {
+
+        return Objects.hash(diagnosis_name, diagnosis_time, diagnosis_num, diagnosis_type_name);
     }
 }

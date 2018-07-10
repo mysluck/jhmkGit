@@ -19,9 +19,7 @@ import java.util.*;
 
 @Service
 public class UserModelService {
-    //    private static final String hosptialName = "chaoyang";
-    @Value("${hospitalName}")
-    String hospitalName;
+
     @Autowired
     UserModelRepService userModelRepService;
     @Autowired
@@ -29,8 +27,13 @@ public class UserModelService {
 
     public List<UserModel> getVariableList() {
         //查询所有父类modul集合
-        List<UserModel> pModuls = userModelRepService.findByUmHospitalName(hospitalName);
+        Iterable<UserModel> iterable = userModelRepService.findAll();
 //        List<UserModel> pModuls = userModulRepService.findByUmParentIdAndUmHospitalName(null, hosptialName);
+        Iterator<UserModel> iterator = iterable.iterator();
+       List<UserModel> pModuls=new ArrayList<>();
+        while (iterator.hasNext()){
+            pModuls.add(iterator.next());
+        }
         List<UserModel> userModels = recursiveSel1(pModuls);
         return userModels;
     }
@@ -79,7 +82,7 @@ public class UserModelService {
 
     public List<UserModel> recursiveSel(List<UserModel> pModuls) {
         for (int i = 0; i < pModuls.size(); i++) {
-            List<UserModel> childList = userModelRepService.findByUmParentIdAndUmHospitalName(pModuls.get(i).getUmId(), hospitalName);
+            List<UserModel> childList = userModelRepService.findByUmParentId(pModuls.get(i).getUmId());
             if (childList.size() > 0) {
                 return recursiveSel(childList);
             }

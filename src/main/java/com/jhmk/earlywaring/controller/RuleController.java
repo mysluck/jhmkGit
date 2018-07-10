@@ -24,6 +24,7 @@ import com.jhmk.earlywaring.service.RuleService;
 import com.jhmk.earlywaring.service.UserModelService;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -394,6 +395,7 @@ public class RuleController extends BaseEntityController<Object> {
         //解析规则 一诉五史 检验报告等
         String s = ruleService.anaRule(map);
         String s2 = ruleService.stringTransform(s);
+        System.out.println(s2);
         JSONObject parse = JSONObject.parseObject(s2);
         ReciveRule fill = ReciveRule.fill(parse);
         String data = "";
@@ -404,8 +406,10 @@ public class RuleController extends BaseEntityController<Object> {
         } catch (Exception e) {
             logger.info("规则匹配失败：" + e.getMessage());
         }
-        ruleService.add2LogTable(data, s2);
-        ruleService.add2ShowLog(fill, data);
+        if (StringUtils.isNotBlank(data)) {
+            ruleService.add2LogTable(data, s2);
+            ruleService.add2ShowLog(fill, data);
+        }
         ruleService.getTipList2ShowLog(fill, map);
     }
 
@@ -554,16 +558,16 @@ public class RuleController extends BaseEntityController<Object> {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    @PostMapping("/matchDoctorAdv")
-    @ResponseBody
-    public void matchDoctorAdv(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-        //获取检验报告 检查报告最新的结果
-        BaseRule fill = BaseRule.fill(JSONObject.parseObject(map));
-        String string = JSONObject.toJSONString(fill);
-        System.out.println(string);
-        AtResponse resp = ruleService.ruleMatch(string, "医嘱");
-        wirte(response, resp);
-    }
+//    @PostMapping("/matchDoctorAdv")
+//    @ResponseBody
+//    public void matchDoctorAdv(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
+//        //获取检验报告 检查报告最新的结果
+//        BaseRule fill = BaseRule.fill(JSONObject.parseObject(map));
+//        String string = JSONObject.toJSONString(fill);
+//        System.out.println(string);
+//        AtResponse resp = ruleService.ruleMatch(string, "医嘱");
+//        wirte(response, resp);
+//    }
 
     /**
      * 诊断预警
@@ -573,12 +577,12 @@ public class RuleController extends BaseEntityController<Object> {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    @PostMapping("/matchDiagnose")
-    @ResponseBody
-    public void matchDiagnose(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-        AtResponse resp = ruleService.ruleMatch(map, "诊断");
-        wirte(response, resp);
-    }
+//    @PostMapping("/matchDiagnose")
+//    @ResponseBody
+//    public void matchDiagnose(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
+//        AtResponse resp = ruleService.ruleMatch(map, "诊断");
+//        wirte(response, resp);
+//    }
 
     /**
      * 统计规则数目

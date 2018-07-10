@@ -26,6 +26,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletResponse;
@@ -56,6 +57,8 @@ public class RuleService {
 
     ExecutorService exec = Executors.newFixedThreadPool(32);
 
+    public final String symbol = "[]";
+    public final String resultSym = "result";
 
     /**
      * 去重  获取字段名唯一 日期最大的 map
@@ -202,7 +205,7 @@ public class RuleService {
 
             AnalyzeBean analyzeBean = objects.get(i);
             String field = analyzeBean.getField();
-            Optional.ofNullable(userModelRepService.findByUmNameAndUmHospitalName(field.substring(field.lastIndexOf("_") + 1), "bysy"))
+            Optional.ofNullable(userModelRepService.findByUmName(field.substring(field.lastIndexOf("_") + 1)))
                     .ifPresent(s -> {
                         analyzeBean.setUmType(s.getUmType());
                     });
@@ -239,22 +242,31 @@ public class RuleService {
 
     public String ruleMatchGetResp(ReciveRule fill) {
         //todo 获取疾病同义词，用于跑医院数据到数据库
-//                List<Zhenduan> binglizhenduan = fill.getBinglizhenduan();
-//                if (binglizhenduan != null) {
-//                    Set<Zhenduan> set = new HashSet<>();
-//                    List<Zhenduan> zhenduans = new ArrayList<>();
-//                    for (Zhenduan b : binglizhenduan) {
-//                        List<Zhenduan> zhenduan = getZhenduan(b);
-//                        set.addAll(zhenduan);
-//                    }
-//                    zhenduans.addAll(set);
-//                    fill.setBinglizhenduan(zhenduans);
-//                }
-
-        Object o = JSONObject.parse(JSONObject.toJSONString(fill));
-        AtResponse resp = new AtResponse();
-        String data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
+        ReciveRule sameZhenDuanList = getSameZhenDuanList(fill);
+        Object o = JSONObject.parse(JSONObject.toJSONString(sameZhenDuanList));
+        String data = "";
+        try {
+            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
+        } catch (Exception e) {
+            logger.info("规则匹配失败：原因：" + e.getMessage() + data);
+        }
         return data;
+    }
+
+
+    private ReciveRule getSameZhenDuanList(ReciveRule fill) {
+        List<Zhenduan> binglizhenduan = fill.getBinglizhenduan();
+        if (binglizhenduan != null) {
+            Set<Zhenduan> set = new HashSet<>();
+            List<Zhenduan> zhenduans = new ArrayList<>();
+            for (Zhenduan b : binglizhenduan) {
+                List<Zhenduan> zhenduan = getZhenduan(b);
+                set.addAll(zhenduan);
+            }
+            zhenduans.addAll(set);
+            fill.setBinglizhenduan(zhenduans);
+        }
+        return fill;
     }
 
     /**
@@ -262,19 +274,17 @@ public class RuleService {
      * @param fromData 原始json数据
      */
     public void add2ShowLog(ReciveRule data, String fromData) {
-
         List<SmShowLog> datalist = new ArrayList<>();
         String doctor_id = data.getDoctor_id();
         String patient_id = data.getPatient_id();
         Map<String, Object> parse = (Map) JSON.parse(fromData);
         Object result = parse.get("result");
-        if (ObjectUtils.anyNotNull(result) && !"[]".equals(result)) {
+        if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
 
             JSONArray array = (JSONArray) result;
             Iterator<Object> iterator = array.iterator();
             while (iterator.hasNext()) {
                 JSONObject jsonObject = (JSONObject) iterator.next();
-
                 if (!"诊断预警".equals(jsonObject.getString("classification"))) {
                     continue;
                 }
@@ -283,8 +293,6 @@ public class RuleService {
                 if (log != null) {
                     continue;
                 }
-
-
                 if (jsonObject.keySet().contains("diseaseMessageMap")) {
                     Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
                     if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
@@ -293,7 +301,6 @@ public class RuleService {
                         SmShowLog hintMesRule = new SmShowLog();
                         while (iterator1.hasNext()) {
                             JSONObject next = (JSONObject) iterator1.next();
-
                             String diagnosis_name = "";
                             String diagnosis_num = "";
                             String sex_name = "";
@@ -324,7 +331,6 @@ public class RuleService {
                                     bglab_result_value = names;
                                 }
                             }
-
                             //判断主诊断或其他诊断
                             if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
                                 if (StringUtils.isNotBlank(next.getString(diagnosis_num)) && "1".equals(next.getString(diagnosis_num))) {
@@ -334,7 +340,6 @@ public class RuleService {
                                 }
                             }
                             Map<String, String> otherMap = new HashMap<>();
-
                             //判断性别
                             if (StringUtils.isNotBlank(next.getString(sex_name))) {
                                 hintMesRule.setSex(next.getString(sex_name));
@@ -342,7 +347,6 @@ public class RuleService {
                             //盘段医嘱
                             if (StringUtils.isNotBlank(next.getString(order_item_name))) {
 //                                hintMesRule.setYizhu(next.getString(order_item_name));
-
                             }
                             //判断入院记录检查细项和值
                             String baogaoKeyName = "";
@@ -351,7 +355,6 @@ public class RuleService {
                             String ruyuanKeyValue = "";
                             if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
                                 baogaoKeyName = next.getString(zylab_sub_item_name);
-
                             }
                             if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
                                 baogaoKeyValue = next.getString(zylab_result_value);
@@ -359,12 +362,10 @@ public class RuleService {
                             //判断检验检查细项和值
                             if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
                                 ruyuanKeyName = next.getString(bglab_sub_item_name);
-
                             }
                             if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
                                 ruyuanKeyValue = next.getString(bglab_result_value);
                             }
-
                             if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
                                 otherMap.put(baogaoKeyName, baogaoKeyValue);
                             }
@@ -374,7 +375,7 @@ public class RuleService {
                             if (otherMap.size() > 0) {
                                 hintMesRule.setOtherMap(JSONObject.toJSONString(otherMap));
                             }
-                            hintMesRule.setDate(DateFormatUtil.format(new Date(),DateFormatUtil.DATETIME_PATTERN_SS));
+                            hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
                             //新添加规则默认0
                             hintMesRule.setDoctorId(doctor_id);
                             hintMesRule.setPatientId(patient_id);
@@ -389,14 +390,13 @@ public class RuleService {
             }
         }
         smShowLogRepService.save(datalist);
-
     }
 
     //如果匹配到规则，解析规则匹配的返回数据入库 hostpital表
     public void add2LogTable(String resultData, String mes) {
         JSONObject jsonObject = JSONObject.parseObject(resultData);
-        if (!"[]".equals(jsonObject.get("result"))) {
-            Object result = jsonObject.get("result");
+        if (!symbol.equals(jsonObject.getString(resultSym))) {
+            Object result = jsonObject.get(resultSym);
             if (ObjectUtils.anyNotNull(result)) {
                 //todo 预警等级需要返回
                 JSONArray ja = (JSONArray) result;
@@ -434,103 +434,103 @@ public class RuleService {
      * @param fromSource 规则来源
      * @return
      */
-    public AtResponse ruleMatch(String map, String fromSource) {
-        Callable<AtResponse> callable = null;
-        callable = new Callable<AtResponse>() {
-            @Override
-            public AtResponse call() throws Exception {
-                //todo  重写解析规则
-                String s = anaRule(map);
-                String s2 = s.replaceAll("\\(", "（").replaceAll("\\)", "）");
-                JSONObject parse = JSONObject.parseObject(s2);
-                ReciveRule fill = ReciveRule.fill(parse);
-
-                //todo 获取疾病同义词，用于跑医院数据到数据库
-//                List<Zhenduan> binglizhenduan = fill.getBinglizhenduan();
-//                if (binglizhenduan != null) {
-//                    Set<Zhenduan> set = new HashSet<>();
-//                    List<Zhenduan> zhenduans = new ArrayList<>();
-//                    for (Zhenduan b : binglizhenduan) {
-//                        List<Zhenduan> zhenduan = getZhenduan(b);
-//                        set.addAll(zhenduan);
+//    public AtResponse ruleMatch(String map, String fromSource) {
+//        Callable<AtResponse> callable = null;
+//        callable = new Callable<AtResponse>() {
+//            @Override
+//            public AtResponse call() throws Exception {
+//                //todo  重写解析规则
+//                String s = anaRule(map);
+//                String s2 = s.replaceAll("\\(", "（").replaceAll("\\)", "）");
+//                JSONObject parse = JSONObject.parseObject(s2);
+//                ReciveRule fill = ReciveRule.fill(parse);
+//
+//                //todo 获取疾病同义词，用于跑医院数据到数据库
+////                List<Zhenduan> binglizhenduan = fill.getBinglizhenduan();
+////                if (binglizhenduan != null) {
+////                    Set<Zhenduan> set = new HashSet<>();
+////                    List<Zhenduan> zhenduans = new ArrayList<>();
+////                    for (Zhenduan b : binglizhenduan) {
+////                        List<Zhenduan> zhenduan = getZhenduan(b);
+////                        set.addAll(zhenduan);
+////                    }
+////                    zhenduans.addAll(set);
+////                    fill.setBinglizhenduan(zhenduans);
+////                }
+//
+//                Object o = JSONObject.parse(JSONObject.toJSONString(fill));
+//                AtResponse resp = new AtResponse();
+//                String data = "";
+//                try {
+//                    data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
+//                    Map<String, Object> result = (Map<String, Object>) JSON.parseObject(data);
+//                    if ("200".equals(result.get("code")) && !symbol.equals(result.get(resultSym))) {
+//                        JSONArray array = (JSONArray) result.get(resultSym);
+//                        if (result.get(resultSym) != null && array.size() > 0) {
+//                            resp.setMessage(BaseConstants.SUCCESS);
+//                            if (result.get(resultSym) != null) {
+//                                Object resultData = result.get(resultSym);
+//
+//                                List<HintMesRule> list = showMes(data);
+//                                Map<String, Object> resultMap = new HashMap<>();
+//                                resultMap.put("rule", resultData);
+//                                resultMap.put("hint", list);
+//                                resp.setData(resultMap);
+//
+//                                //todo 预警等级需要返回
+//                                JSONArray ja = (JSONArray) resultData;
+//                                if (ja.size() > 0) {
+//                                    SmHospitalLog smHospitalLog = hosptailLogService.addLog(s2);
+//                                    Iterator<Object> iterator = ja.iterator();
+//                                    while (iterator.hasNext()) {
+//                                        Object next = iterator.next();
+//                                        Map<String, String> datamap = (Map) next;
+//                                        //预警等级
+//                                        String warninglevel = datamap.get("warninglevel");
+//                                        smHospitalLog.setAlarmLevel(warninglevel);
+//                                        //释义
+//                                        smHospitalLog.setHintContent(datamap.get("hintContent"));
+//                                        smHospitalLog.setSignContent(datamap.get("signContent"));
+//                                        smHospitalLog.setRuleSource(datamap.get("ruleSource"));
+//                                        smHospitalLog.setClassification(datamap.get("classification"));
+//                                        smHospitalLog.setIdentification(datamap.get("identification"));
+//                                        //获取触发的规则id
+//                                        smHospitalLog.setRuleId(datamap.get("_id"));
+//                                        smHospitalLogRepService.save(smHospitalLog);
+//                                    }
+//                                }
+//
+//                            }
+//
+//                        } else {
+//                            logger.info("没有匹配到规则！");
+//                        }
+//
+//                        resp.setResponseCode(ResponseCode.OK);
+//                    } else {
+//                        logger.info("规则匹配失败！" + data);
+//                        logger.info("原始数据：" + o.toString());
+//                        resp.setResponseCode(ResponseCode.INERERROR4);
 //                    }
-//                    zhenduans.addAll(set);
-//                    fill.setBinglizhenduan(zhenduans);
+//                } catch (Exception e) {
+//                    logger.info("cdss服务器规则匹配失败！" + e.getMessage());
+//                    logger.info("原始数据：" + o.toString());
+//                    resp.setResponseCode(ResponseCode.INERERROR4);
 //                }
-
-                Object o = JSONObject.parse(JSONObject.toJSONString(fill));
-                AtResponse resp = new AtResponse();
-                String data = "";
-                try {
-                    data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
-                    Map<String, Object> result = (Map<String, Object>) JSON.parseObject(data);
-                    if ("200".equals(result.get("code")) && !"[]".equals(result.get("result"))) {
-                        JSONArray array = (JSONArray) result.get("result");
-                        if (result.get("result") != null && array.size() > 0) {
-                            resp.setMessage(BaseConstants.SUCCESS);
-                            if (result.get("result") != null) {
-                                Object resultData = result.get("result");
-
-                                List<HintMesRule> list = showMes(data);
-                                Map<String, Object> resultMap = new HashMap<>();
-                                resultMap.put("rule", resultData);
-                                resultMap.put("hint", list);
-                                resp.setData(resultMap);
-
-                                //todo 预警等级需要返回
-                                JSONArray ja = (JSONArray) resultData;
-                                if (ja.size() > 0) {
-                                    SmHospitalLog smHospitalLog = hosptailLogService.addLog(s2);
-                                    Iterator<Object> iterator = ja.iterator();
-                                    while (iterator.hasNext()) {
-                                        Object next = iterator.next();
-                                        Map<String, String> datamap = (Map) next;
-                                        //预警等级
-                                        String warninglevel = datamap.get("warninglevel");
-                                        smHospitalLog.setAlarmLevel(warninglevel);
-                                        //释义
-                                        smHospitalLog.setHintContent(datamap.get("hintContent"));
-                                        smHospitalLog.setSignContent(datamap.get("signContent"));
-                                        smHospitalLog.setRuleSource(datamap.get("ruleSource"));
-                                        smHospitalLog.setClassification(datamap.get("classification"));
-                                        smHospitalLog.setIdentification(datamap.get("identification"));
-                                        //获取触发的规则id
-                                        smHospitalLog.setRuleId(datamap.get("_id"));
-                                        smHospitalLogRepService.save(smHospitalLog);
-                                    }
-                                }
-
-                            }
-
-                        } else {
-                            logger.info("没有匹配到规则！");
-                        }
-
-                        resp.setResponseCode(ResponseCode.OK);
-                    } else {
-                        logger.info("规则匹配失败！" + data);
-                        logger.info("原始数据：" + o.toString());
-                        resp.setResponseCode(ResponseCode.INERERROR4);
-                    }
-                } catch (Exception e) {
-                    logger.info("cdss服务器规则匹配失败！" + e.getMessage());
-                    logger.info("原始数据：" + o.toString());
-                    resp.setResponseCode(ResponseCode.INERERROR4);
-                }
-                return resp;
-            }
-        };
-        Future<AtResponse> submit = exec.submit(callable);
-        AtResponse s = null;
-        try {
-            s = submit.get();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (ExecutionException e) {
-            e.printStackTrace();
-        }
-        return s;
-    }
+//                return resp;
+//            }
+//        };
+//        Future<AtResponse> submit = exec.submit(callable);
+//        AtResponse s = null;
+//        try {
+//            s = submit.get();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (ExecutionException e) {
+//            e.printStackTrace();
+//        }
+//        return s;
+//    }
 
     /**
      * 将英文()括号改为中文（）
@@ -546,7 +546,7 @@ public class RuleService {
     private List<HintMesRule> showMes(String data) {
         Map parse = (Map) JSONObject.parse(data);
         List<HintMesRule> ruleList = new ArrayList<>();
-        Optional.ofNullable(parse.get("result")).ifPresent(s -> {
+        Optional.ofNullable(parse.get(resultSym)).ifPresent(s -> {
             JSONArray array = (JSONArray) s;
             Iterator<Object> iterator = array.iterator();
             while (iterator.hasNext()) {
@@ -666,7 +666,7 @@ public class RuleService {
         Map<String, Object> endparamMap = new HashMap<String, Object>();
         endparamMap.putAll(paramMap);
         for (String key : paramMap.keySet()) {
-            if (key.equals("ruyuanjilu")) {
+            if ("ruyuanjilu".equals(key)) {
                 String ryjl = String.valueOf(paramMap.get("ruyuanjilu"));
                 JSONArray jsonArray = JSON.parseArray(ryjl);
                 Iterator<Object> it = jsonArray.iterator();
@@ -676,25 +676,25 @@ public class RuleService {
                     String ryjlkey = ob.getString("key");
                     String value = ob.getString("value");
                     if (value != null && !value.isEmpty()) {
-                        if (ryjlkey.equals("既往史")) {
+                        if ("既往史".equals(ryjlkey)) {
                             ryjlMap.put("history_of_past_illness", value);
-                        } else if (ryjlkey.equals("主诉")) {
+                        } else if ("主诉".equals(ryjlkey)) {
                             ryjlMap.put("chief_complaint", value);
-                        } else if (ryjlkey.equals("现病史")) {
+                        } else if ("现病史".equals(ryjlkey)) {
                             ryjlMap.put("history_of_present_illness", value);
-                        } else if (ryjlkey.equals("家族史")) {
+                        } else if ("家族史".equals(ryjlkey)) {
                             ryjlMap.put("history_of_family_member_diseases", value);
-                        } else if (ryjlkey.equals("婚姻史")) {
+                        } else if ("婚姻史".equals(ryjlkey)) {
                             ryjlMap.put("menstrual_and_obstetrical_histories", value);
-                        } else if (ryjlkey.equals("辅助检查")) {
+                        } else if ("辅助检查".equals(ryjlkey)) {
                             ryjlMap.put("auxiliary_examination", value);
-                        } else if (ryjlkey.equals("体格检查")) {
+                        } else if ("体格检查".equals(ryjlkey)) {
                             ryjlMap.put("physical_examination", value);
                         }
                     }
                 }
                 endparamMap.put("ruyuanjilu", ryjlMap);
-            } else if (key.equals("jianyanbaogao")) {
+            } else if ("jianyanbaogao".equals(key)) {
                 String jybg = String.valueOf(paramMap.get("jianyanbaogao"));
                 JSONArray jsonArray = JSON.parseArray(jybg);
                 Iterator<Object> it = jsonArray.iterator();
@@ -707,14 +707,18 @@ public class RuleService {
                         JSONArray sbjsonArray = JSON.parseArray(labTestItems.toString());
                         for (Object object : sbjsonArray) {
                             JSONObject sbobj = (JSONObject) object;
-                            if (sbobj.getString("name") != null)
+                            if (sbobj.getString("name") != null) {
                                 jcbg.put("lab_sub_item_name", sbobj.getString("name"));
-                            if (sbobj.getString("unit") != null)
+                            }
+                            if (sbobj.getString("unit") != null) {
                                 jcbg.put("lab_result_value_unit", sbobj.getString("unit"));
-                            if (sbobj.getString("lab_result_value") != null)
+                            }
+                            if (sbobj.getString("lab_result_value") != null) {
                                 jcbg.put("lab_result_value", sbobj.getString("lab_result_value"));
-                            if (sbobj.getString("result_status_code") != null)
+                            }
+                            if (sbobj.getString("result_status_code") != null) {
                                 jcbg.put("result_status_code", sbobj.getString("result_status_code"));
+                            }
                         }
                     }
                     jybgMap.add(jcbg);
@@ -733,7 +737,7 @@ public class RuleService {
         param.put("diseaseName", b.getDiagnosis_name());
         Object parse1 = JSONObject.toJSON(param);
         String sames = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getSamilarWord, parse1, String.class);
-        if (sames != null && !"[]".equals(sames.trim())) {
+        if (sames != null && !symbol.equals(sames.trim())) {
             JSONArray objects = JSONArray.parseArray(sames);
             Iterator<Object> iterator = objects.iterator();
             while (iterator.hasNext()) {
@@ -750,18 +754,18 @@ public class RuleService {
             binglizhenduanSet.add(newBlzd);
         }
         //发送 获取疾病父类
-//        String parentList = restTemplate.postForObject(urlConfig.getMed() + BaseConstants.getParentList, parse1, String.class);
-//        if (parentList != null && !"[]".equals(parentList)) {
-//            JSONArray objects = JSONArray.parseArray(parentList);
-//            Iterator<Object> iterator = objects.iterator();
-//            while (iterator.hasNext()) {
-//                Object next = iterator.next();
-//                Zhenduan newBlzd = new Zhenduan();
-//                BeanUtils.copyProperties(b, newBlzd);
-//                newBlzd.setDiagnosis_name(next.toString());
-//                binglizhenduanSet.add(newBlzd);
-//            }
-//        }
+        String parentList = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getParentList, parse1, String.class);
+        if (parentList != null && !symbol.equals(parentList)) {
+            JSONArray objects = JSONArray.parseArray(parentList);
+            Iterator<Object> iterator = objects.iterator();
+            while (iterator.hasNext()) {
+                Object next = iterator.next();
+                Zhenduan newBlzd = new Zhenduan();
+                BeanUtils.copyProperties(b, newBlzd);
+                newBlzd.setDiagnosis_name(next.toString());
+                binglizhenduanSet.add(newBlzd);
+            }
+        }
         List<Zhenduan> list = new ArrayList<Zhenduan>(binglizhenduanSet);
         return list;
     }
@@ -771,52 +775,47 @@ public class RuleService {
         String patient_id = fill.getPatient_id();
 
         Object o = JSONObject.parse(map);
-        String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getTipList, o, String.class);
-        if (!"[]".equals(result)) {
-            JSONArray array = JSONArray.parseArray(result);
-            Iterator<Object> iterator = array.iterator();
-            while (iterator.hasNext()) {
-                SmShowLog smShowLog = new SmShowLog();
-                JSONObject next = (JSONObject) iterator.next();
-                String itemName = next.getString("itemName");
-                String type = next.getString("type");
-                String stat = next.getString("stat");
+        String result = "";
+        try {
 
-                SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStat(doctor_id, patient_id, itemName, type, stat);
-                if (isExist != null) {
-                    continue;
+            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getTipList, o, String.class);
+            if (!symbol.equals(result)) {
+                JSONArray array = JSONArray.parseArray(result);
+                Iterator<Object> iterator = array.iterator();
+                while (iterator.hasNext()) {
+                    SmShowLog smShowLog = new SmShowLog();
+                    JSONObject next = (JSONObject) iterator.next();
+                    String itemName = next.getString("itemName");
+                    String type = next.getString("type");
+                    String stat = next.getString("stat");
+
+                    SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStat(doctor_id, patient_id, itemName, type, stat);
+                    if (isExist != null) {
+                        continue;
+                    }
+                    smShowLog.setItemName(itemName);
+                    smShowLog.setType(type);
+                    smShowLog.setStat(stat);
+                    String data = next.getString("data");
+//                    smShowLog.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+                    smShowLog.setDate(data);
+                    String significance = next.getString("significance");
+                    if ("{}".equals(significance.trim()) && StringUtils.isNotBlank(itemName)) {
+
+                        smShowLog.setSignificance(significance);
+                        String value = next.getString("value");
+                        smShowLog.setValue(value);
+                        smShowLog.setRuleStatus(0);
+                        smShowLog.setPatientId(patient_id);
+                        smShowLog.setDoctorId(doctor_id);
+                        smShowLogRepService.save(smShowLog);
+                    }
                 }
-                smShowLog.setItemName(itemName);
-                smShowLog.setType(type);
-                smShowLog.setStat(stat);
-                String data = next.getString("data");
-                smShowLog.setDate(DateFormatUtil.format(new Date(),DateFormatUtil.DATETIME_PATTERN_SS));
-                String significance = next.getString("significance");
-                smShowLog.setSignificance(significance);
-                String value = next.getString("value");
-                smShowLog.setValue(value);
-                smShowLog.setRuleStatus(0);
-                smShowLog.setPatientId(patient_id);
-                smShowLog.setDoctorId(doctor_id);
-                smShowLogRepService.save(smShowLog);
-
-
             }
+        } catch (HttpServerErrorException e) {
+            logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
         }
 
-    }
-
-    public static void main(String[] args) {
-        String result = "[{\"itemName\":\"高血压\",\"data\":\"2018-07-02 16:03:33\",\"type\":\"jiwangshi\"},{\"itemName\":\"2型糖尿病\",\"data\":\"2018-07-02 16:03:33\",\"type\":\"jiwangshi\"},{\"itemName\":\"脑梗塞\",\"data\":\"2018-07-02 16:03:33\",\"type\":\"jiwangshi\"},{\"itemName\":\"膝关节炎\",\"data\":\"2018-07-02 16:03:33\",\"type\":\"jiwangshi\"},{\"significance\":\"{\\\"升高\\\":\\\"a.生理性:见于胎儿及新生儿、妊娠5个月以上、分娩期、月经期、饭后、剧烈运动后、暴热、严寒及极度恐惧等\\\\nb.病理性:急性细菌性感染、严重组织损伤、尿毒症、传染病、严重烧伤、单核细胞增多症、传染性淋巴细胞增多症、手术创伤后、急性出血、白血病等\\\"}\",\"stat\":\"H\",\"itemName\":\"白细胞\",\"data\":\"2017-09-06 11:56:18\",\"type\":\"lab\",\"value\":\"4.910^9/L\"},{\"significance\":\"{\\\"升高\\\":\\\"a.生理性:见于胎儿及新生儿、妊娠5个月以上、分娩期、月经期、饭后、剧烈运动后、暴热、严寒及极度恐惧等\\\\nb.病理性:急性细菌性感染、严重组织损伤、尿毒症、传染病、严重烧伤、单核细胞增多症、传染性淋巴细胞增多症、手术创伤后、急性出血、白血病等\\\"}\",\"stat\":\"H\",\"itemName\":\"白细胞\",\"data\":\"2017-09-06 11:56:18\",\"type\":\"lab\",\"value\":\"4.910^9/L\"}]";
-        if (!"[]".equals(result)) {
-            JSONArray array = JSONArray.parseArray(result);
-            Iterator<Object> iterator = array.iterator();
-            while (iterator.hasNext()) {
-                JSONObject next = (JSONObject) iterator.next();
-                String itemName = next.getString("itemName");
-                System.out.println(itemName);
-            }
-        }
 
     }
 
