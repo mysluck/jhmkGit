@@ -5,6 +5,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.MapUtil;
 import org.apache.commons.collections.map.HashedMap;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.client.RestTemplate;
 
@@ -230,12 +231,6 @@ public class ReciveRule {
         return o;
     }
 
-    public static void main(String[] args) {
-        String s = "2017-05-02 11:12:12";
-        String s1 = "2017-05-02 10:12:12";
-        System.out.println(s.compareTo(s1));
-    }
-
     /**
      * //去除重复字段 保留时间最大的
      *
@@ -250,7 +245,7 @@ public class ReciveRule {
             Map m1 = list.get(i);
             for (int j = i + 1; j < list.size(); j++) {
                 Map m2 = list.get(j);
-                if (!m1.containsKey(field2) || !m2.containsKey(field2)||!m1.containsKey(field1)||!m2.containsKey(field2)) {
+                if (!m1.containsKey(field2) || !m2.containsKey(field2) || !m1.containsKey(field1) || !m2.containsKey(field2)) {
                     continue;
                 }
                 if (m1.get(field1).equals(m2.get(field1))) {
@@ -270,12 +265,15 @@ public class ReciveRule {
     }
 
     private static List<Map<String, String>> deleteRepetitionFieldByMap(List<Map<String, String>> list, String
-            field1, String field2) {
+            field1, String field2) throws NullPointerException {
         Map<String, Map<String, String>> tempMap = new HashedMap();
         for (int i = 0; i < list.size(); i++) {
 
             Map<String, String> map = list.get(i);
             String fName = map.get(field1);
+            if (StringUtils.isBlank(fName)) {
+                continue;
+            }
             if (tempMap.containsKey(fName)) {
                 //已存map
                 Map<String, String> tmap = tempMap.get(fName);

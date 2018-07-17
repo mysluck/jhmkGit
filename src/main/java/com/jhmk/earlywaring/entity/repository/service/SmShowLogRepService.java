@@ -73,9 +73,10 @@ public class SmShowLogRepService extends BaseRepService<SmShowLog, Integer> {
         return repository.findAll(specification, pageable);
     }
 
+
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmShowLog findFirstByDoctorIdAndPatientIdAndRuleId(String doctorId, String patientId, String ruleId) {
-        return repository.findFirstByDoctorIdAndPatientIdAndRuleId(doctorId, patientId, ruleId);
+    public SmShowLog findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(String doctorId, String patientId, String ruleId,String visitId) {
+        return repository.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctorId, patientId, ruleId,visitId);
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
@@ -84,8 +85,8 @@ public class SmShowLogRepService extends BaseRepService<SmShowLog, Integer> {
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<SmShowLog> findByDoctorIdAndPatientId(String doctorId, String patientId) {
-        return repository.findByDoctorIdAndPatientId(doctorId, patientId);
+    public List<SmShowLog> findByDoctorIdAndPatientIdAndVisitIdOrderByDateDesc(String doctorId, String patientId,String visitId) {
+        return repository.findByDoctorIdAndPatientIdAndVisitIdOrderByDateDesc(doctorId, patientId,visitId);
     }
 
 
@@ -95,8 +96,8 @@ public class SmShowLogRepService extends BaseRepService<SmShowLog, Integer> {
     }
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public SmShowLog findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStat(String doctorId, String patientId, String itemName, String type, String stat) {
-        return repository.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStat(doctorId, patientId, itemName, type, stat);
+    public SmShowLog findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(String doctorId, String patientId, String itemName, String type, String stat,String visitId) {
+        return repository.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(doctorId, patientId, itemName, type, stat,visitId);
     }
 
 }

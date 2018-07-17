@@ -6,7 +6,7 @@
   <session-factory>
     <property name="connection.url">jdbc:mysql://192.168.8.22:3306/jhmk_waring</property>
     <property name="connection.driver_class">com.mysql.jdbc.Driver</property>
-    <mapping class="com.jhmk.earlywaring.entity.SmModule"/>
+      <mapping class="com.jhmk.earlywaring.entity.SmModule"/>
     <mapping class="com.jhmk.earlywaring.entity.SmRole"/>
       <mapping class="com.jhmk.earlywaring.entity.SmEvaluate"/>
       <mapping class="com.jhmk.earlywaring.entity.SmHospitalLog"/>

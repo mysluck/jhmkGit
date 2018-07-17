@@ -261,7 +261,14 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
         if (StringUtils.isNotBlank(params.get("doctorName"))) {
             condMap.put("doctorName", params.get("doctorName"));
         }
-        List<HospitalLog> dataByCondition = hosptailLogService.getDataByCondition(yearFirst, yearLast, condMap);
+        if (StringUtils.isNotBlank(params.get("alarmLevel"))) {
+            condMap.put("alarmLevel", params.get("alarmLevel"));
+        }
+        Integer pageNo = 0;
+        if (StringUtils.isNotBlank(params.get("pageNo"))) {
+            pageNo = Integer.valueOf(params.get("pageNo"));
+        }
+        List<SmHospitalLog> dataByCondition = hosptailLogService.getDataByConditionBySort(yearFirst, yearLast, condMap, pageNo, null);
         atsp.setResponseCode(ResponseCode.OK);
         atsp.setData(dataByCondition);
         wirte(response, atsp);
@@ -294,6 +301,7 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
                         .append(next.getDoctorId()).append(",")
                         .append(next.getDoctorName()).append(",")
                         .append(next.getPatientId()).append(",")
+                        .append(next.getVisitId()).append(",")
                         .append(next.getDeptCode()).append(",")
                         .append(next.getRuleId()).append(",")
                         .append(next.getDiagnosisName()).append(",")

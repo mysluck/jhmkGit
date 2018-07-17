@@ -428,9 +428,8 @@ public class RuleController extends BaseEntityController<Object> {
         JSONObject jsonObject = JSONObject.parseObject(map);
         String doctor_id = jsonObject.getString("doctor_id");
         String patient_id = jsonObject.getString("patient_id");
-        List<SmShowLog> byDoctorIdAndPatientId = smShowLogRepService.findByDoctorIdAndPatientId(doctor_id, patient_id);
-        for (SmShowLog log : byDoctorIdAndPatientId) {
-        }
+        String visit_id = jsonObject.getString("visit_id");
+        List<SmShowLog> byDoctorIdAndPatientId = smShowLogRepService.findByDoctorIdAndPatientIdAndVisitIdOrderByDateDesc(doctor_id, patient_id,visit_id);
         resp.setData(byDoctorIdAndPatientId);
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);

@@ -22,8 +22,10 @@ import org.apache.poi.ss.formula.functions.T;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -41,7 +43,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
 
 
     @Autowired
-    SmHospitalLogRepService SmHospitalLogRepService;
+    SmHospitalLogRepService smHospitalLogRepService;
     @Autowired
     RuleService ruleService;
     @Autowired
@@ -74,7 +76,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         Date endTime = DateFormatUtil.getYearLast(year);
         Map<String, Integer> map = new HashMap<>();
         //根据部门查询所有log
-        List<SmHospitalLog> hosptailLogList = SmHospitalLogRepService.getAllByDeptAndYear(deptId, startTime, endTime);
+        List<SmHospitalLog> hosptailLogList = smHospitalLogRepService.getAllByDeptAndYear(deptId, startTime, endTime);
         if (hosptailLogList.size() > 0) {
             for (SmHospitalLog log : hosptailLogList) {
                 //将log 的key：value  主疾病 ：次数
@@ -100,7 +102,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         Date startTime = DateFormatUtil.getYearFirst(year);
         Date endTime = DateFormatUtil.getYearLast(year);
         //用于分页  相当于limit（0,10）
-        List<Object[]> list = SmHospitalLogRepService.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime);
+        List<Object[]> list = smHospitalLogRepService.getCountByDiagnosisNameAndDeptCode(deptId, startTime, endTime);
         Map<String, Integer> map = new LinkedHashMap<>();
         for (int i = 0; i < list.size(); i++) {
             Object[] objects = list.get(i);
@@ -116,7 +118,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
     //科室分布功能
     public List<LogBean> countByDept(int year) {
         Map<String, LogBean> map = new HashMap<>();
-        List<SmHospitalLog> logList = SmHospitalLogRepService.getDeptCountByYear(DateFormatUtil.getYearFirst(year), DateFormatUtil.getYearLast(year));
+        List<SmHospitalLog> logList = smHospitalLogRepService.getDeptCountByYear(DateFormatUtil.getYearFirst(year), DateFormatUtil.getYearLast(year));
         for (SmHospitalLog SmHospitalLog : logList) {
             if (map.containsKey(SmHospitalLog.getDeptCode())) {
                 LogBean bean = map.get(SmHospitalLog.getDeptCode());
@@ -163,7 +165,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
     }
 
     public List<String> mapDeptNames() {
-        List<String> countByDistinctDeptCode = SmHospitalLogRepService.getCountByDistinctDeptCode();
+        List<String> countByDistinctDeptCode = smHospitalLogRepService.getCountByDistinctDeptCode();
         return countByDistinctDeptCode;
     }
 
@@ -171,7 +173,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
     //人员分布功能
     public List<LogBean> countByDoctor(String deptId, int year) {
         Map<String, LogBean> map = new HashMap<>();
-        List<SmHospitalLog> logList = SmHospitalLogRepService.getAllByDeptAndYear(deptId, DateFormatUtil.getYearFirst(year), DateFormatUtil.getYearLast(year));
+        List<SmHospitalLog> logList = smHospitalLogRepService.getAllByDeptAndYear(deptId, DateFormatUtil.getYearFirst(year), DateFormatUtil.getYearLast(year));
         for (SmHospitalLog SmHospitalLog : logList) {
             if (map.containsKey(SmHospitalLog.getDoctorId())) {
                 LogBean bean = map.get(SmHospitalLog.getDoctorId());
@@ -234,7 +236,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         //发送
         Specification sf = getWhereClause(startTime, endTime, params);
 
-        List<SmHospitalLog> all = SmHospitalLogRepService.findAll(sf);
+        List<SmHospitalLog> all = smHospitalLogRepService.findAll(sf);
         return "";
 
     }
@@ -250,7 +252,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         //发送
         Specification sf = getWhereClause(startTime, endTime, params);
 
-        List<SmHospitalLog> all = SmHospitalLogRepService.findAll(sf);
+        List<SmHospitalLog> all = smHospitalLogRepService.findAll(sf);
         List<String> monthBetween = DateFormatUtil.getMonthBetween(startTime, endTime);
 
         Map<String, Integer> map = new HashMap<>();
@@ -301,33 +303,52 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         //发送
         Specification sf = getWhereClause(startTime, endTime, params);
 
-        List<SmHospitalLog> all = SmHospitalLogRepService.findAll(sf);
+        List<SmHospitalLog> all = smHospitalLogRepService.findAll(sf);
         return "";
 
     }
 
-    public List<HospitalLog> getDataByCondition(Date start, Date end, Map param) {
-        Specification sf = getWhereClause(start, end, param);
-        List<SmHospitalLog> all = SmHospitalLogRepService.findAll(sf);
-        List<HospitalLog> result = new ArrayList<>();
-        for (SmHospitalLog log : all) {
-            HospitalLog hospitalLog = new HospitalLog();
-            String patientId = log.getPatientId();
-            hospitalLog.setPatientId(patientId);
-            String visitId = log.getVisitId();
-            hospitalLog.setVisitId(visitId);
-            String ruleId = log.getRuleId();
-            Map<String, String> idMap = new HashMap<>();
-            idMap.put("_id", ruleId);
-            String data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, idMap, String.class);
-            Map<String, Object> parse = (Map) JSONObject.parse(data);
-            JSONObject object = JSONObject.parseObject(parse.get("result").toString());
-            String ruleCondition = object.getString("ruleCondition");
-            String s = ruleService.disposeRuleCondition(ruleCondition);
-            hospitalLog.setRuleCondition(s);
-            result.add(hospitalLog);
+    public List<SmHospitalLog> getDataByCondition(Date start, Date end, Map param, Integer pageNo, Integer pageSize) {
+        int page = 0;
+        if (pageNo != null) {
+            // Pageable页面从0开始计
+            page = pageNo;
         }
-        return result;
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+
+        WebPage webPage = new WebPage();
+        if (pageSize != null) {
+            webPage.setPageSize(pageSize);
+        }
+
+        Pageable pageable = new PageRequest(page, webPage.getPageSize(), sort);
+        Specification sf = getWhereClause(start, end, param);
+//        List<SmHospitalLog> all = smHospitalLogRepService.findAll(sf, pageable);
+//        List<SmHospitalLog> all = smHospitalLogRepService.findAllByOrderByCreateTimeDesc(sf);
+        Page<SmHospitalLog> pageCount = smHospitalLogRepService.findAll(sf, pageable);
+        List<SmHospitalLog> all = pageCount.getContent();
+        for (SmHospitalLog l : all) {
+            Date createTime = l.getCreateTime();
+            l.setRuledate(DateFormatUtil.format(createTime, DateFormatUtil.DATETIME_PATTERN_SS));
+        }
+
+        return all;
+    }
+    public List<SmHospitalLog> getDataByConditionBySort(Date start, Date end, Map param, Integer pageNo, Integer pageSize) {
+        int page = 0;
+        if (pageNo != null) {
+            // Pageable页面从0开始计
+            page = pageNo;
+        }
+        Sort sort = new Sort(Sort.Direction.DESC, "createTime");
+
+        Specification sf = getWhereClause(start, end, param);
+        List<SmHospitalLog> all = smHospitalLogRepService.findAll(sf, sort);
+        for (SmHospitalLog l : all) {
+            Date createTime = l.getCreateTime();
+            l.setRuledate(DateFormatUtil.format(createTime, DateFormatUtil.DATETIME_PATTERN_SS));
+        }
+        return all;
     }
 
     public Specification<T> getWhereClause(String startTime, String endTime, Map<String, Object> params) {
@@ -386,7 +407,6 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
                 }
                 if (endTime != null) {
                     list.add(cb.lessThanOrEqualTo(root.get("createTime").as(Date.class), endTime));
-
                 }
 //                //拼接传入参数
                 if (params != null) {
@@ -503,24 +523,24 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         //主诊断
         String affirmSickness = "";
         //判断首页诊断如果不为空，确认主疾病为首页诊断
-            if (binglizhenduan != null) {
-                JSONArray objects = JSONArray.parseArray(binglizhenduan.toString());
-                Iterator<Object> iterator = objects.iterator();
-                while (iterator.hasNext()) {
-                    {
-                        Map<String, String> next = (Map) iterator.next();
-                        if ("1".equals(next.get("diagnosis_num"))) {
-                            Optional.ofNullable(next.get("diagnosis_name")).ifPresent(s -> {
-                                smHospitalLog.setDiagnosisName(next.get("diagnosis_name").trim());
-                            });
-                            Optional.ofNullable(next.get("diagnosis_time")).ifPresent(s -> {
-                                smHospitalLog.setCreateTime( DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
-                            });
-                        }
-
+        if (binglizhenduan != null) {
+            JSONArray objects = JSONArray.parseArray(binglizhenduan.toString());
+            Iterator<Object> iterator = objects.iterator();
+            while (iterator.hasNext()) {
+                {
+                    Map<String, String> next = (Map) iterator.next();
+                    if ("1".equals(next.get("diagnosis_num"))) {
+                        Optional.ofNullable(next.get("diagnosis_name")).ifPresent(s -> {
+                            smHospitalLog.setDiagnosisName(next.get("diagnosis_name").trim());
+                        });
+                        Optional.ofNullable(next.get("diagnosis_time")).ifPresent(s -> {
+                            smHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
+                        });
                     }
+
                 }
-            } else {
+            }
+        } else {
             JSONArray objects = JSONArray.parseArray(shouyezhenduan.toString());
             Iterator<Object> iterator = objects.iterator();
             while (iterator.hasNext()) {
@@ -532,7 +552,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
                             smHospitalLog.setDiagnosisName(next.get("diagnosis_name").trim());
                         });
                         Optional.ofNullable(next.get("diagnosis_time")).ifPresent(s -> {
-                            smHospitalLog.setCreateTime( DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
+                            smHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
                         });
                     }
 

@@ -6,6 +6,7 @@ import com.jhmk.earlywaring.entity.repository.SmHospitalLogRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -75,11 +76,23 @@ public class SmHospitalLogRepService extends BaseRepService<SmHospitalLog, Integ
         return repository.findAll(specification, pageable);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<SmHospitalLog> findAll(Specification<SmHospitalLog> specification, Sort sort) {
+        return repository.findAll(specification, sort);
+    }
+
     //筛选列表
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public List<SmHospitalLog> findAll(Specification specification) {
         return repository.findAll(specification);
+    }
+
+
+    //筛选列表
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<SmHospitalLog> findAllByOrderByCreateTimeDesc(Specification specification) {
+        return repository.findAllByOrderByCreateTimeDesc(specification);
     }
 
 

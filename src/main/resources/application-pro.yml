@@ -1,8 +1,9 @@
 server:
   port: 8111
 spring:
+  profiles: pro
   datasource:
-    url: jdbc:mysql://192.168.8.22:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+    url: jdbc:mysql://192.168.132.4:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
     password: 123456
@@ -11,6 +12,5 @@ spring:
     generate-ddl: true
     show-sql: true
 
-
 url:
-  cdssurl : http://192.168.8.20:8010
+  cdssurl : http://192.168.132.7:8010

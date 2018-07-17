@@ -2,6 +2,7 @@ package com.jhmk.earlywaring.entity.repository;
 
 import com.jhmk.earlywaring.entity.SmHospitalLog;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
@@ -65,6 +66,10 @@ public interface SmHospitalLogRepository extends PagingAndSortingRepository<SmHo
 
     @Query("select distinct (d.doctorId),d.doctorName from SmHospitalLog d ")
     List<SmHospitalLog> getCountByDistinctDoctorId();
+
+
+    List<SmHospitalLog> findAllByOrderByCreateTimeDesc(Specification specification);
+
 
 
 }

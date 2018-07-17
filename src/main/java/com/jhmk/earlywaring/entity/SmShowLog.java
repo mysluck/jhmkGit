@@ -13,6 +13,7 @@ public class SmShowLog {
     private int id;
     private String doctorId;
     private String patientId;
+    private String visitId;
     private String ruleId;
     private String sex;
     private String date;
@@ -25,6 +26,8 @@ public class SmShowLog {
     private String stat;
     private String itemName;
     private String value;
+    private String orderItemNames;
+    private String drugAllergyName;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -58,6 +61,18 @@ public class SmShowLog {
         this.patientId = patientId;
     }
 
+
+    @Basic
+    @Column(name = "visit_id", nullable = true, length = 2)
+    public String getVisitId() {
+        return visitId;
+    }
+
+    public void setVisitId(String visitId) {
+        this.visitId = visitId;
+    }
+
+
     @Basic
     @Column(name = "rule_id", nullable = true, length = 100)
     public String getRuleId() {
@@ -79,7 +94,7 @@ public class SmShowLog {
     }
 
     @Basic
-    @Column(name = "date", nullable = true)
+    @Column(name = "date", nullable = true, length = 100)
     public String getDate() {
         return date;
     }
@@ -186,7 +201,7 @@ public class SmShowLog {
     }
 
     @Basic
-    @Column(name = "itemName", nullable = true, length = 20)
+    @Column(name = "item_name", nullable = true, length = 20)
     public String getItemName() {
         return itemName;
     }
@@ -205,4 +220,23 @@ public class SmShowLog {
         this.value = value;
     }
 
+    @Basic
+    @Column(name = "order_item_names", nullable = true, length = 255)
+    public String getOrderItemNames() {
+        return orderItemNames;
+    }
+
+    public void setOrderItemNames(String orderItemNames) {
+        this.orderItemNames = orderItemNames;
+    }
+
+    @Basic
+    @Column(name = "drug_allergy_name", nullable = true, length = 255)
+    public String getDrugAllergyName() {
+        return drugAllergyName;
+    }
+
+    public void setDrugAllergyName(String drugAllergyName) {
+        this.drugAllergyName = drugAllergyName;
+    }
 }

@@ -1,13 +1,20 @@
 package com.jhmk.earlywaring.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import javax.persistence.*;
-import java.io.Serializable;
 import java.util.Date;
 import java.util.Objects;
 
+/**
+ * @author ziyu.zhou
+ * @date 2018/7/12 18:04
+ */
+
 @Entity
 @Table(name = "sm_hospital_log", schema = "jhmk_waring", catalog = "")
-public class SmHospitalLog implements Serializable {
+public class SmHospitalLog {
     private int id;
     private String patientId;
     private String visitId;
@@ -25,6 +32,17 @@ public class SmHospitalLog implements Serializable {
     private String ruleSource;
     private String signContent;
     private String ruleId;
+    private String ruleCondition;
+    @Transient
+    private String ruledate;
+
+    public String getRuledate() {
+        return ruledate;
+    }
+
+    public void setRuledate(String ruledate) {
+        this.ruledate = ruledate;
+    }
 
     @Id
     @Column(name = "id", nullable = false)
@@ -147,8 +165,9 @@ public class SmHospitalLog implements Serializable {
         this.warnSource = warnSource;
     }
 
-    @Basic
     @Column(name = "create_time", nullable = true)
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Temporal(TemporalType.TIMESTAMP)
     public Date getCreateTime() {
         return createTime;
     }
@@ -197,14 +216,20 @@ public class SmHospitalLog implements Serializable {
         this.ruleId = ruleId;
     }
 
+    @Basic
+    @Column(name = "rule_condition", nullable = true, length = 255)
+    public String getRuleCondition() {
+        return ruleCondition;
+    }
+
+    public void setRuleCondition(String ruleCondition) {
+        this.ruleCondition = ruleCondition;
+    }
+
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         SmHospitalLog that = (SmHospitalLog) o;
         return id == that.id &&
                 Objects.equals(patientId, that.patientId) &&
@@ -222,34 +247,13 @@ public class SmHospitalLog implements Serializable {
                 Objects.equals(hintContent, that.hintContent) &&
                 Objects.equals(ruleSource, that.ruleSource) &&
                 Objects.equals(signContent, that.signContent) &&
-                Objects.equals(ruleId, that.ruleId);
+                Objects.equals(ruleId, that.ruleId) &&
+                Objects.equals(ruleCondition, that.ruleCondition);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent, ruleId);
-    }
-
-    @Override
-    public String toString() {
-        return "SmHospitalLog{" +
-                "id=" + id +
-                ", patientId='" + patientId + '\'' +
-                ", visitId='" + visitId + '\'' +
-                ", doctorName='" + doctorName + '\'' +
-                ", doctorId='" + doctorId + '\'' +
-                ", deptCode='" + deptCode + '\'' +
-                ", diagnosisName='" + diagnosisName + '\'' +
-                ", alarmLevel='" + alarmLevel + '\'' +
-                ", classification='" + classification + '\'' +
-                ", identification='" + identification + '\'' +
-                ", warnSource='" + warnSource + '\'' +
-                ", createTime=" + createTime +
-                ", hintContent='" + hintContent + '\'' +
-                ", ruleSource='" + ruleSource + '\'' +
-                ", signContent='" + signContent + '\'' +
-                ", ruleId='" + ruleId + '\'' +
-                '}';
+        return Objects.hash(id, patientId, visitId, doctorName, doctorId, deptCode, diagnosisName, sicknessGrade, alarmLevel, classification, identification, warnSource, createTime, hintContent, ruleSource, signContent, ruleId, ruleCondition);
     }
 }

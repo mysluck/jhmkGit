@@ -242,8 +242,8 @@ public class RuleService {
 
     public String ruleMatchGetResp(ReciveRule fill) {
         //todo 获取疾病同义词，用于跑医院数据到数据库
-        ReciveRule sameZhenDuanList = getSameZhenDuanList(fill);
-        Object o = JSONObject.parse(JSONObject.toJSONString(sameZhenDuanList));
+//        ReciveRule sameZhenDuanList = getSameZhenDuanList(fill);
+        Object o = JSONObject.parse(JSONObject.toJSONString(fill));
         String data = "";
         try {
             data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, o, String.class);
@@ -277,119 +277,142 @@ public class RuleService {
         List<SmShowLog> datalist = new ArrayList<>();
         String doctor_id = data.getDoctor_id();
         String patient_id = data.getPatient_id();
-        Map<String, Object> parse = (Map) JSON.parse(fromData);
-        Object result = parse.get("result");
-        if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
+        String visit_id = data.getVisit_id();
+        if (StringUtils.isNotBlank(patient_id) && StringUtils.isNotBlank(doctor_id)) {
 
-            JSONArray array = (JSONArray) result;
-            Iterator<Object> iterator = array.iterator();
-            while (iterator.hasNext()) {
-                JSONObject jsonObject = (JSONObject) iterator.next();
-                if (!"诊断预警".equals(jsonObject.getString("classification"))) {
-                    continue;
-                }
-                String id = jsonObject.getString("_id");
-                SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleId(doctor_id, patient_id, id);
-                if (log != null) {
-                    continue;
-                }
-                if (jsonObject.keySet().contains("diseaseMessageMap")) {
-                    Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
-                    if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
-                        JSONArray diseaseMessageArray = (JSONArray) diseaseMessageMap;
-                        Iterator<Object> iterator1 = diseaseMessageArray.iterator();
-                        SmShowLog hintMesRule = new SmShowLog();
-                        while (iterator1.hasNext()) {
-                            JSONObject next = (JSONObject) iterator1.next();
-                            String diagnosis_name = "";
-                            String diagnosis_num = "";
-                            String sex_name = "";
-                            String order_item_name = "";
-                            //入院记录的检验子项目 和值
-                            String zylab_sub_item_name = "";
-                            String zylab_result_value = "";
-                            //报告的子项目和值
-                            String bglab_sub_item_name = "";
-                            String bglab_result_value = "";
-                            Set<String> keyNames = next.keySet();
-                            for (String names : keyNames) {
-                                if (names.contains("diagnosis_name")) {
-                                    diagnosis_name = names;
-                                } else if (names.contains("diagnosis_num")) {
-                                    diagnosis_num = names;
-                                } else if (names.contains("sex_name")) {
-                                    sex_name = names;
-                                } else if (names.contains("order_item_name")) {
-                                    order_item_name = names;
-                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
-                                    zylab_sub_item_name = names;
-                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
-                                    zylab_result_value = names;
-                                } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
-                                    bglab_sub_item_name = names;
-                                } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
-                                    bglab_result_value = names;
+            Map<String, Object> parse = (Map) JSON.parse(fromData);
+            Object result = parse.get("result");
+            if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
+
+                JSONArray array = (JSONArray) result;
+                Iterator<Object> iterator = array.iterator();
+                while (iterator.hasNext()) {
+                    JSONObject jsonObject = (JSONObject) iterator.next();
+                    String classification = jsonObject.getString("classification");
+                    if (!("诊断预警".equals(classification) || "合理用药".equals(classification) || "药品预警".equals(classification))) {
+                        continue;
+                    }
+                    String id = jsonObject.getString("_id");
+                    SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctor_id, patient_id, id,visit_id);
+                    if (log != null) {
+                        continue;
+                    }
+                    if (jsonObject.keySet().contains("diseaseMessageMap")) {
+                        Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
+                        if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
+                            JSONArray diseaseMessageArray = (JSONArray) diseaseMessageMap;
+                            Iterator<Object> iterator1 = diseaseMessageArray.iterator();
+                            SmShowLog hintMesRule = new SmShowLog();
+                            Set<String> orderItemNames = new HashSet<>();
+                            while (iterator1.hasNext()) {
+                                JSONObject next = (JSONObject) iterator1.next();
+                                String diagnosis_name = "";
+                                String diagnosis_num = "";
+                                String sex_name = "";
+                                //过敏药物
+                                String drug_allergy_name = "";
+                                //医嘱
+                                String order_item_name = "";
+                                //入院记录的检验子项目 和值
+                                String zylab_sub_item_name = "";
+                                String zylab_result_value = "";
+                                //报告的子项目和值
+                                String bglab_sub_item_name = "";
+                                String bglab_result_value = "";
+                                Set<String> keyNames = next.keySet();
+                                for (String names : keyNames) {
+                                    if (names.contains("diagnosis_name")) {
+                                        diagnosis_name = names;
+                                    } else if (names.contains("diagnosis_num")) {
+                                        diagnosis_num = names;
+                                    } else if (names.contains("sex_name")) {
+                                        sex_name = names;
+                                    } else if (names.contains("order_item_name")) {
+                                        order_item_name = names;
+                                    } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
+                                        zylab_sub_item_name = names;
+                                    } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
+                                        zylab_result_value = names;
+                                    } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
+                                        bglab_sub_item_name = names;
+                                    } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
+                                        bglab_result_value = names;
+                                    } else if (names.contains("drug_allergy_name")) {
+                                        drug_allergy_name = names;
+                                    }
+
+                                    //盘段医嘱
+                                    if (StringUtils.isNotBlank(next.getString(order_item_name))) {
+                                        orderItemNames.add(next.getString(order_item_name));
+                                    }
                                 }
-                            }
-                            //判断主诊断或其他诊断
-                            if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
-                                if (StringUtils.isNotBlank(next.getString(diagnosis_num)) && "1".equals(next.getString(diagnosis_num))) {
-                                    hintMesRule.setMainIllName(next.getString(diagnosis_name));
-                                } else {
-                                    hintMesRule.setOtherIllName(next.getString(diagnosis_name));
+                                //判断主诊断或其他诊断
+                                if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
+                                    if (StringUtils.isNotBlank(next.getString(diagnosis_num)) && "1".equals(next.getString(diagnosis_num))) {
+                                        hintMesRule.setMainIllName(next.getString(diagnosis_name));
+                                    } else {
+                                        hintMesRule.setOtherIllName(next.getString(diagnosis_name));
+                                    }
                                 }
+                                //判断性别
+                                if (StringUtils.isNotBlank(next.getString(sex_name))) {
+                                    hintMesRule.setSex(next.getString(sex_name));
+                                }
+                                //过敏药物
+                                if (StringUtils.isNotBlank(next.getString(drug_allergy_name))) {
+                                    hintMesRule.setDrugAllergyName(next.getString(drug_allergy_name));
+                                }
+                                Map<String, String> otherMap = new HashMap<>();
+
+                                //判断入院记录检查细项和值
+                                String baogaoKeyName = "";
+                                String baogaoKeyValue = "";
+                                String ruyuanKeyName = "";
+                                String ruyuanKeyValue = "";
+                                if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
+                                    baogaoKeyName = next.getString(zylab_sub_item_name);
+                                }
+                                if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
+                                    baogaoKeyValue = next.getString(zylab_result_value);
+                                }
+                                //判断检验检查细项和值
+                                if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
+                                    ruyuanKeyName = next.getString(bglab_sub_item_name);
+                                }
+                                if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
+                                    ruyuanKeyValue = next.getString(bglab_result_value);
+                                }
+                                if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
+                                    otherMap.put(baogaoKeyName, baogaoKeyValue);
+                                }
+                                if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
+                                    otherMap.put(ruyuanKeyName, ruyuanKeyValue);
+                                }
+                                if (otherMap.size() > 0) {
+                                    hintMesRule.setOtherMap(JSONObject.toJSONString(otherMap));
+                                }
+
+                                hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+                                //新添加规则默认0
+                                hintMesRule.setDoctorId(doctor_id);
+                                hintMesRule.setPatientId(patient_id);
+                                hintMesRule.setVisitId(visit_id);
+                                hintMesRule.setRuleId(id);
+                                hintMesRule.setRuleStatus(0);
+                                //用于区分规则匹配添加和诊疗提醒（cdss）添加
+                                hintMesRule.setType("rulematch");
                             }
-                            Map<String, String> otherMap = new HashMap<>();
-                            //判断性别
-                            if (StringUtils.isNotBlank(next.getString(sex_name))) {
-                                hintMesRule.setSex(next.getString(sex_name));
+                            if (orderItemNames.size() > 0) {
+                                hintMesRule.setOrderItemNames(JSONObject.toJSONString(orderItemNames));
                             }
-                            //盘段医嘱
-                            if (StringUtils.isNotBlank(next.getString(order_item_name))) {
-//                                hintMesRule.setYizhu(next.getString(order_item_name));
-                            }
-                            //判断入院记录检查细项和值
-                            String baogaoKeyName = "";
-                            String baogaoKeyValue = "";
-                            String ruyuanKeyName = "";
-                            String ruyuanKeyValue = "";
-                            if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
-                                baogaoKeyName = next.getString(zylab_sub_item_name);
-                            }
-                            if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
-                                baogaoKeyValue = next.getString(zylab_result_value);
-                            }
-                            //判断检验检查细项和值
-                            if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                ruyuanKeyName = next.getString(bglab_sub_item_name);
-                            }
-                            if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
-                                ruyuanKeyValue = next.getString(bglab_result_value);
-                            }
-                            if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
-                                otherMap.put(baogaoKeyName, baogaoKeyValue);
-                            }
-                            if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
-                                otherMap.put(ruyuanKeyName, ruyuanKeyValue);
-                            }
-                            if (otherMap.size() > 0) {
-                                hintMesRule.setOtherMap(JSONObject.toJSONString(otherMap));
-                            }
-                            hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-                            //新添加规则默认0
-                            hintMesRule.setDoctorId(doctor_id);
-                            hintMesRule.setPatientId(patient_id);
-                            hintMesRule.setRuleId(id);
-                            hintMesRule.setRuleStatus(0);
-                            //用于区分规则匹配添加和诊疗提醒（cdss）添加
-                            hintMesRule.setType("rulematch");
+                            datalist.add(hintMesRule);
                         }
-                        datalist.add(hintMesRule);
                     }
                 }
             }
+            smShowLogRepService.save(datalist);
         }
-        smShowLogRepService.save(datalist);
+
     }
 
     //如果匹配到规则，解析规则匹配的返回数据入库 hostpital表
@@ -397,11 +420,11 @@ public class RuleService {
         JSONObject jsonObject = JSONObject.parseObject(resultData);
         if (!symbol.equals(jsonObject.getString(resultSym))) {
             Object result = jsonObject.get(resultSym);
+            SmHospitalLog smHospitalLog = hosptailLogService.addLog(mes);
             if (ObjectUtils.anyNotNull(result)) {
                 //todo 预警等级需要返回
                 JSONArray ja = (JSONArray) result;
                 if (ja.size() > 0) {
-                    SmHospitalLog smHospitalLog = hosptailLogService.addLog(mes);
                     Iterator<Object> iterator = ja.iterator();
                     while (iterator.hasNext()) {
                         Object next = iterator.next();
@@ -415,9 +438,14 @@ public class RuleService {
                         smHospitalLog.setRuleSource(datamap.get("ruleSource"));
                         smHospitalLog.setClassification(datamap.get("classification"));
                         smHospitalLog.setIdentification(datamap.get("identification"));
+                        String ruleCondition = datamap.get("ruleCondition");
+                        if (StringUtils.isNotBlank(ruleCondition)) {
+                            String condition = disposeRuleCondition(ruleCondition);
+                            smHospitalLog.setRuleCondition(condition);
+                        }
+                        smHospitalLog.setCreateTime(new Date());
                         //获取触发的规则id
                         smHospitalLog.setRuleId(datamap.get("_id"));
-
                         SmHospitalLog save = smHospitalLogRepService.save(smHospitalLog);
                         if (save == null) {
                             logger.info("入日志库失败:" + save.toString());
@@ -773,49 +801,57 @@ public class RuleService {
     public void getTipList2ShowLog(ReciveRule fill, String map) throws ExecutionException, InterruptedException {
         String doctor_id = fill.getDoctor_id();
         String patient_id = fill.getPatient_id();
+        String visit_id = fill.getVisit_id();
+        if (StringUtils.isNotBlank(doctor_id) && StringUtils.isNotBlank(patient_id)) {
+            Object o = JSONObject.parse(map);
+            String result = "";
+            try {
 
-        Object o = JSONObject.parse(map);
-        String result = "";
-        try {
+                result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getTipList, o, String.class);
+                if (!symbol.equals(result)) {
+                    JSONArray array = JSONArray.parseArray(result);
+                    Iterator<Object> iterator = array.iterator();
+                    while (iterator.hasNext()) {
+                        SmShowLog smShowLog = new SmShowLog();
+                        JSONObject next = (JSONObject) iterator.next();
+                        String itemName = next.getString("itemName");
+                        String type = next.getString("type");
+                        String stat = next.getString("stat");
 
-            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getTipList, o, String.class);
-            if (!symbol.equals(result)) {
-                JSONArray array = JSONArray.parseArray(result);
-                Iterator<Object> iterator = array.iterator();
-                while (iterator.hasNext()) {
-                    SmShowLog smShowLog = new SmShowLog();
-                    JSONObject next = (JSONObject) iterator.next();
-                    String itemName = next.getString("itemName");
-                    String type = next.getString("type");
-                    String stat = next.getString("stat");
-
-                    SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStat(doctor_id, patient_id, itemName, type, stat);
-                    if (isExist != null) {
-                        continue;
-                    }
-                    smShowLog.setItemName(itemName);
-                    smShowLog.setType(type);
-                    smShowLog.setStat(stat);
-                    String data = next.getString("data");
+                        SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(doctor_id, patient_id, itemName, type, stat,visit_id);
+                        if (isExist != null) {
+                            continue;
+                        }
+                        smShowLog.setItemName(itemName);
+                        smShowLog.setType(type);
+                        smShowLog.setStat(stat);
+                        String data = next.getString("data");
 //                    smShowLog.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-                    smShowLog.setDate(data);
-                    String significance = next.getString("significance");
-                    if ("{}".equals(significance.trim()) && StringUtils.isNotBlank(itemName)) {
+                        smShowLog.setDate(data);
+                        String significance = next.getString("significance");
 
-                        smShowLog.setSignificance(significance);
-                        String value = next.getString("value");
-                        smShowLog.setValue(value);
-                        smShowLog.setRuleStatus(0);
-                        smShowLog.setPatientId(patient_id);
-                        smShowLog.setDoctorId(doctor_id);
-                        smShowLogRepService.save(smShowLog);
+
+                        if (StringUtils.isNotBlank(itemName) || StringUtils.isNotBlank(significance) || !"{}".equals(significance.trim())) {
+
+                            smShowLog.setSignificance(significance);
+                            String value = next.getString("value");
+                            smShowLog.setValue(value);
+                            smShowLog.setRuleStatus(0);
+                            smShowLog.setPatientId(patient_id);
+                            smShowLog.setDoctorId(doctor_id);
+                            smShowLog.setVisitId(visit_id);
+                            smShowLog.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+                            smShowLogRepService.save(smShowLog);
+                        }
                     }
                 }
-            }
-        } catch (HttpServerErrorException e) {
-            logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
-        }
 
+            } catch (HttpServerErrorException e) {
+                logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
+            }
+        }else {
+            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}"+fill+map);
+        }
 
     }
 
