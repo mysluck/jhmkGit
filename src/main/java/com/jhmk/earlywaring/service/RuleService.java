@@ -289,11 +289,13 @@ public class RuleService {
                 while (iterator.hasNext()) {
                     JSONObject jsonObject = (JSONObject) iterator.next();
                     String classification = jsonObject.getString("classification");
+                    String hintContent = jsonObject.getString("hintContent");
+
                     if (!("诊断预警".equals(classification) || "合理用药".equals(classification) || "药品预警".equals(classification))) {
                         continue;
                     }
                     String id = jsonObject.getString("_id");
-                    SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctor_id, patient_id, id,visit_id);
+                    SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctor_id, patient_id, id, visit_id);
                     if (log != null) {
                         continue;
                     }
@@ -398,6 +400,8 @@ public class RuleService {
                                 hintMesRule.setPatientId(patient_id);
                                 hintMesRule.setVisitId(visit_id);
                                 hintMesRule.setRuleId(id);
+                                hintMesRule.setClassification(classification);
+                                hintMesRule.setHintContent(hintContent);
                                 hintMesRule.setRuleStatus(0);
                                 //用于区分规则匹配添加和诊疗提醒（cdss）添加
                                 hintMesRule.setType("rulematch");
@@ -414,6 +418,54 @@ public class RuleService {
         }
 
     }
+
+    /**
+     * 添加触发规则到showlog
+     *
+     * @param data
+     * @param fromData
+     */
+//    public void add2ShowLog(ReciveRule data, String fromData) {
+//        List<SmShowLog> datalist = new ArrayList<>();
+//        String doctor_id = data.getDoctor_id();
+//        String patient_id = data.getPatient_id();
+//        String visit_id = data.getVisit_id();
+//        if (StringUtils.isNotBlank(patient_id) && StringUtils.isNotBlank(doctor_id)) {
+//
+//            Map<String, Object> parse = (Map) JSON.parse(fromData);
+//            Object result = parse.get("result");
+//            if (Objects.nonNull(result) && !symbol.equals(result)) {
+//
+//                JSONArray array = (JSONArray) result;
+//                Iterator<Object> iterator = array.iterator();
+//                while (iterator.hasNext()) {
+//                    SmShowLog hintMesRule = new SmShowLog();
+//                    JSONObject jsonObject = (JSONObject) iterator.next();
+//                    String classification = jsonObject.getString("classification");
+//                    String hintContent = jsonObject.getString("hintContent");
+//                    String id = jsonObject.getString("_id");
+//                    SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctor_id, patient_id, id, visit_id);
+//                    if (log != null) {
+//                        continue;
+//                    }
+//                    hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+//                    //新添加规则默认0
+//                    hintMesRule.setDoctorId(doctor_id);
+//                    hintMesRule.setPatientId(patient_id);
+//                    hintMesRule.setVisitId(visit_id);
+//                    hintMesRule.setRuleId(id);
+//                    hintMesRule.setClassification(classification);
+//                    hintMesRule.setHintContent(hintContent);
+//                    hintMesRule.setRuleStatus(0);
+//                    //用于区分规则匹配添加和诊疗提醒（cdss）添加
+//                    hintMesRule.setType("rulematch");
+//                    datalist.add(hintMesRule);
+//                }
+//                smShowLogRepService.save(datalist);
+//            }
+//        }
+//
+//    }
 
     //如果匹配到规则，解析规则匹配的返回数据入库 hostpital表
     public void add2LogTable(String resultData, String mes) {
@@ -798,7 +850,8 @@ public class RuleService {
         return list;
     }
 
-    public void getTipList2ShowLog(ReciveRule fill, String map) throws ExecutionException, InterruptedException {
+    public void getTipList2ShowLog(ReciveRule fill, String map) throws
+            ExecutionException, InterruptedException {
         String doctor_id = fill.getDoctor_id();
         String patient_id = fill.getPatient_id();
         String visit_id = fill.getVisit_id();
@@ -818,7 +871,7 @@ public class RuleService {
                         String type = next.getString("type");
                         String stat = next.getString("stat");
 
-                        SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(doctor_id, patient_id, itemName, type, stat,visit_id);
+                        SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(doctor_id, patient_id, itemName, type, stat, visit_id);
                         if (isExist != null) {
                             continue;
                         }
@@ -849,8 +902,8 @@ public class RuleService {
             } catch (HttpServerErrorException e) {
                 logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
             }
-        }else {
-            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}"+fill+map);
+        } else {
+            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}" + fill + map);
         }
 
     }

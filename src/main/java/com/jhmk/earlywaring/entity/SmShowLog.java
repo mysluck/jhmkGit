@@ -28,6 +28,8 @@ public class SmShowLog {
     private String value;
     private String orderItemNames;
     private String drugAllergyName;
+    private String hintContent;
+    private String classification;
 
     @Id
     @Column(name = "id", nullable = false)
@@ -41,6 +43,25 @@ public class SmShowLog {
         this.id = id;
     }
 
+    @Basic
+    @Column(name = "hint_content", nullable = true, length = 255)
+    public String getHintContent() {
+        return hintContent;
+    }
+
+    public void setHintContent(String hintContent) {
+        this.hintContent = hintContent;
+    }
+
+    @Basic
+    @Column(name = "classification", nullable = true, length = 8)
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
     @Basic
     @Column(name = "doctor_id", nullable = true, length = 20)
     public String getDoctorId() {

@@ -15,10 +15,6 @@ public class BaseConstants {
     public static final String TOKEN = "token";
 
 
-    public static final String DEFAULT_ORG = "0001";//默认业务机构
-    public static final String REMIT_SELF_BANK = "0";//bank_type放款本行二类户
-    public static final String REMIT_OTHER_BANK = "1";//bank_type放款他行借记卡
-
     //参数状态：1-启用 0- 未启用
     public static final String PARAMTER_STATUS_1 = "1";//参数启用
     public static final String PARAMTER_STATUS_0 = "0";//参数未启用
@@ -26,12 +22,6 @@ public class BaseConstants {
 
     public static final String ALARM_CODE1 = "住院";//住院预警
     public static final String ALARM_CODE2 = "门诊";//住院预警
-
-
-    public static final String ALARMSTSTUS1 = "1";//触发预警
-    public static final String ALARMSTSTUS0 = "0";//没触发预警
-
-    public static final String TYPECLASS = "typeClass";
 
 
     public static final String OK = "200";// 状态码 200 成功
@@ -89,5 +79,29 @@ public class BaseConstants {
     public static final String getDiseaseChildrenList = "/med/cdss/getDiseaseChildrenList.json";
     //获取疾病父节点
     public static final String getParentList = "/med/cdss/getParentList.json";
+
+
+    /**
+     * OID账号，用于数据中心权限通行证
+     */
+    public static final String OID = "1.2.156.112636.1.2.46";
+    /**
+     * 数据中心webservice 服务接口
+     */
+    private static final String JHHDRWS001 = "JHHDRWS001";//患者信息
+    private static final String JHHDRWS005 = "JHHDRWS005";//检查数据
+    private static final String JHHDRWS006A = "JHHDRWS006A";//检验数据（主表）
+    private static final String JHHDRWS006B = "JHHDRWS006B";//检验结果明细
+    private static final String JHHDRWS007A = "JHHDRWS007A";//门诊就诊
+    private static final String JHHDRWS007C = "JHHDRWS007C";//门诊诊断
+    private static final String JHHDRWS012A = "JHHDRWS012A";//住院医嘱
+    private static final String JHHDRWS017 = "JHHDRWS017";//体征测量
+    private static final String JHHDRWS020C = "JHHDRWS020C";//首页诊断
+    private static final String JHHDRWS020A = "JHHDRWS020A";//病案首页
+    private static final String JHHDRWS021D = "JHHDRWS021D";//病历诊断
+    private static final String JHHDRWS021A = "JHHDRWS021A";//病历文书
+    private static final String JHHDRWS021B = "JHHDRWS021B";//病历章节（反结构化）
+    private static final String JHHDRWS029 = "JHHDRWS029";//规整后数据，包括主诉、现病史、既往史、过敏史等数据
+    private static final String JHHDRWS031 = "JHHDRWS031";//重症ICU生命体征
 
 }
