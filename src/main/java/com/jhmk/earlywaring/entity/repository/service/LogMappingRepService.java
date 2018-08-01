@@ -61,6 +61,14 @@ public class LogMappingRepService extends BaseRepService<LogMapping, Integer> {
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     public Page<LogMapping> findAll(Pageable pageable) {
+
         return repository.findAll(pageable);
     }
+
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<LogMapping> findAllByLogId(int logId) {
+        return repository.findAllByLogId(logId);
+
+    }
+
 }

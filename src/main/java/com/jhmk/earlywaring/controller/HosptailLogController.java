@@ -9,6 +9,7 @@ import com.jhmk.earlywaring.entity.HospitalLog;
 import com.jhmk.earlywaring.entity.LogBean;
 import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.repository.service.*;
+import com.jhmk.earlywaring.entity.rule.LogMapping;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
@@ -54,6 +55,8 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
     SmUsersRepService smUsersRepService;
     @Autowired
     DeptRelRepService deptRelRepService;
+    @Autowired
+    LogMappingRepService logMappingRepService;
     @Autowired
     UrlConfig urlConfig;
 
@@ -269,6 +272,23 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
             pageNo = Integer.valueOf(params.get("pageNo"));
         }
         List<SmHospitalLog> dataByCondition = hosptailLogService.getDataByConditionBySort(yearFirst, yearLast, condMap, pageNo, null);
+        List<SmHospitalLog>beanList =new LinkedList<>();
+        for (SmHospitalLog log:dataByCondition) {
+            List<LogMapping> allByLogId = logMappingRepService.findAllByLogId(log.getId());
+            String ruleCondition = log.getRuleCondition();
+            for (LogMapping mapping:allByLogId){
+                if (ruleCondition.contains(mapping.getLogResult())){
+                    String logTime = mapping.getLogTime();
+                    String value=mapping.getLogResult();
+                    if (StringUtils.isNotBlank(logTime)){
+                        value=mapping.getLogResult()+"("+logTime+")";
+                    }
+                    ruleCondition = ruleCondition.replaceAll(mapping.getLogResult(), value);
+                }
+            }
+            log.setRuleCondition(ruleCondition);
+            beanList.add(log);
+        }
         atsp.setResponseCode(ResponseCode.OK);
         atsp.setData(dataByCondition);
         wirte(response, atsp);
