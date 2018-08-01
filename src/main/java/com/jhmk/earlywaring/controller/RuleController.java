@@ -385,30 +385,29 @@ public class RuleController extends BaseEntityController<Object> {
     @PostMapping("/ruleMatch")
     @ResponseBody
     public void ruleMatch(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-        Map<String, String> paramMap = (Map) JSON.parse(map);
-        //解析规则 一诉五史 检验报告等
-        String s = ruleService.anaRule(paramMap);
-        String s2 = ruleService.stringTransform(s);
-        Object parse1 = JSONObject.parse(s2);
-//        System.out.println(parse1.toString());
-        String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, s2, String.class);
-         result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, parse1, String.class);
-
-        JSONObject parse = JSONObject.parseObject(s2);
-        Rule fill = Rule.fill(parse);
+        Map<String,String> parse = (Map) JSONObject.parse(map);
+        String s = ruleService.anaRule(parse);
+        //解析一诉五史
+        JSONObject jsonObject = JSONObject.parseObject(s);
+        Rule rule = Rule.fill(jsonObject);
+        //获取 拼接检验检查报告
+//        rule = ruleService.getbaogao(rule);
         String data = "";
         try {
-
-            data = ruleService.ruleMatchGetResp(fill);
+            //规则匹配
+            data = ruleService.ruleMatchGetResp(rule);
             wirte(response, data);
         } catch (Exception e) {
             logger.info("规则匹配失败:{}" + e.getMessage());
         }
         if (StringUtils.isNotBlank(data)) {
-            ruleService.add2LogTable(data, fill);
-            ruleService.add2ShowLog(fill, data);
+            ruleService.add2LogTable(data, rule);
+            ruleService.add2ShowLog(rule, data);
         }
-        ruleService.getTipList2ShowLog(fill, map);
+        ruleService.getTipList2ShowLog(rule, map);
+        //一诉五史信息入库
+        ruleService.saveRule2Database(rule);
+
     }
 
 
