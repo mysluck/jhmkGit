@@ -13,7 +13,7 @@ import java.util.Objects;
  */
 
 @Entity
-@Table(name = "sm_hospital_log", schema = "jhmk_waring", catalog = "")
+@Table(name = "sm_hospital_log", schema = "jhmk_waring")
 public class SmHospitalLog {
     private int id;
     private String patientId;

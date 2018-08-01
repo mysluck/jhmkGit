@@ -8,7 +8,7 @@ import java.sql.Date;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_show_log", schema = "jhmk_waring", catalog = "")
+@Table(name = "sm_show_log", schema = "jhmk_waring")
 public class SmShowLog {
     private int id;
     private String doctorId;

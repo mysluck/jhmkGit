@@ -1,8 +1,11 @@
 package com.jhmk.earlywaring.entity.rule;
 
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.util.Objects;
 
 public class Zhenduan {
+
 
     private String diagnosis_name;
     private String diagnosis_time;

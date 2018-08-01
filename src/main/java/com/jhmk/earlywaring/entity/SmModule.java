@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Table(name = "sm_module", schema = "jhmk_waring", catalog = "")
+@Table(name = "sm_module", schema = "jhmk_waring")
 public class SmModule {
     private String modCode;
     private String modName;

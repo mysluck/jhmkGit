@@ -2,7 +2,6 @@ package com.jhmk.earlywaring.entity.rule;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.MapUtil;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
@@ -22,6 +21,10 @@ public class ReciveRule {
     private String patient_id;
     private String visit_id;
     private String pageSource;
+    //入院时间
+    private String admission_time;
+    //出院时间
+    private String discharge_time;
 
     private Map<String, String> bingchengjilu;
     private Map<String, String> binganshouye;
@@ -153,9 +156,39 @@ public class ReciveRule {
         this.yizhu = yizhu;
     }
 
+    public RestTemplate getRestTemplate() {
+        return restTemplate;
+    }
+
+    public void setRestTemplate(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
+
+    public String getAdmission_time() {
+        return admission_time;
+    }
+
+    public void setAdmission_time(String admission_time) {
+        this.admission_time = admission_time;
+    }
+
+    public String getDischarge_time() {
+        return discharge_time;
+    }
+
+    public void setDischarge_time(String discharge_time) {
+        this.discharge_time = discharge_time;
+    }
+
     public static ReciveRule fill(JSONObject jo) {
         ReciveRule o = new ReciveRule();
 
+        if (jo.containsKey("discharge_time")) {
+            o.setDischarge_time(jo.getString("discharge_time"));
+        }
+        if (jo.containsKey("admission_time")) {
+            o.setAdmission_time(jo.getString("admission_time"));
+        }
         if (jo.containsKey("doctor_id")) {
             o.setDoctor_id(jo.getString("doctor_id"));
         }
@@ -190,13 +223,13 @@ public class ReciveRule {
         }
         if (jo.containsKey("jianyanbaogao")) {
             List<Map<String, String>> jianyanbaogao = (List<Map<String, String>>) jo.get("jianyanbaogao");
-            List<Map<String, String>> maps = deleteRepetitionField(jianyanbaogao, "lab_sub_item_name", "report_time");
-            o.setJianyanbaogao(maps);
+//            List<Map<String, String>> maps = deleteRepetitionField(jianyanbaogao, "lab_sub_item_name", "report_time");
+            o.setJianyanbaogao(jianyanbaogao);
         }
         if (jo.containsKey("jianchabaogao")) {
             List<Map<String, String>> jianchabaogao = (List<Map<String, String>>) jo.get("jianchabaogao");
-            List<Map<String, String>> maps = deleteRepetitionField(jianchabaogao, "exam_item_name", "exam_time");
-            o.setJianchabaogao(maps);
+//            List<Map<String, String>> maps = deleteRepetitionField(jianchabaogao, "exam_item_name", "exam_time");
+            o.setJianchabaogao(jianchabaogao);
         }
         if (jo.containsKey("binglizhenduan")) {
             List<Zhenduan> beanList = new ArrayList<>();
@@ -292,24 +325,6 @@ public class ReciveRule {
         return endList;
     }
 
-    /**
-     * @param jo
-     * @param field1 一级字段名
-     * @param field2 2级字段名
-     * @param value  修改的值
-     */
-    public static List<Map<String, String>> updataFieldValue(JSONObject jo, String field1, String field2, String
-            value) {
-        List<Map<String, String>> resultMap = new ArrayList<>();
-        List<Map<String, String>> shouyezhenduan = (List<Map<String, String>>) jo.get(field1);
-        Iterator<Map<String, String>> iterator = shouyezhenduan.iterator();
-        while (iterator.hasNext()) {
-            Map<String, String> next = iterator.next();
-            next.put(field2, value);
-            resultMap.add(next);
-        }
-        return resultMap;
-    }
 
     public static List<ReciveRule> fillList(JSONArray ja) {
         if (ja == null || ja.size() == 0) {

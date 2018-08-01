@@ -13,6 +13,10 @@ import com.jhmk.earlywaring.entity.repository.SmHospitalLogRepository;
 import com.jhmk.earlywaring.entity.repository.service.SmDeptsRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmHospitalLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
+import com.jhmk.earlywaring.entity.rule.Binglizhenduan;
+import com.jhmk.earlywaring.entity.rule.Rule;
+import com.jhmk.earlywaring.entity.rule.Shouyezhenduan;
+import com.jhmk.earlywaring.entity.rule.Zhenduan;
 import com.jhmk.earlywaring.model.WebPage;
 import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.DateFormatUtil;
@@ -430,69 +434,7 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
         };
     }
 
-    //    public SmHospitalLog addLog(String map) {
-//        SmHospitalLog SmHospitalLog = new SmHospitalLog();
-//        Map<String, Object> jsonObject = (Map) JSON.parseObject(map);
-//
-//        Object doctor_id = jsonObject.get("doctor_id");
-//        SmHospitalLog.setDoctorId(ObjectUtils.flagObj(doctor_id));
-//        Object doctorName = jsonObject.get("doctor_name");
-//        SmHospitalLog.setDoctorName(ObjectUtils.flagObj(doctorName));
-//
-//        Object deptName = jsonObject.get("dept_code");
-//        SmHospitalLog.setDeptCode(ObjectUtils.flagObj(deptName));
-//        //病人id
-//        Object patient_id = jsonObject.get("patient_id");
-//        SmHospitalLog.setPatientId(ObjectUtils.flagObj(patient_id));
-//        Object visit_id = jsonObject.get("visit_id");
-//        SmHospitalLog.setVisitId(ObjectUtils.flagObj(visit_id));
-//        Object warnSource = jsonObject.get("warnSource");
-//        SmHospitalLog.setWarnSource(ObjectUtils.flagObj(warnSource));
-//        Object shouyezhenduan = jsonObject.get("shouyezhenduan");
-//        //主诊断
-//        String affirmSickness = "";
-//        //判断首页诊断如果不为空，确认主疾病为首页诊断
-//        if (shouyezhenduan != null) {
-//            JSONArray objects = JSONArray.parseArray(shouyezhenduan.toString());
-//            Iterator<Object> iterator = objects.iterator();
-//            while (iterator.hasNext()) {
-//                {
-//                    Map<String, String> next = (Map) iterator.next();
-//                    if (next.get("diagnosis_num").equals("1")) {
-//                        affirmSickness = next.get("diagnosis_name").trim();
-//                    }
-//
-//                }
-//            }
-//            if (!"".equals(affirmSickness)) {
-//                SmHospitalLog.setDiagnosisName(affirmSickness);
-//            }
-//        } else {
-//            Object binglizhenduan = jsonObject.get("binglizhenduan");
-//            if (binglizhenduan != null) {
-//                JSONArray objects = JSONArray.parseArray(binglizhenduan.toString());
-//                Iterator<Object> iterator = objects.iterator();
-//                while (iterator.hasNext()) {
-//                    {
-//                        Map<String, String> next = (Map) iterator.next();
-//                        if (next.get("diagnosis_num").equals("1")) {
-//                            affirmSickness = next.get("diagnosis_name").trim();
-//
-//                            SmHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
-//                        }
-//
-//                    }
-//                }
-//            }
-//            if ("".equals(affirmSickness) || affirmSickness == null) {
-//                logger.debug("确认主疾病存在问题！" + map.toString());
-//            }
-//            SmHospitalLog.setDiagnosisName(affirmSickness);
-//        }
-////        SmHospitalLog.setCreateTime(new Date());
-//        return SmHospitalLog;
-//
-//    }
+
     public SmHospitalLog addLog(String map) {
         SmHospitalLog smHospitalLog = new SmHospitalLog();
         Map<String, Object> jsonObject = (Map) JSON.parseObject(map);
@@ -553,6 +495,65 @@ public class HosptailLogService extends BaseRepService<SmHospitalLog, Integer> {
                         });
                         Optional.ofNullable(next.get("diagnosis_time")).ifPresent(s -> {
                             smHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.get("diagnosis_time"), DateFormatUtil.DATETIME_PATTERN_SS));
+                        });
+                    }
+
+                }
+            }
+
+        }
+        return smHospitalLog;
+
+    }
+    public SmHospitalLog addLog(Rule rule) {
+        SmHospitalLog smHospitalLog = new SmHospitalLog();
+        smHospitalLog.setDoctorId(rule.getDoctor_id());
+        smHospitalLog.setDoctorName(rule.getDoctor_name());
+        if (StringUtils.isNotBlank(rule.getDoctor_name())) {
+
+            List<SmUsers> byUserName = smUsersRepService.findByUserName(rule.getDoctor_name());
+            if (byUserName != null && byUserName.size() > 0) {
+                smHospitalLog.setDoctorId(byUserName.get(0).getUserId());
+            }
+        }
+        smHospitalLog.setDeptCode(rule.getDept_code());
+        //病人id
+        smHospitalLog.setPatientId(rule.getPatient_id());
+        smHospitalLog.setVisitId(rule.getVisit_id());
+        smHospitalLog.setWarnSource(rule.getWarnSource());
+        List<Binglizhenduan> binglizhenduan = rule.getBinglizhenduan();
+        List<Shouyezhenduan> shouyezhenduan = rule.getShouyezhenduan();
+        //主诊断
+        String affirmSickness = "";
+        //判断首页诊断如果不为空，确认主疾病为首页诊断
+        if (Objects.nonNull(binglizhenduan)) {
+            Iterator<Binglizhenduan> iterator = binglizhenduan.iterator();
+            while (iterator.hasNext()) {
+                {
+                    Binglizhenduan next = iterator.next();
+                    if ("1".equals(next.getDiagnosis_num())) {
+                        Optional.ofNullable(next.getDiagnosis_name()).ifPresent(s -> {
+                            smHospitalLog.setDiagnosisName(next.getDiagnosis_name().trim());
+                        });
+                        Optional.ofNullable(next.getDiagnosis_time()).ifPresent(s -> {
+                            smHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.getDiagnosis_time(), DateFormatUtil.DATETIME_PATTERN_SS));
+                        });
+                    }
+
+                }
+            }
+        } else {
+            Iterator<Shouyezhenduan> iterator = shouyezhenduan.iterator();
+            while (iterator.hasNext()) {
+                {
+                    Shouyezhenduan next = iterator.next();
+                    if ("1".equals(next.getDiagnosis_num())) {
+                        affirmSickness = next.getDiagnosis_name().trim();
+                        Optional.ofNullable(next.getDiagnosis_name()).ifPresent(s -> {
+                            smHospitalLog.setDiagnosisName(next.getDiagnosis_name().trim());
+                        });
+                        Optional.ofNullable(next.getDiagnosis_time()).ifPresent(s -> {
+                            smHospitalLog.setCreateTime(DateFormatUtil.parseDate(next.getDiagnosis_time(), DateFormatUtil.DATETIME_PATTERN_SS));
                         });
                     }
 

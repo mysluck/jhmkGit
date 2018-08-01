@@ -2,7 +2,6 @@ package com.jhmk.earlywaring.controller;
 
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
@@ -15,24 +14,21 @@ import com.jhmk.earlywaring.entity.repository.service.SmHospitalLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmShowLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
-import com.jhmk.earlywaring.entity.rule.BaseRule;
-import com.jhmk.earlywaring.entity.rule.ReciveRule;
+import com.jhmk.earlywaring.entity.rule.Rule;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
 import com.jhmk.earlywaring.service.RuleService;
 import com.jhmk.earlywaring.service.UserModelService;
 import com.jhmk.earlywaring.util.DateFormatUtil;
+import com.jhmk.earlywaring.webservice.AnalysisXmlService;
+import com.jhmk.earlywaring.webservice.CdrService;
 import org.apache.commons.collections.map.HashedMap;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -40,7 +36,6 @@ import javax.servlet.http.HttpServletResponse;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * 规则管理
@@ -66,7 +61,10 @@ public class RuleController extends BaseEntityController<Object> {
     UrlConfig urlConfig;
     @Autowired
     OriRuleRepService oriRuleRepService;
-
+    @Autowired
+    CdrService cdrService;
+    @Autowired
+    AnalysisXmlService analysisXmlService;
     private static final Logger logger = LoggerFactory.getLogger(RuleController.class);
 
 
@@ -376,42 +374,43 @@ public class RuleController extends BaseEntityController<Object> {
     }
 
 
+
+
     /**
-     * 6. 规则匹配
-     *
      * @param response
+     * @throws ExecutionException
+     * @throws InterruptedException
      */
-//    @PostMapping("/ruleMatch")
-//    @ResponseBody
-//    public void ruleMatch1(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-//
-////        AtResponse resp = ruleService.ruleMatch(map, "");
-//        AtResponse resp = ruleService.ruleMatch(map,"");
-//        wirte(response, resp);
-//    }
+
     @PostMapping("/ruleMatch")
     @ResponseBody
     public void ruleMatch(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
+        Map<String, String> paramMap = (Map) JSON.parse(map);
         //解析规则 一诉五史 检验报告等
-        String s = ruleService.anaRule(map);
+        String s = ruleService.anaRule(paramMap);
         String s2 = ruleService.stringTransform(s);
-        System.out.println(s2);
+        Object parse1 = JSONObject.parse(s2);
+//        System.out.println(parse1.toString());
+        String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, s2, String.class);
+         result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, parse1, String.class);
+
         JSONObject parse = JSONObject.parseObject(s2);
-        ReciveRule fill = ReciveRule.fill(parse);
+        Rule fill = Rule.fill(parse);
         String data = "";
         try {
 
             data = ruleService.ruleMatchGetResp(fill);
             wirte(response, data);
         } catch (Exception e) {
-            logger.info("规则匹配失败：" + e.getMessage());
+            logger.info("规则匹配失败:{}" + e.getMessage());
         }
         if (StringUtils.isNotBlank(data)) {
-            ruleService.add2LogTable(data, s2);
+            ruleService.add2LogTable(data, fill);
             ruleService.add2ShowLog(fill, data);
         }
         ruleService.getTipList2ShowLog(fill, map);
     }
+
 
     /**
      * 获取医生触发规则id
@@ -429,7 +428,7 @@ public class RuleController extends BaseEntityController<Object> {
         String doctor_id = jsonObject.getString("doctor_id");
         String patient_id = jsonObject.getString("patient_id");
         String visit_id = jsonObject.getString("visit_id");
-        List<SmShowLog> byDoctorIdAndPatientId = smShowLogRepService.findByDoctorIdAndPatientIdAndVisitIdOrderByDateDesc(doctor_id, patient_id,visit_id);
+        List<SmShowLog> byDoctorIdAndPatientId = smShowLogRepService.findByDoctorIdAndPatientIdAndVisitIdOrderByDateDesc(doctor_id, patient_id, visit_id);
         resp.setData(byDoctorIdAndPatientId);
         resp.setResponseCode(ResponseCode.OK);
         wirte(response, resp);
