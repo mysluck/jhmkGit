@@ -43,7 +43,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         Object sessionToken = request.getSession().getAttribute("token");
         //设置session过期时间，每次访问资源都会经过过滤器，如超过2小时时间不访问则过期
         response.setCharacterEncoding("utf-8");
-        PrintWriter writer = response.getWriter();
+//        PrintWriter writer = response.getWriter();
         AtResponse resp = new AtResponse();
 
         if (token == null) {
@@ -81,9 +81,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
             }
 
         }
-        writer.print(resp);
-        writer.flush();
-        writer.close();
+        BaseController.wirte(response,resp);
     }
 
 }

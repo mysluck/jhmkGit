@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 
 @Entity
-@Table(name = "rule_binganshouye", schema = "jhmk_waring", catalog = "")
+@Table(name = "rule_binganshouye", schema = "jhmk_waring")
 public class Binganshouye {
     private int id;
     private String patient_id;
@@ -26,6 +26,7 @@ public class Binganshouye {
 
     @Id
     @Column(name = "id", nullable = false)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     public int getId() {
         return id;
     }

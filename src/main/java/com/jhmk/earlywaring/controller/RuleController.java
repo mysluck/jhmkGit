@@ -190,43 +190,6 @@ public class RuleController extends BaseEntityController<Object> {
     }
 
     /**
-     * 分页查询
-     *
-     * @param response
-     */
-
-//    @PostMapping("/findallrule")
-//    @ResponseBody
-//    public void findallrule(HttpServletResponse response, @RequestBody(required = false) Map map) {
-//        Map<String, Object> params = new HashMap<>();
-//        String currentRoleRange = getCurrentRoleRange();
-//        Map<String, Object> foramtData = new HashMap<>();
-//        if (!"2".equals(currentRoleRange)) {
-//            String userId = getUserId();
-//            params.put("doctorId", userId);
-//            //前端控制修改权限标志
-//            foramtData.put("checkRule", "false");
-//        } else {
-//            //前台权限控制按钮 2表示可以查看所有并且修改 否则只能查看自己添加的规则
-//            foramtData.put("checkRule", "true");
-//        }
-//        if (map != null) {
-//            params.putAll(map);
-//        }
-//        Object o = JSONObject.toJSON(params);
-//        String forObject = "";
-//        try {
-//            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.findallrule, o, String.class);
-//            foramtData.putAll(ruleService.formatData(forObject));
-//        } catch (Exception e) {
-//            logger.info("查询所有以提交的规则信息失败：" + e.getMessage());
-//        } finally {
-//
-//            wirte(response, foramtData);
-//        }
-//    }
-
-    /**
      * 根据条件查询
      *
      * @param response
@@ -385,26 +348,25 @@ public class RuleController extends BaseEntityController<Object> {
     @PostMapping("/ruleMatch")
     @ResponseBody
     public void ruleMatch(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-        Map<String,String> parse = (Map) JSONObject.parse(map);
-        String s = ruleService.anaRule(parse);
-        //解析一诉五史
-        JSONObject jsonObject = JSONObject.parseObject(s);
-        Rule rule = Rule.fill(jsonObject);
-        //获取 拼接检验检查报告
-//        rule = ruleService.getbaogao(rule);
+        Map<String, String> paramMap = (Map) JSON.parse(map);
+        //解析规则 一诉五史 检验报告等
+        String s = ruleService.anaRule(paramMap);
+        String s2 = ruleService.stringTransform(s);
+        JSONObject parse = JSONObject.parseObject(s2);
+        Rule rule = Rule.fill(parse);
         String data = "";
         try {
             //规则匹配
             data = ruleService.ruleMatchGetResp(rule);
             wirte(response, data);
         } catch (Exception e) {
-            logger.info("规则匹配失败:{}" + e.getMessage());
+            logger.info("规则匹配失败:{}" , e.getMessage());
         }
         if (StringUtils.isNotBlank(data)) {
             ruleService.add2LogTable(data, rule);
             ruleService.add2ShowLog(rule, data);
         }
-        ruleService.getTipList2ShowLog(rule, map);
+//        ruleService.getTipList2ShowLog(rule, map);
         //一诉五史信息入库
         ruleService.saveRule2Database(rule);
 
@@ -500,7 +462,6 @@ public class RuleController extends BaseEntityController<Object> {
 
     }
 
-
     /**
      * 修改规则
      *
@@ -510,76 +471,42 @@ public class RuleController extends BaseEntityController<Object> {
     @PostMapping("/updaterule")
     @ResponseBody
     public void updaterule(HttpServletResponse response, @RequestBody String map) {
-        Map parse = (Map) JSONObject.parse(map);
-        String result = null;
-        try {
-            result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.updaterule, parse, String.class);
-        } catch (Exception e) {
-            logger.info("删除规则失败：" + map);
-        } finally {
-            wirte(response, result);
-        }
 
+        //获取原始规则条件
+        Map<String, Object> param = (Map) JSONObject.parse(map);
+        Object condition = param.get("ruleCondition");
+        //转换条件格式
+        String ruleCondition = userModelService.getOldRule(condition);
+        param.put("ruleCondition", ruleCondition);
+
+        String userId = getUserId();
+        param.put("doctorId", userId.trim());
+        String time = DateFormatUtil.format(new Timestamp(System.currentTimeMillis()), DateFormatUtil.DATETIME_PATTERN_SS);
+        param.put("createTime", time);
+        Object o = JSON.toJSON(param);
+        String forObject = "";
+        try {
+            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.updaterule, o, String.class);
+            //mongo库中_id
+            String id = ruleService.getId(forObject);
+            OriRule rule = oriRuleRepService.findOne(id);
+            JSONObject jsonObject = JSONObject.parseObject(map);
+            String oriRule = JSONObject.toJSONString(jsonObject);
+            rule.setRule(oriRule);
+            OriRule save = oriRuleRepService.save(rule);
+            if (save == null) {
+                logger.info("更新本地原始规则失败：" + oriRule);
+            }
+        } catch (Exception e) {
+            logger.info("更新规则失败：" + e.getMessage());
+        } finally {
+            wirte(response, forObject);
+        }
     }
 
 
-//    @PostMapping("/getVariableListNew")
-//    @ResponseBody
-//    public void getVariableListNew(HttpServletResponse response) {
-//        String result = null;
-//        LinkedMultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap();
-//
-//        HttpHeaders headers = new HttpHeaders();
-//        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-//        HttpEntity<LinkedMultiValueMap> entity = new HttpEntity<LinkedMultiValueMap>(multiValueMap, headers);
-//        Map map = null;
-//        try {
-//            result = restTemplate.postForObject(urlConfig.getYwdurl() + BaseConstants.getVariableListNew, entity, String.class);
-//            map = (Map) JSONObject.parse(result);
-//            map.put("标识符", "");
-//            System.out.println(map.get("再入院"));
-//        } catch (Exception e) {
-//            System.out.println(e.getMessage());
-//            logger.info("查询失败：");
-//        } finally {
-//            wirte(response, map);
-//        }
-//
-//    }
 
-    /**
-     * 医嘱预警
-     *
-     * @param response
-     * @param map
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-//    @PostMapping("/matchDoctorAdv")
-//    @ResponseBody
-//    public void matchDoctorAdv(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-//        //获取检验报告 检查报告最新的结果
-//        BaseRule fill = BaseRule.fill(JSONObject.parseObject(map));
-//        String string = JSONObject.toJSONString(fill);
-//        System.out.println(string);
-//        AtResponse resp = ruleService.ruleMatch(string, "医嘱");
-//        wirte(response, resp);
-//    }
 
-    /**
-     * 诊断预警
-     *
-     * @param response
-     * @param map
-     * @throws ExecutionException
-     * @throws InterruptedException
-     */
-//    @PostMapping("/matchDiagnose")
-//    @ResponseBody
-//    public void matchDiagnose(HttpServletResponse response, @RequestBody String map) throws ExecutionException, InterruptedException {
-//        AtResponse resp = ruleService.ruleMatch(map, "诊断");
-//        wirte(response, resp);
-//    }
 
     /**
      * 统计规则数目

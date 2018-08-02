@@ -9,7 +9,7 @@ import java.util.Objects;
  */
 
 @Entity
-@Table(name = "rule_log_mapping", schema = "jhmk_waring", catalog = "")
+@Table(name = "rule_log_mapping", schema = "jhmk_waring")
 public class LogMapping {
     private int id;
     private int logId;

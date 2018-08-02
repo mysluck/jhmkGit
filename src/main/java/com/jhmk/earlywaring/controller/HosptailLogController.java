@@ -14,6 +14,7 @@ import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
 import com.jhmk.earlywaring.service.RuleService;
+import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.HttpHeadersUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -272,25 +273,21 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
             pageNo = Integer.valueOf(params.get("pageNo"));
         }
         List<SmHospitalLog> dataByCondition = hosptailLogService.getDataByConditionBySort(yearFirst, yearLast, condMap, pageNo, null);
-        List<SmHospitalLog>beanList =new LinkedList<>();
-        for (SmHospitalLog log:dataByCondition) {
-            List<LogMapping> allByLogId = logMappingRepService.findAllByLogId(log.getId());
-            String ruleCondition = log.getRuleCondition();
-            for (LogMapping mapping:allByLogId){
-                if (ruleCondition.contains(mapping.getLogResult())){
-                    String logTime = mapping.getLogTime();
-                    String value=mapping.getLogResult();
-                    if (StringUtils.isNotBlank(logTime)){
-                        value=mapping.getLogResult()+"("+logTime+")";
-                    }
-                    ruleCondition = ruleCondition.replaceAll(mapping.getLogResult(), value);
-                }
-            }
-            log.setRuleCondition(ruleCondition);
-            beanList.add(log);
-        }
         atsp.setResponseCode(ResponseCode.OK);
         atsp.setData(dataByCondition);
+        wirte(response, atsp);
+    }
+
+    @PostMapping(value = "/getLogMappingById")
+    @ResponseBody
+    public void getLogMappingById(HttpServletResponse response, @RequestBody(required = false) String map) {
+        JSONObject jsonObject = JSONObject.parseObject(map);
+        Integer logId = jsonObject.getInteger("logId");
+        List<LogMapping> allByLogId = logMappingRepService.findAllByLogId(logId);
+        Collections.sort(allByLogId, CompareUtil.createComparator(1,"logTime"));
+        AtResponse atsp = new AtResponse();
+        atsp.setResponseCode(ResponseCode.OK);
+        atsp.setData(allByLogId);
         wirte(response, atsp);
     }
 

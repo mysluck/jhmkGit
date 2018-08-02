@@ -96,7 +96,7 @@ public class BaseController {
 //    }
 
 
-    public void wirte(HttpServletResponse response, Object obj) {
+    public static void wirte(HttpServletResponse response, Object obj) {
         response.setCharacterEncoding("utf-8");
         try {
             PrintWriter writer = response.getWriter();

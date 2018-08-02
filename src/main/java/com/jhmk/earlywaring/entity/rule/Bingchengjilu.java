@@ -18,6 +18,7 @@ public class Bingchengjilu {
     private String template_content;
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     public int getId() {
         return id;

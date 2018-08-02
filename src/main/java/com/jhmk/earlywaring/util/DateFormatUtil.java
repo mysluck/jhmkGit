@@ -130,14 +130,14 @@ public class DateFormatUtil {
         return timeStr;
     }
 
+
+
     public static Date parseDate(String dateStr, String pattern) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern);
         LocalDate localDate = LocalDate.parse(dateStr, format);
         ZoneId zone = ZoneId.systemDefault();
         Instant instant = localDate.atStartOfDay().atZone(zone).toInstant();
         Date newDate = Date.from(instant);
-
-
         return newDate;
     }
 
@@ -153,12 +153,12 @@ public class DateFormatUtil {
 
     }
 
-    public static Timestamp parseDateTime(String dateStr, String pattern) {
+    public static LocalDateTime parseDateTime(String dateStr, String pattern) {
         DateTimeFormatter format = DateTimeFormatter.ofPattern(pattern);
         LocalDateTime localDatetime = LocalDateTime.parse(dateStr, format);
-        ZoneId zone = ZoneId.systemDefault();
-        Instant instant = localDatetime.atZone(zone).toInstant();
-        return new Timestamp(instant.toEpochMilli());
+//        ZoneId zone = ZoneId.systemDefault();
+//        Instant instant = localDatetime.atZone(zone).toInstant();
+        return localDatetime;
     }
 
     public static Date add(Date date, int field, int days) {
@@ -478,8 +478,13 @@ public class DateFormatUtil {
 //        String firstDayOfMonth = DateFormatUtil.getFirstDayOfMonth(Integer.valueOf(split[0]), Integer.valueOf(split[1]));
 //        System.out.println(firstDayOfMonth);
 
-        Date yearFirst = getYearFirst(2018);
-        Date yearLast = getYearLast(2018);
+//        Date yearFirst = getYearFirst(2018);
+//        Date yearLast = getYearLast(2018);
+
+
+        Date date = parseDate("2017-11-11 11:11:11", DateFormatUtil.DATETIME_PATTERN_SS);
+        Date date1 = parseDateBySdf("2017-11-11 11:11:11", DateFormatUtil.DATETIME_PATTERN_SS);
+
     }
 
     public static List<String> getMonthBetween(String minDate, String maxDate) {

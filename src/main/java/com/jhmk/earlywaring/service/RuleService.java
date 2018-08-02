@@ -10,6 +10,7 @@ import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.SmShowLog;
 import com.jhmk.earlywaring.entity.repository.service.*;
 import com.jhmk.earlywaring.entity.rule.*;
+import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.DateFormatUtil;
 import com.jhmk.earlywaring.util.MapUtil;
 import com.jhmk.earlywaring.webservice.AnalysisXmlService;
@@ -274,8 +275,7 @@ public class RuleService {
         //todo 获取疾病同义词，用于跑医院数据到数据库
 //        Rule sameZhenDuanList = getSameZhenDuanList(fill);
         String o = JSONObject.toJSONString(fill);
-        String s = stringTransform(o);
-        Object parse = JSONObject.parse(s);
+        Object parse = JSONObject.parse(o);
         String data = "";
         System.out.println(parse.toString());
         try {
@@ -306,151 +306,6 @@ public class RuleService {
      * @param data     规则匹配成功返回信息
      * @param fromData 原始json数据
      */
-    public void add2ShowLog(ReciveRule data, String fromData) {
-        List<SmShowLog> datalist = new ArrayList<>();
-        String doctor_id = data.getDoctor_id();
-        String patient_id = data.getPatient_id();
-        String visit_id = data.getVisit_id();
-        if (StringUtils.isNotBlank(patient_id) && StringUtils.isNotBlank(doctor_id)) {
-
-            Map<String, Object> parse = (Map) JSON.parse(fromData);
-            Object result = parse.get("result");
-            if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
-
-                JSONArray array = (JSONArray) result;
-                Iterator<Object> iterator = array.iterator();
-                while (iterator.hasNext()) {
-                    JSONObject jsonObject = (JSONObject) iterator.next();
-                    String classification = jsonObject.getString("classification");
-                    String hintContent = jsonObject.getString("hintContent");
-
-                    if (!("诊断预警".equals(classification) || "合理用药".equals(classification) || "药品预警".equals(classification))) {
-                        continue;
-                    }
-                    String id = jsonObject.getString("_id");
-                    SmShowLog log = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndRuleIdAndVisitId(doctor_id, patient_id, id, visit_id);
-                    if (log != null) {
-                        continue;
-                    }
-                    if (jsonObject.keySet().contains("diseaseMessageMap")) {
-                        Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
-                        if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
-                            JSONArray diseaseMessageArray = (JSONArray) diseaseMessageMap;
-                            Iterator<Object> iterator1 = diseaseMessageArray.iterator();
-                            SmShowLog hintMesRule = new SmShowLog();
-                            Set<String> orderItemNames = new HashSet<>();
-                            while (iterator1.hasNext()) {
-                                JSONObject next = (JSONObject) iterator1.next();
-                                String diagnosis_name = "";
-                                String diagnosis_num = "";
-                                String sex_name = "";
-                                //过敏药物
-                                String drug_allergy_name = "";
-                                //医嘱
-                                String order_item_name = "";
-                                //入院记录的检验子项目 和值
-                                String zylab_sub_item_name = "";
-                                String zylab_result_value = "";
-                                //报告的子项目和值
-                                String bglab_sub_item_name = "";
-                                String bglab_result_value = "";
-                                Set<String> keyNames = next.keySet();
-                                for (String names : keyNames) {
-                                    if (names.contains("diagnosis_name")) {
-                                        diagnosis_name = names;
-                                    } else if (names.contains("diagnosis_num")) {
-                                        diagnosis_num = names;
-                                    } else if (names.contains("sex_name")) {
-                                        sex_name = names;
-                                    } else if (names.contains("order_item_name")) {
-                                        order_item_name = names;
-                                    } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
-                                        zylab_sub_item_name = names;
-                                    } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
-                                        zylab_result_value = names;
-                                    } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
-                                        bglab_sub_item_name = names;
-                                    } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
-                                        bglab_result_value = names;
-                                    } else if (names.contains("drug_allergy_name")) {
-                                        drug_allergy_name = names;
-                                    }
-
-                                    //盘段医嘱
-                                    if (StringUtils.isNotBlank(next.getString(order_item_name))) {
-                                        orderItemNames.add(next.getString(order_item_name));
-                                    }
-                                }
-                                //判断主诊断或其他诊断
-                                if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
-                                    if (StringUtils.isNotBlank(next.getString(diagnosis_num)) && "1".equals(next.getString(diagnosis_num))) {
-                                        hintMesRule.setMainIllName(next.getString(diagnosis_name));
-                                    } else {
-                                        hintMesRule.setOtherIllName(next.getString(diagnosis_name));
-                                    }
-                                }
-                                //判断性别
-                                if (StringUtils.isNotBlank(next.getString(sex_name))) {
-                                    hintMesRule.setSex(next.getString(sex_name));
-                                }
-                                //过敏药物
-                                if (StringUtils.isNotBlank(next.getString(drug_allergy_name))) {
-                                    hintMesRule.setDrugAllergyName(next.getString(drug_allergy_name));
-                                }
-                                Map<String, String> otherMap = new HashMap<>();
-
-                                //判断入院记录检查细项和值
-                                String baogaoKeyName = "";
-                                String baogaoKeyValue = "";
-                                String ruyuanKeyName = "";
-                                String ruyuanKeyValue = "";
-                                if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
-                                    baogaoKeyName = next.getString(zylab_sub_item_name);
-                                }
-                                if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
-                                    baogaoKeyValue = next.getString(zylab_result_value);
-                                }
-                                //判断检验检查细项和值
-                                if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                    ruyuanKeyName = next.getString(bglab_sub_item_name);
-                                }
-                                if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
-                                    ruyuanKeyValue = next.getString(bglab_result_value);
-                                }
-                                if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
-                                    otherMap.put(baogaoKeyName, baogaoKeyValue);
-                                }
-                                if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
-                                    otherMap.put(ruyuanKeyName, ruyuanKeyValue);
-                                }
-                                if (otherMap.size() > 0) {
-                                    hintMesRule.setOtherMap(JSONObject.toJSONString(otherMap));
-                                }
-
-                                hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-                                //新添加规则默认0
-                                hintMesRule.setDoctorId(doctor_id);
-                                hintMesRule.setPatientId(patient_id);
-                                hintMesRule.setVisitId(visit_id);
-                                hintMesRule.setRuleId(id);
-                                hintMesRule.setClassification(classification);
-                                hintMesRule.setHintContent(hintContent);
-                                hintMesRule.setRuleStatus(0);
-                                //用于区分规则匹配添加和诊疗提醒（cdss）添加
-                                hintMesRule.setType("rulematch");
-                            }
-                            if (orderItemNames.size() > 0) {
-                                hintMesRule.setOrderItemNames(JSONObject.toJSONString(orderItemNames));
-                            }
-                            datalist.add(hintMesRule);
-                        }
-                    }
-                }
-            }
-            smShowLogRepService.save(datalist);
-        }
-
-    }
 
     public void add2ShowLog(Rule data, String fromData) {
         List<SmShowLog> datalist = new ArrayList<>();
@@ -497,11 +352,19 @@ public class RuleService {
                                 //医嘱
                                 String order_item_name = "";
                                 //入院记录的检验子项目 和值
-                                String zylab_sub_item_name = "";
-                                String zylab_result_value = "";
-                                //报告的子项目和值
-                                String bglab_sub_item_name = "";
-                                String bglab_result_value = "";
+                                String ryjybgKey = "";
+                                String ryjybgValue = "";
+                                //入院检查报告 key value
+                                String ryjcbgKey = "";
+                                String ryjcbgValue = "";
+                                //检验报告的子项目和值
+                                String jybgKey = "";
+                                String jybgValue = "";
+
+                                //检查报告的子项目和值
+                                String jcbgKey = "";
+                                String jcbgValue = "";
+
                                 Set<String> keyNames = next.keySet();
                                 for (String names : keyNames) {
                                     if (names.contains("diagnosis_name")) {
@@ -513,18 +376,24 @@ public class RuleService {
                                     } else if (names.contains("order_item_name")) {
                                         order_item_name = names;
                                     } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
-                                        zylab_sub_item_name = names;
+                                        ryjybgKey = names;
                                     } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
-                                        zylab_result_value = names;
+                                        ryjybgValue = names;
                                     } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
-                                        bglab_sub_item_name = names;
+                                        jybgKey = names;
                                     } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
-                                        bglab_result_value = names;
+                                        jybgValue = names;
                                     } else if (names.contains("drug_allergy_name")) {
                                         drug_allergy_name = names;
+                                        //检查所见
+                                    } else if (names.contains("jianchabaogao.exam_report.exam_item_name")) {
+                                        jcbgKey = names;
+                                        //检查结论
+                                    } else if (names.contains("jianchabaogao.exam_report.exam_diag")) {
+                                        jcbgValue = names;
                                     }
 
-                                    //盘段医嘱
+                                    //医嘱
                                     if (StringUtils.isNotBlank(next.getString(order_item_name))) {
                                         orderItemNames.add(next.getString(order_item_name));
                                     }
@@ -548,28 +417,28 @@ public class RuleService {
                                 Map<String, String> otherMap = new HashMap<>();
 
                                 //判断入院记录检查细项和值
-                                String baogaoKeyName = "";
-                                String baogaoKeyValue = "";
-                                String ruyuanKeyName = "";
-                                String ruyuanKeyValue = "";
-                                if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
-                                    baogaoKeyName = next.getString(zylab_sub_item_name);
+                                String jybgKeyName = "";
+                                String jybgKeyValue = "";
+                                String ryjybgKeyName = "";
+                                String ryjybgKeyValue = "";
+                                if (StringUtils.isNotBlank(next.getString(ryjybgKey))) {
+                                    jybgKeyName = next.getString(ryjybgKey);
                                 }
-                                if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
-                                    baogaoKeyValue = next.getString(zylab_result_value);
+                                if (StringUtils.isNotBlank(next.getString(ryjybgValue))) {
+                                    jybgKeyValue = next.getString(ryjybgValue);
                                 }
                                 //判断检验检查细项和值
-                                if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                    ruyuanKeyName = next.getString(bglab_sub_item_name);
+                                if (StringUtils.isNotBlank(next.getString(jybgKey))) {
+                                    ryjybgKeyName = next.getString(jybgKey);
                                 }
-                                if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
-                                    ruyuanKeyValue = next.getString(bglab_result_value);
+                                if (StringUtils.isNotBlank(next.getString(jybgValue))) {
+                                    ryjybgKeyValue = next.getString(jybgValue);
                                 }
-                                if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
-                                    otherMap.put(baogaoKeyName, baogaoKeyValue);
+                                if (StringUtils.isNotBlank(jybgKeyName) && StringUtils.isNotBlank(jybgKeyValue)) {
+                                    otherMap.put(jybgKeyName, jybgKeyValue);
                                 }
-                                if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
-                                    otherMap.put(ruyuanKeyName, ruyuanKeyValue);
+                                if (StringUtils.isNotBlank(ryjybgKeyName) && StringUtils.isNotBlank(ryjybgKeyValue)) {
+                                    otherMap.put(ryjybgKeyName, ryjybgKeyValue);
                                 }
                                 if (otherMap.size() > 0) {
                                     hintMesRule.setOtherMap(JSONObject.toJSONString(otherMap));
@@ -670,11 +539,26 @@ public class RuleService {
                             String condition = disposeRuleCondition(ruleCondition);
                             smHospitalLog.setRuleCondition(condition);
                         }
-                        smHospitalLog.setCreateTime(new Date());
                         //获取触发的规则id
                         smHospitalLog.setRuleId(datamap.get("_id"));
+                        List<LogMapping> notSaveLogMapping = getNotSaveLogMapping(mes, resultData);
+                        Collections.sort(notSaveLogMapping, CompareUtil.createComparator(1, "logTime"));
+                        String logTime = notSaveLogMapping.get(0).getLogTime();
+                        if (StringUtils.isNotBlank(logTime)) {
+                            smHospitalLog.setCreateTime(DateFormatUtil.parseDateBySdf(logTime, DateFormatUtil.DATETIME_PATTERN_SS));
+                        } else {
+                            smHospitalLog.setCreateTime(new Date());
+                        }
+
                         SmHospitalLog save = smHospitalLogRepService.save(smHospitalLog);
-                        saveData2MapTable(mes,resultData,save);
+                        int id = save.getId();
+                        for (LogMapping mapping : notSaveLogMapping) {
+                            mapping.setLogId(id);
+                            logMappingRepService.save(mapping);
+
+                        }
+//                        saveData2MapTable(mes, resultData, save);
+
 
                         if (save == null) {
                             logger.info("入日志库失败:" + save.toString());
@@ -719,11 +603,11 @@ public class RuleService {
                             //医嘱
                             String order_item_name = "";
                             //入院记录的检验子项目 和值
-                            String zylab_sub_item_name = "";
-                            String zylab_result_value = "";
+                            String ryjybgKey = "";
+                            String ryjybgValue = "";
                             //报告的子项目和值
-                            String bglab_sub_item_name = "";
-                            String bglab_result_value = "";
+                            String jybgKey = "";
+                            String jybgValue = "";
                             //检查
                             String exam_item_code = "";
                             //检查结论
@@ -739,13 +623,13 @@ public class RuleService {
                                 } else if (names.contains("order_item_name")) {
                                     order_item_name = names;
                                 } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
-                                    zylab_sub_item_name = names;
+                                    ryjybgKey = names;
                                 } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
-                                    zylab_result_value = names;
+                                    ryjybgValue = names;
                                 } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
-                                    bglab_sub_item_name = names;
+                                    jybgKey = names;
                                 } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
-                                    bglab_result_value = names;
+                                    jybgValue = names;
                                 } else if (names.contains("drug_allergy_name")) {
                                     drug_allergy_name = names;
                                 } else if (names.contains("jiancanbaogao.exam_report.exam_item_code")) {
@@ -808,22 +692,22 @@ public class RuleService {
                             String jianchavalue = "";
 
                             //判断入院记录检查细项和值
-                            String baogaoKeyName = "";
-                            String baogaoKeyValue = "";
-                            String ruyuanKeyName = "";
-                            String ruyuanKeyValue = "";
-                            if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
-                                baogaoKeyName = next.getString(zylab_sub_item_name);
+                            String jybgKeyName = "";
+                            String jybgKeyValue = "";
+                            String ryjybgKeyName = "";
+                            String ryjybgKeyValue = "";
+                            if (StringUtils.isNotBlank(next.getString(ryjybgKey))) {
+                                jybgKeyName = next.getString(ryjybgKey);
                             }
-                            if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
-                                baogaoKeyValue = next.getString(zylab_result_value);
+                            if (StringUtils.isNotBlank(next.getString(ryjybgValue))) {
+                                jybgKeyValue = next.getString(ryjybgValue);
                             }
                             //判断检验检查细项和值
-                            if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                ruyuanKeyName = next.getString(bglab_sub_item_name);
+                            if (StringUtils.isNotBlank(next.getString(jybgKey))) {
+                                ryjybgKeyName = next.getString(jybgKey);
                             }
-                            if (StringUtils.isNotBlank(next.getString(bglab_result_value))) {
-                                ruyuanKeyValue = next.getString(bglab_result_value);
+                            if (StringUtils.isNotBlank(next.getString(jybgValue))) {
+                                ryjybgKeyValue = next.getString(jybgValue);
                             }
 
                             if (StringUtils.isNotBlank(next.getString(exam_item_code))) {
@@ -852,16 +736,16 @@ public class RuleService {
                                 }
                             }
 
-                            if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
+                            if (StringUtils.isNotBlank(jybgKeyName) && StringUtils.isNotBlank(jybgKeyValue)) {
                                 LogMapping logMapping = new LogMapping();
 
                                 logMapping.setLogId(log_id);
-                                logMapping.setLogObj(baogaoKeyName);
-                                logMapping.setLogResult(baogaoKeyValue);
+                                logMapping.setLogObj(jybgKeyName);
+                                logMapping.setLogResult(jybgKeyValue);
                                 List<Jianyanbaogao> jianyanbaogaoList = rule.getJianyanbaogao();
 
-                                for (Jianyanbaogao bean:jianyanbaogaoList) {
-                                    if (baogaoKeyName.equals(bean.getLab_sub_item_name())&&baogaoKeyValue.equals(bean.getLab_result_value())){
+                                for (Jianyanbaogao bean : jianyanbaogaoList) {
+                                    if (jybgKeyName.equals(bean.getLab_sub_item_name()) && jybgKeyValue.equals(bean.getLab_result_value())) {
                                         logMapping.setLogTime(bean.getReport_time());
 
                                     }
@@ -869,11 +753,11 @@ public class RuleService {
                                 logMappingList.add(logMapping);
 
                             }
-                            if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
+                            if (StringUtils.isNotBlank(ryjybgKeyName) && StringUtils.isNotBlank(ryjybgKeyValue)) {
                                 LogMapping logMapping = new LogMapping();
                                 logMapping.setLogId(log_id);
-                                logMapping.setLogObj(ruyuanKeyName);
-                                logMapping.setLogResult(ruyuanKeyValue);
+                                logMapping.setLogObj(ryjybgKeyName);
+                                logMapping.setLogResult(ryjybgKeyValue);
                                 logMappingList.add(logMapping);
                             }
                         }
@@ -883,6 +767,203 @@ public class RuleService {
             //保存映射表信息
             logMappingRepService.save(logMappingList);
         }
+    }
+
+    public List<LogMapping> getNotSaveLogMapping(Rule rule, String fromData) {
+        List<LogMapping> logMappingList = new LinkedList<>();
+        Map<String, Object> parse = (Map) JSON.parse(fromData);
+        Object result = parse.get("result");
+        if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
+            JSONArray array = (JSONArray) result;
+            Iterator<Object> iterator = array.iterator();
+            while (iterator.hasNext()) {
+                JSONObject jsonObject = (JSONObject) iterator.next();
+                if (jsonObject.keySet().contains("diseaseMessageMap")) {
+                    Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
+                    if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
+                        JSONArray diseaseMessageArray = (JSONArray) diseaseMessageMap;
+                        Iterator<Object> iterator1 = diseaseMessageArray.iterator();
+                        while (iterator1.hasNext()) {
+                            JSONObject next = (JSONObject) iterator1.next();
+
+
+                            String diagnosis_name = "";
+                            String diagnosis_num = "";
+                            String sex_name = "";
+                            //过敏药物
+                            String drug_allergy_name = "";
+                            //医嘱
+                            String order_item_name = "";
+                            //入院记录的检验子项目 和值
+                            String ryjybgKey = "";
+                            String ryjybgValue = "";
+                            //报告的子项目和值
+                            String jybgKey = "";
+                            String jybgValue = "";
+                            //检查报告
+                            String jcbgKey = "";
+                            String jcbgValue = "";
+
+                            Set<String> keyNames = next.keySet();
+                            for (String names : keyNames) {
+                                if (names.contains("diagnosis_name")) {
+                                    diagnosis_name = names;
+                                } else if (names.contains("diagnosis_num")) {
+                                    diagnosis_num = names;
+                                } else if (names.contains("sex_name")) {
+                                    sex_name = names;
+                                } else if (names.contains("order_item_name")) {
+                                    order_item_name = names;
+                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
+                                    ryjybgKey = names;
+                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
+                                    ryjybgValue = names;
+                                } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
+                                    jybgKey = names;
+                                } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
+                                    jybgValue = names;
+                                } else if (names.contains("drug_allergy_name")) {
+                                    drug_allergy_name = names;
+                                } else if (names.contains("jianchabaogao.exam_report.exam_item_name")) {
+                                    jcbgKey = names;
+                                } else if (names.contains("jianchabaogao.exam_report.exam_diag")) {
+                                    jcbgValue = names;
+                                }
+
+                                //盘段医嘱
+                                if (StringUtils.isNotBlank(next.getString(order_item_name))) {
+                                    LogMapping logMapping = new LogMapping();
+//                                    logMapping.setLogId(log_id);
+                                    logMapping.setLogObj("医嘱项名称");
+                                    String itemName = next.getString(order_item_name);
+                                    logMapping.setLogResult(itemName);
+                                    List<Yizhu> yizhuList = rule.getYizhu();
+                                    for (Yizhu yizhu : yizhuList) {
+                                        if (itemName.equals(yizhu.getOrder_item_name())) {
+                                            logMapping.setLogTime(yizhu.getOrder_begin_time());
+                                        }
+                                    }
+
+                                    logMappingList.add(logMapping);
+                                }
+                            }
+                            //判断主诊断或其他诊断
+                            if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
+                                LogMapping logMapping = new LogMapping();
+//                                logMapping.setLogId(log_id);
+                                logMapping.setLogObj("诊断名称");
+                                String diagnosisName = next.getString(diagnosis_name);
+                                logMapping.setLogResult(diagnosisName);
+                                List<Binglizhenduan> binglizhenduanList = rule.getBinglizhenduan();
+                                for (Binglizhenduan binglizhenduan : binglizhenduanList) {
+                                    if (diagnosisName.equals(binglizhenduan.getDiagnosis_name())) {
+                                        logMapping.setLogTime(binglizhenduan.getDiagnosis_time());
+                                    }
+                                }
+                                logMappingList.add(logMapping);
+                            }
+                            //判断性别
+                            if (StringUtils.isNotBlank(next.getString(sex_name))) {
+                                LogMapping logMapping = new LogMapping();
+//                                logMapping.setLogId(log_id);
+                                logMapping.setLogObj("性别");
+                                logMapping.setLogResult(next.getString(sex_name));
+                                logMappingList.add(logMapping);
+                            }
+                            //过敏药物
+                            if (StringUtils.isNotBlank(next.getString(drug_allergy_name))) {
+                                LogMapping logMapping = new LogMapping();
+//                                logMapping.setLogId(log_id);
+                                logMapping.setLogObj("过敏药物");
+                                logMapping.setLogResult(next.getString(drug_allergy_name));
+                                logMappingList.add(logMapping);
+                            }
+                            //检查报告
+                            String jianchakey = "";
+                            String jianchavalue = "";
+
+                            //判断入院记录检查细项和值
+                            String jybgKeyName = "";
+                            String jybgKeyValue = "";
+                            //入院检验报告
+                            String ryjybgKeyName = "";
+                            String ryjybgKeyValue = "";
+                            //入院检查报告
+                            String ryjcbgKeyName = "";
+                            String ryjcybgKeyValue = "";
+
+                            if (StringUtils.isNotBlank(next.getString(ryjybgKey))) {
+                                jybgKeyName = next.getString(ryjybgKey);
+                            }
+                            if (StringUtils.isNotBlank(next.getString(ryjybgValue))) {
+                                jybgKeyValue = next.getString(ryjybgValue);
+                            }
+                            //判断检验检查细项和值
+                            if (StringUtils.isNotBlank(next.getString(jybgKey))) {
+                                ryjybgKeyName = next.getString(jybgKey);
+                            }
+                            if (StringUtils.isNotBlank(next.getString(jybgValue))) {
+                                ryjybgKeyValue = next.getString(jybgValue);
+                            }
+
+                            if (StringUtils.isNotBlank(next.getString(jcbgKey))) {
+                                ryjybgKeyName = next.getString(jcbgKey);
+                            }
+                            if (StringUtils.isNotBlank(next.getString(jcbgValue))) {
+                                ryjybgKeyValue = next.getString(jcbgValue);
+                            }
+                            //检查报告
+                            if (StringUtils.isNotBlank(next.getString(jcbgKey))) {
+                                String key = next.getString(jcbgKey);
+                                String value = next.getString(jcbgValue);
+                                LogMapping logMapping = new LogMapping();
+                                logMapping.setLogObj("(检查报告)"+key);
+                                logMapping.setLogResult(value);
+                                List<Jianchabaogao> jianchabaogaoList = rule.getJianchabaogao();
+                                if (StringUtils.isNotBlank(value)) {
+                                    for (Jianchabaogao jianchabaogao : jianchabaogaoList) {
+                                        if (key.equals(jianchabaogao.getExam_item_name()) && value.equals(jianchabaogao.getExam_diag())) {
+                                            logMapping.setLogTime(jianchabaogao.getExam_time());
+                                            continue;
+                                        }
+                                    }
+                                } else {
+                                    for (Jianchabaogao jianchabaogao : jianchabaogaoList) {
+                                        if (key.equals(jianchabaogao.getExam_item_name())) {
+                                            logMapping.setLogTime(jianchabaogao.getExam_time());
+                                            continue;
+                                        }
+                                    }
+                                }
+                            }
+                            //检验报告
+                            if (StringUtils.isNotBlank(jybgKeyName) && StringUtils.isNotBlank(jybgKeyValue)) {
+                                LogMapping logMapping = new LogMapping();
+                                logMapping.setLogObj("（检验报告）"+jybgKeyName);
+                                logMapping.setLogResult(jybgKeyValue);
+                                List<Jianyanbaogao> jianyanbaogaoList = rule.getJianyanbaogao();
+                                for (Jianyanbaogao bean : jianyanbaogaoList) {
+                                    if (jybgKeyName.equals(bean.getLab_sub_item_name()) && jybgKeyValue.equals(bean.getLab_result_value())) {
+                                        logMapping.setLogTime(bean.getReport_time());
+
+                                    }
+                                }
+                                logMappingList.add(logMapping);
+
+                            }
+                            if (StringUtils.isNotBlank(ryjybgKeyName) && StringUtils.isNotBlank(ryjybgKeyValue)) {
+                                LogMapping logMapping = new LogMapping();
+                                logMapping.setLogObj(ryjybgKeyName);
+                                logMapping.setLogResult(ryjybgKeyValue);
+                                logMappingList.add(logMapping);
+                            }
+                        }
+                    }
+                }
+            }
+            //保存映射表信息
+        }
+        return logMappingList;
     }
 
     /**
@@ -999,118 +1080,6 @@ public class RuleService {
         return s2;
     }
 
-    private List<HintMesRule> showMes(String data) {
-        Map parse = (Map) JSONObject.parse(data);
-        List<HintMesRule> ruleList = new ArrayList<>();
-        Optional.ofNullable(parse.get(resultSym)).ifPresent(s -> {
-            JSONArray array = (JSONArray) s;
-            Iterator<Object> iterator = array.iterator();
-            while (iterator.hasNext()) {
-                JSONObject jsonObject = (JSONObject) iterator.next();
-                if (!"诊断预警".equals(jsonObject.getString("classification"))) {
-                    continue;
-                }
-                if (jsonObject.keySet().contains("diseaseMessageMap")) {
-                    Object diseaseMessageMap = jsonObject.get("diseaseMessageMap");
-                    if (ObjectUtils.anyNotNull(diseaseMessageMap)) {
-                        JSONArray diseaseMessageArray = (JSONArray) diseaseMessageMap;
-                        Iterator<Object> iterator1 = diseaseMessageArray.iterator();
-                        HintMesRule hintMesRule = new HintMesRule();
-                        while (iterator1.hasNext()) {
-                            JSONObject next = (JSONObject) iterator1.next();
-
-                            String diagnosis_name = "";
-                            String diagnosis_num = "";
-                            String sex_name = "";
-                            String order_item_name = "";
-                            //入院记录的检验子项目 和值
-                            String zylab_sub_item_name = "";
-                            String zylab_result_value = "";
-                            //报告的子项目和值
-                            String bglab_sub_item_name = "";
-                            String bglab_result_value = "";
-                            Set<String> keyNames = next.keySet();
-                            for (String names : keyNames) {
-                                if (names.contains("diagnosis_name")) {
-                                    diagnosis_name = names;
-                                } else if (names.contains("diagnosis_num")) {
-                                    diagnosis_num = names;
-                                } else if (names.contains("sex_name")) {
-                                    sex_name = names;
-                                } else if (names.contains("order_item_name")) {
-                                    order_item_name = names;
-                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_sub_item_name")) {
-                                    zylab_sub_item_name = names;
-                                } else if (names.contains("ruyuanjilu.auxiliary_examination.lab.lab_result_value")) {
-                                    zylab_result_value = names;
-                                } else if (names.contains("jianyanbaogao.lab_report.lab_sub_item_name")) {
-                                    bglab_sub_item_name = names;
-                                } else if (names.contains("jianyanbaogao.lab_report.lab_result_value")) {
-                                    bglab_result_value = names;
-                                }
-                            }
-
-                            //判断主诊断或其他诊断
-                            if (StringUtils.isNotBlank(next.getString(diagnosis_name))) {
-                                if (StringUtils.isNotBlank(next.getString(diagnosis_num)) & "1".equals(next.getString(diagnosis_num))) {
-                                    hintMesRule.setMainIllName(next.getString(diagnosis_name));
-                                } else {
-                                    hintMesRule.setOtherIllName(next.getString(diagnosis_name));
-                                }
-                            }
-                            Map<String, String> otherMap = new HashMap<>();
-
-                            //判断性别
-                            if (StringUtils.isNotBlank(next.getString(sex_name))) {
-                                hintMesRule.setSex(next.getString(sex_name));
-                            }
-                            //盘段医嘱
-                            if (StringUtils.isNotBlank(next.getString(order_item_name))) {
-                                hintMesRule.setYizhu(next.getString(order_item_name));
-
-                            }
-                            //判断入院记录检查细项和值
-                            String baogaoKeyName = "";
-                            String baogaoKeyValue = "";
-                            String ruyuanKeyName = "";
-                            String ruyuanKeyValue = "";
-                            if (StringUtils.isNotBlank(next.getString(zylab_sub_item_name))) {
-                                baogaoKeyName = next.getString(zylab_sub_item_name);
-
-                            }
-                            if (StringUtils.isNotBlank(next.getString(zylab_result_value))) {
-                                baogaoKeyValue = next.getString(zylab_result_value);
-                            }
-                            //判断检验检查细项和值
-                            if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                ruyuanKeyName = next.getString(bglab_sub_item_name);
-
-                            }
-                            if (StringUtils.isNotBlank(next.getString(bglab_sub_item_name))) {
-                                ruyuanKeyValue = next.getString(bglab_sub_item_name);
-                            }
-
-                            if (StringUtils.isNotBlank(baogaoKeyName) && StringUtils.isNotBlank(baogaoKeyValue)) {
-                                otherMap.put(baogaoKeyName, baogaoKeyValue);
-                            }
-                            if (StringUtils.isNotBlank(ruyuanKeyName) && StringUtils.isNotBlank(ruyuanKeyValue)) {
-                                otherMap.put(ruyuanKeyName, ruyuanKeyValue);
-                            }
-                            hintMesRule.setOtherMap(otherMap);
-                            hintMesRule.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-
-                        }
-                        System.out.println(JSONObject.toJSONString(hintMesRule));
-                        ruleList.add(hintMesRule);
-
-                    }
-                }
-            }
-        });
-
-        return ruleList;
-    }
-
     /**
      * 解析规则 一诉五史 key value型转为  键值对：
      *
@@ -1160,9 +1129,9 @@ public class RuleService {
                     if (ob.containsKey("labTestItems")) {
                         Object labTestItems = ob.get("labTestItems");
                         String report_time = ob.getString("report_time");
-                        jcbg.put("report_time",report_time);
+                        jcbg.put("report_time", report_time);
                         String specimen = ob.getString("specimen");
-                        jcbg.put("specimen",specimen);
+                        jcbg.put("specimen", specimen);
                         JSONArray sbjsonArray = JSON.parseArray(labTestItems.toString());
                         for (Object object : sbjsonArray) {
                             JSONObject sbobj = (JSONObject) object;
@@ -1189,80 +1158,6 @@ public class RuleService {
         return JSONObject.toJSONString(endparamMap);
     }
 
-    public String anaRule1(Map<String, String> paramMap) {
-        Map<String, Object> endparamMap = new HashMap<String, Object>();
-        endparamMap.putAll(paramMap);
-        for (String key : paramMap.keySet()) {
-            if ("ruyuanjilu".equals(key)) {
-                String ryjl = String.valueOf(paramMap.get("ruyuanjilu"));
-                JSONArray jsonArray = JSON.parseArray(ryjl);
-                Iterator<Object> it = jsonArray.iterator();
-                Map<String, String> ryjlMap = new HashMap<String, String>();
-                while (it.hasNext()) {
-                    JSONObject ob = (JSONObject) it.next();
-                    String ryjlkey = ob.getString("key");
-                    String value = ob.getString("value");
-                    if (value != null && !value.isEmpty()) {
-                        if ("既往史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_past_illness", value);
-                        } else if ("主诉".equals(ryjlkey)) {
-                            ryjlMap.put("chief_complaint", value);
-                        } else if ("现病史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_present_illness", value);
-                        } else if ("家族史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_family_member_diseases", value);
-                        } else if ("婚姻史".equals(ryjlkey)) {
-                            ryjlMap.put("menstrual_and_obstetrical_histories", value);
-                        } else if ("辅助检查".equals(ryjlkey)) {
-                            ryjlMap.put("auxiliary_examination", value);
-                        } else if ("体格检查".equals(ryjlkey)) {
-                            ryjlMap.put("physical_examination", value);
-                        }
-                    }
-                }
-                endparamMap.put("ruyuanjilu", ryjlMap);
-            }
-        }
-        return JSONObject.toJSONString(endparamMap);
-    }
-
-
-    public Map<String, Object> anaRule2Map(Map<String, String> paramMap) {
-        Map<String, Object> endparamMap = new HashMap<String, Object>();
-        endparamMap.putAll(paramMap);
-        for (String key : paramMap.keySet()) {
-            if ("ruyuanjilu".equals(key)) {
-                String ryjl = String.valueOf(paramMap.get("ruyuanjilu"));
-                JSONArray jsonArray = JSON.parseArray(ryjl);
-                Iterator<Object> it = jsonArray.iterator();
-                Map<String, String> ryjlMap = new HashMap<String, String>();
-                while (it.hasNext()) {
-                    JSONObject ob = (JSONObject) it.next();
-                    String ryjlkey = ob.getString("key");
-                    String value = ob.getString("value");
-                    if (value != null && !value.isEmpty()) {
-                        if ("既往史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_past_illness", value);
-                        } else if ("主诉".equals(ryjlkey)) {
-                            ryjlMap.put("chief_complaint", value);
-                        } else if ("现病史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_present_illness", value);
-                        } else if ("家族史".equals(ryjlkey)) {
-                            ryjlMap.put("history_of_family_member_diseases", value);
-                        } else if ("婚姻史".equals(ryjlkey)) {
-                            ryjlMap.put("menstrual_and_obstetrical_histories", value);
-                        } else if ("辅助检查".equals(ryjlkey)) {
-                            ryjlMap.put("auxiliary_examination", value);
-                        } else if ("体格检查".equals(ryjlkey)) {
-                            ryjlMap.put("physical_examination", value);
-                        }
-                    }
-                }
-                endparamMap.put("ruyuanjilu", ryjlMap);
-            }
-        }
-        return endparamMap;
-    }
 
     public List<Binglizhenduan> getZhenduan(Binglizhenduan b) {
         Set<Binglizhenduan> binglizhenduanSet = new HashSet<>();
@@ -1303,8 +1198,7 @@ public class RuleService {
         return list;
     }
 
-    public void getTipList2ShowLog(ReciveRule fill, String map) throws
-            ExecutionException, InterruptedException {
+    public void getTipList2ShowLog(Rule fill, String map)  {
         String doctor_id = fill.getDoctor_id();
         String patient_id = fill.getPatient_id();
         String visit_id = fill.getVisit_id();
@@ -1356,65 +1250,7 @@ public class RuleService {
                 logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
             }
         } else {
-            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}" + fill + map);
-        }
-
-    }
-
-    public void getTipList2ShowLog(Rule fill, String map) throws
-            ExecutionException, InterruptedException {
-        String doctor_id = fill.getDoctor_id();
-        String patient_id = fill.getPatient_id();
-        String visit_id = fill.getVisit_id();
-        if (StringUtils.isNotBlank(doctor_id) && StringUtils.isNotBlank(patient_id)) {
-            Object o = JSONObject.parse(map);
-            String result = "";
-            try {
-
-                result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getTipList, o, String.class);
-                if (!symbol.equals(result)) {
-                    JSONArray array = JSONArray.parseArray(result);
-                    Iterator<Object> iterator = array.iterator();
-                    while (iterator.hasNext()) {
-                        SmShowLog smShowLog = new SmShowLog();
-                        JSONObject next = (JSONObject) iterator.next();
-                        String itemName = next.getString("itemName");
-                        String type = next.getString("type");
-                        String stat = next.getString("stat");
-
-                        SmShowLog isExist = smShowLogRepService.findFirstByDoctorIdAndPatientIdAndItemNameAndTypeAndStatAndVisitId(doctor_id, patient_id, itemName, type, stat, visit_id);
-                        if (isExist != null) {
-                            continue;
-                        }
-                        smShowLog.setItemName(itemName);
-                        smShowLog.setType(type);
-                        smShowLog.setStat(stat);
-                        String data = next.getString("data");
-//                    smShowLog.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-                        smShowLog.setDate(data);
-                        String significance = next.getString("significance");
-
-
-                        if (StringUtils.isNotBlank(itemName) || StringUtils.isNotBlank(significance) || !"{}".equals(significance.trim())) {
-
-                            smShowLog.setSignificance(significance);
-                            String value = next.getString("value");
-                            smShowLog.setValue(value);
-                            smShowLog.setRuleStatus(0);
-                            smShowLog.setPatientId(patient_id);
-                            smShowLog.setDoctorId(doctor_id);
-                            smShowLog.setVisitId(visit_id);
-                            smShowLog.setDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
-                            smShowLogRepService.save(smShowLog);
-                        }
-                    }
-                }
-
-            } catch (HttpServerErrorException e) {
-                logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
-            }
-        } else {
-            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}" + fill + map);
+            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}", fill, map);
         }
 
     }
