@@ -277,12 +277,13 @@ public class RuleService {
         String o = JSONObject.toJSONString(fill);
         Object parse = JSONObject.parse(o);
         String data = "";
-        System.out.println(parse.toString());
+//        System.out.println(parse.toString());
         try {
             data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, parse, String.class);
         } catch (Exception e) {
             logger.info("规则匹配失败：原因：" + e.getMessage() + data);
         }
+        System.out.println(data);
         return data;
     }
 
