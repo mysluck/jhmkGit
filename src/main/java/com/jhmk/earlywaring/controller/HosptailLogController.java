@@ -284,7 +284,7 @@ public class HosptailLogController extends BaseEntityController<SmHospitalLog> {
         JSONObject jsonObject = JSONObject.parseObject(map);
         Integer logId = jsonObject.getInteger("logId");
         List<LogMapping> allByLogId = logMappingRepService.findAllByLogId(logId);
-        Collections.sort(allByLogId, CompareUtil.createComparator(1,"logTime"));
+        Collections.sort(allByLogId, CompareUtil.createComparator(1,"logTime","logOrderF","logOrderS"));
         AtResponse atsp = new AtResponse();
         atsp.setResponseCode(ResponseCode.OK);
         atsp.setData(allByLogId);

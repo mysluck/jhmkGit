@@ -2,6 +2,7 @@ package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
 import com.jhmk.earlywaring.entity.repository.ShouyezhenduanRepository;
+import com.jhmk.earlywaring.entity.rule.Ruyuanjilu;
 import com.jhmk.earlywaring.entity.rule.Shouyezhenduan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -71,4 +72,8 @@ public class ShouyezhenduanRepService extends BaseRepService<Shouyezhenduan, Int
         return repository.findAllByPatient_idAndVisit_id(patient_id, visit_id);
     }
 
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<Shouyezhenduan> findLessThanVisit_id(String patient_id, String visit_id) {
+        return repository.findLessThanVisit_id(patient_id,visit_id);
+    }
 }

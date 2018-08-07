@@ -3,6 +3,7 @@ package com.jhmk.earlywaring.entity.repository.service;
 import com.jhmk.earlywaring.base.BaseRepService;
 import com.jhmk.earlywaring.entity.repository.BasicInfoRepository;
 import com.jhmk.earlywaring.entity.repository.BinganshouyeRepository;
+import com.jhmk.earlywaring.entity.rule.BasicInfo;
 import com.jhmk.earlywaring.entity.rule.Binganshouye;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -71,5 +72,8 @@ public class BinganshouyeRepService extends BaseRepService<Binganshouye, Integer
     public Binganshouye findByPatient_idAndVisit_id(String patient_id, String visit_id) {
         return repository.findByPatient_idAndVisit_id(patient_id, visit_id);
     }
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<Binganshouye> findLessThanVisit_id(String patient_id, String visit_id) {
+        return repository.findLessThanVisit_id(patient_id,visit_id);
+    }
 }

@@ -24,7 +24,7 @@ public class ZhenduanService {
     public void saveAndFlush(Rule rule) {
         String patient_id = rule.getPatient_id();
         String visit_id = rule.getVisit_id();
-        List<Binglizhenduan> binglizhenduanList = binglizhenduanRepService.findAllByPatient_idAndVisit_id(patient_id, visit_id);
+        List<Binglizhenduan> binglizhenduanList = binglizhenduanRepService.findLessThanVisit_id(patient_id, visit_id);
         if (binglizhenduanList != null) {
             binglizhenduanRepService.delete(binglizhenduanList);
         }
@@ -32,7 +32,7 @@ public class ZhenduanService {
         if (binglizhenduan != null) {
             binglizhenduanRepService.save(binglizhenduan);
         }
-        List<Shouyezhenduan> shouyezhenduanList = shouyezhenduanRepService.findAllByPatient_idAndVisit_id(patient_id, visit_id);
+        List<Shouyezhenduan> shouyezhenduanList = shouyezhenduanRepService.findLessThanVisit_id(patient_id, visit_id);
         if (shouyezhenduanList != null) {
             shouyezhenduanRepService.delete(shouyezhenduanList);
         }

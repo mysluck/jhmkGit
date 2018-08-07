@@ -105,4 +105,12 @@ public class BaseConstants {
     public static final String JHHDRWS029 = "JHHDRWS029";//规整后数据，包括主诉、现病史、既往史、过敏史等数据
     public static final String JHHDRWS031 = "JHHDRWS031";//重症ICU生命体征
 
+    final static public String LTE = "小于等于";
+    final static public String GTE = "大于等于";
+    final static public String NEQ = "不等于";
+    final static public String NCT = "不包含";
+    final static public String LT = "小于";
+    final static public String GT = "大于";
+    final static public String EQ = "等于";
+    final static public String CT = "包含";
 }

@@ -2,6 +2,7 @@ package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
 import com.jhmk.earlywaring.entity.repository.RuyuanjiluRepository;
+import com.jhmk.earlywaring.entity.rule.Binglizhenduan;
 import com.jhmk.earlywaring.entity.rule.Ruyuanjilu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -70,5 +71,8 @@ public class RuyuanjiluRepService extends BaseRepService<Ruyuanjilu, Integer> {
     public List<Ruyuanjilu> findAllByPatientIdAndVisitId(String patient_id, String visit_id) {
         return repository.findAllByPatientIdAndVisitId(patient_id, visit_id);
     }
-
+    @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<Ruyuanjilu> findLessThanVisit_id(String patient_id, String visit_id) {
+        return repository.findLessThanVisit_id(patient_id,visit_id);
+    }
 }

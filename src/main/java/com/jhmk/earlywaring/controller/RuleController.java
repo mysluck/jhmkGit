@@ -366,7 +366,7 @@ public class RuleController extends BaseEntityController<Object> {
             ruleService.add2LogTable(data, rule);
             ruleService.add2ShowLog(rule, data);
         }
-//        ruleService.getTipList2ShowLog(rule, map);
+        ruleService.getTipList2ShowLog(rule, map);
         //一诉五史信息入库
         ruleService.saveRule2Database(rule);
 

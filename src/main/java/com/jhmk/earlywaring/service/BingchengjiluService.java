@@ -25,14 +25,14 @@ public class BingchengjiluService {
     public void saveAndFlush(Rule rule) {
         String patient_id = rule.getPatient_id();
         String visit_id = rule.getVisit_id();
-        Bingchengjilu byPatientIdAndVisitId = bingchengjiluRepService.findByPatient_idAndVisit_id(patient_id, visit_id);
+        List<Bingchengjilu> byPatientIdAndVisitId = bingchengjiluRepService.findLessThanVisit_id(patient_id, visit_id);
 
 
-        if (byPatientIdAndVisitId != null) {
+        if (byPatientIdAndVisitId .size()>0) {
             bingchengjiluRepService.delete(byPatientIdAndVisitId);
         }
         Bingchengjilu bingchengjilu = rule.getBingchengjilu();
-        if (bingchengjilu != null ) {
+        if (bingchengjilu != null) {
             bingchengjiluRepService.save(bingchengjilu);
         }
     }

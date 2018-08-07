@@ -26,7 +26,7 @@ public class YizhuService {
     public void saveAndFlush(Rule rule) {
         String patient_id = rule.getPatient_id();
         String visit_id = rule.getVisit_id();
-        List<Yizhu> allByPatientIdAndVisitId = yizhunRepService.findAllByPatientIdAndVisitId(patient_id, visit_id);
+        List<Yizhu> allByPatientIdAndVisitId = yizhunRepService.findLessThanVisit_id(patient_id, visit_id);
 
 
         if (allByPatientIdAndVisitId != null&&allByPatientIdAndVisitId.size()>0) {

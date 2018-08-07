@@ -26,9 +26,9 @@ public class BasicInfoService {
     public void saveAndFlush(Rule rule) {
         String patient_id = rule.getPatient_id();
         String visit_id = rule.getVisit_id();
-        BasicInfo oldbasicInfo = basicInfoRepService.findByPatient_idAndVisit_id(patient_id, visit_id);
-        if (oldbasicInfo != null) {
-            basicInfoRepService.delete(oldbasicInfo);
+        List<BasicInfo> lessThanVisit_id = basicInfoRepService.findLessThanVisit_id(patient_id, visit_id);
+        if (lessThanVisit_id .size()>0) {
+            basicInfoRepService.delete(lessThanVisit_id);
         }
         String pageSource = rule.getPageSource();
         String warnSource = rule.getWarnSource();

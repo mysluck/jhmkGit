@@ -1,9 +1,8 @@
 package com.jhmk.earlywaring.entity.repository.service;
 
 import com.jhmk.earlywaring.base.BaseRepService;
-import com.jhmk.earlywaring.entity.repository.YizhuRepository;
-import com.jhmk.earlywaring.entity.rule.Shouyezhenduan;
-import com.jhmk.earlywaring.entity.rule.Yizhu;
+import com.jhmk.earlywaring.entity.SmOrder;
+import com.jhmk.earlywaring.entity.repository.SmOrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -14,19 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 @Service
-public class YizhunRepService extends BaseRepService<Yizhu, Integer> {
+public class SmOrderRepService extends BaseRepService<SmOrder, Integer> {
     @Autowired
-    YizhuRepository repository;
+    SmOrderRepository repository;
 
 
     @Override
     @Transactional(propagation = Propagation.REQUIRED)
-    public Yizhu save(Yizhu yizhu) {
-        return repository.save(yizhu);
+    public SmOrder save(SmOrder SmOrder) {
+        return repository.save(SmOrder);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public Iterable<Yizhu> save(List<Yizhu> list) {
+    public Iterable<SmOrder> save(List<SmOrder> list) {
         return repository.save(list);
     }
 
@@ -37,42 +36,38 @@ public class YizhunRepService extends BaseRepService<Yizhu, Integer> {
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(Yizhu Yizhu) {
-        repository.delete(Yizhu);
+    public void delete(SmOrder SmOrder) {
+        repository.delete(SmOrder);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)
-    public void delete(List<Yizhu> list) {
+    public void delete(List<SmOrder> list) {
         repository.delete(list);
     }
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Yizhu findOne(Integer id) {
+    public SmOrder findOne(Integer id) {
         return repository.findOne(id);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Iterable<Yizhu> findAll() {
+    public Iterable<SmOrder> findAll() {
         return repository.findAll();
     }
 
 
     @Override
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public Page<Yizhu> findAll(Pageable pageable) {
+    public Page<SmOrder> findAll(Pageable pageable) {
         return repository.findAll(pageable);
     }
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
+    public List<String> findAllByOrOrderNum(int num) {
+        return repository.findAllByOrOrderNum(num);
+    }
 
-    public List<Yizhu> findAllByPatientIdAndVisitId(String patient_id, String visit_id) {
-        return repository.findAllByPatientIdAndVisitId(patient_id, visit_id);
-    }
-    @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public List<Yizhu> findLessThanVisit_id(String patient_id, String visit_id) {
-        return repository.findLessThanVisit_id(patient_id,visit_id);
-    }
 }

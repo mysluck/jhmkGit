@@ -17,7 +17,8 @@ public class LogMapping {
     private String logRelation;
     private String logResult;
     private String logTime;
-
+    private Integer logOrderF;
+    private Integer logOrderS;
     @Id
     @Column(name = "id", nullable = false)
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -78,6 +79,25 @@ public class LogMapping {
     public void setLogTime(String logTime) {
         this.logTime = logTime;
     }
+    @Basic
+    @Column(name = "log_order_f", nullable = true)
+    public Integer getLogOrderF() {
+        return logOrderF;
+    }
+
+    public void setLogOrderF(Integer logOrderF) {
+        this.logOrderF = logOrderF;
+    }
+
+    @Basic
+    @Column(name = "log_order_s", nullable = true)
+    public Integer getLogOrderS() {
+        return logOrderS;
+    }
+
+    public void setLogOrderS(Integer logOrderS) {
+        this.logOrderS = logOrderS;
+    }
 
     @Override
     public boolean equals(Object o) {
@@ -89,12 +109,28 @@ public class LogMapping {
                 Objects.equals(logObj, that.logObj) &&
                 Objects.equals(logRelation, that.logRelation) &&
                 Objects.equals(logResult, that.logResult) &&
-                Objects.equals(logTime, that.logTime);
+                Objects.equals(logTime, that.logTime) &&
+                Objects.equals(logOrderF, that.logOrderF) &&
+                Objects.equals(logOrderS, that.logOrderS);
     }
 
     @Override
     public int hashCode() {
 
-        return Objects.hash(id, logId, logObj, logRelation, logResult, logTime);
+        return Objects.hash(id, logId, logObj, logRelation, logResult, logTime, logOrderF, logOrderS);
+    }
+
+    @Override
+    public String toString() {
+        return "LogMapping{" +
+                "id=" + id +
+                ", logId=" + logId +
+                ", logObj='" + logObj + '\'' +
+                ", logRelation='" + logRelation + '\'' +
+                ", logResult='" + logResult + '\'' +
+                ", logTime='" + logTime + '\'' +
+                ", logOrderF=" + logOrderF +
+                ", logOrderS=" + logOrderS +
+                '}';
     }
 }
