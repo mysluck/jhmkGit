@@ -2,15 +2,28 @@ server:
   port: 8111
 spring:
   datasource:
+#    type: com.alibaba.druid.pool.DruidDataSource
+#    url: jdbc:mysql://localhost:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
     url: jdbc:mysql://192.168.8.22:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
+#    url: jdbc:mysql://192.168.132.4:3306/jhmk_waring?useUnicode=true&characterEncoding=utf-8&autoReconnect=true&failOverReadOnly=false&useSSL=false
     driver-class-name: com.mysql.jdbc.Driver
     username: root
+#    password: root
     password: 123456
+    max-active: 300
+    test-while-idle: true
+    time-between-eviction-runs-millis: 300000
+    min-evictable-idle-time-millis: 1800000
+    validation-query: select 'x'
+
   jpa:
     database: mysql
     generate-ddl: true
     show-sql: true
-
-
+#    hibernate:
+#      naming:
+#        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
 url:
   cdssurl : http://192.168.8.20:8010
+#  cdssurl : http://192.168.132.7:8010
+
