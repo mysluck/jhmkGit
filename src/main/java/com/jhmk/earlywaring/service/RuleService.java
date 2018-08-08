@@ -280,10 +280,10 @@ public class RuleService {
 //        System.out.println(parse.toString());
         try {
             data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.matchrule, parse, String.class);
+            logger.info("匹配规则结果为{}", data);
         } catch (Exception e) {
             logger.info("规则匹配失败：原因：" + e.getMessage() + data);
         }
-        System.out.println(data);
         return data;
     }
 
@@ -966,7 +966,7 @@ public class RuleService {
                 logger.error("访问{}接口出现异常，错误编码:{},错误信息:{}", "getTipList.json", e.getCause(), e.getMessage());
             }
         } else {
-            logger.info("医生id或病人id为空,条件为：{}，触发规则为：{}", fill, map);
+//            logger.info("医生id或病人id为空,触发规则为：{}", map);
         }
 
     }
