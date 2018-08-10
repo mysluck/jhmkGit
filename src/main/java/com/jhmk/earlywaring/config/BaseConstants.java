@@ -113,4 +113,10 @@ public class BaseConstants {
     final static public String GT = "大于";
     final static public String EQ = "等于";
     final static public String CT = "包含";
+
+
+    public static final String updatechildelement = "/med/cindecision/updatechildelement.json";//  更新childElement 接口  需要提供两个参数  _id  (规则ID)  childElement 具体信息
+    public static final String findallstandardrules = "/med/cindecision/findallstandardrules.json";//  查询所有得标准规则信息    需要提供page pageSize两个参数
+    public static final String findallchildrules = "/med/cindecision/findallchildrules.json";//  查询规则下所有得子类规则信息
+
 }

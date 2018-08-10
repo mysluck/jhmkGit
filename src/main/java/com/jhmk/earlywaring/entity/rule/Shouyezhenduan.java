@@ -10,7 +10,7 @@ import java.util.Objects;
 
 @Entity
 @Table(name = "rule_shouyezhenduan", schema = "jhmk_waring")
-public class Shouyezhenduan extends Zhenduan{
+public class Shouyezhenduan {
     private int id;
     private String visit_id;
     private String patient_id;

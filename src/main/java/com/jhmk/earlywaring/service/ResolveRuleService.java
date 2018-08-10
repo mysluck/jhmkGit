@@ -5,7 +5,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.entity.SmShowLog;
-import com.jhmk.earlywaring.entity.rule.CdssRuleBean;
+import com.jhmk.earlywaring.entity.rule.FormatRule;
 import com.jhmk.earlywaring.entity.rule.LogMapping;
 import com.jhmk.earlywaring.entity.rule.StandardRule;
 import com.jhmk.earlywaring.util.DateFormatUtil;
@@ -35,13 +35,13 @@ public class ResolveRuleService {
      * 获取cdss规则解析
      * 用于标准规则 获取提示释义等信息
      */
-    public CdssRuleBean getStandardRule(String ruleStr) {
+    public FormatRule getStandardRule(String ruleStr) {
         JSONObject jObject = JSON.parseObject(ruleStr);
         Object result = jObject.get("result");
-        CdssRuleBean cdssRuleBean = null;
+        FormatRule cdssRuleBean = null;
         if (ObjectUtils.anyNotNull(result) && !symbol.equals(result)) {
             Map resultMap = (Map) result;
-            cdssRuleBean = MapUtil.map2Bean(resultMap, CdssRuleBean.class);
+            cdssRuleBean = MapUtil.map2Bean(resultMap, FormatRule.class);
         }
         return cdssRuleBean;
     }

@@ -16,7 +16,7 @@
 //public class RedisCacheConfig extends CachingConfigurerSupport {
 //
 //    @Bean
-//    public KeyGenerator jrxCacheKeyGenerator(){
+//    public KeyGenerator jhmkCacheKeyGenerator(){
 //        return new KeyGenerator() {
 //            @Override
 //            public Object generate(Object target, Method method, Object... params) {
@@ -32,7 +32,7 @@
 //    }
 //
 //    @Bean
-//    public KeyGenerator jrxCacheKeyGeneratorForSave(){
+//    public KeyGenerator jhmkCacheKeyGeneratorForSave(){
 //        return new KeyGenerator() {
 //            @Override
 //            public Object generate(Object target, Method method, Object... params) {

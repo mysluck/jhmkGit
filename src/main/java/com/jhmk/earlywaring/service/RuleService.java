@@ -18,6 +18,7 @@ import com.jhmk.earlywaring.webservice.AnalysisXmlService;
 import com.jhmk.earlywaring.webservice.CdrService;
 import com.jhmk.earlywaring.webservice.entity.OriginalJianyanbaogao;
 import com.jhmk.earlywaring.webservice.entity.JianyanbaogaoForAuxiliary;
+import jdk.nashorn.internal.scripts.JS;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -792,7 +793,10 @@ public class RuleService {
      * @return
      */
     public String stringTransform(String data) {
-        String s2 = data.replaceAll("\\(", "（").replaceAll("\\)", "）");
+        String s2 = null;
+        if (StringUtils.isNotBlank(data)) {
+            s2 = data.replaceAll("\\(", "（").replaceAll("\\)", "）");
+        }
         return s2;
     }
 
@@ -1104,6 +1108,107 @@ public class RuleService {
             rule.setBingchengjilu(bingchengjilu);
         }
         return rule;
+    }
+
+    /**
+     * 根据cdss返回数据获取规则条件字段
+     *
+     * @param str
+     * @return
+     */
+    public String getRuleConditionByData(String str) {
+        JSONObject jsonObject = JSONObject.parseObject(str);
+        Object result = jsonObject.get("result");
+        String ruleCondition = "";
+        if (Objects.nonNull(result)) {
+            Map<String, String> parse = (Map) JSONObject.parse(result.toString());
+            ruleCondition = parse.get("ruleCondition");
+        }
+        return ruleCondition;
+    }
+
+
+    /**
+     * 根据id获取cdss规则实体类
+     *
+     * @param id
+     * @return
+     */
+    public FormatRule getFormatRuleById(String id) {
+        Map<String, String> idMap = new HashMap<>();
+        idMap.put("_id", id);
+        Object obj = JSONObject.toJSON(idMap);
+        //获取所有子规则id 或者数据
+        String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, obj, String.class);
+        JSONObject jsonObject = JSONObject.parseObject(result);
+        if (!symbol.equals(result) && StringUtils.isNotBlank(result)) {
+            Object resultData = jsonObject.get("result");
+            Map<String, String> mapData = (Map) JSONObject.parse(resultData.toString());
+            FormatRule formatRule = MapUtil.map2Bean(mapData, FormatRule.class);
+            return formatRule;
+        } else {
+            return null;
+        }
+    }
+
+    /**
+     * 添加标准规则子规则
+     *
+     * @param condition  规则条件
+     * @param formatRule 标准规则
+     * @return
+     */
+    public void addChildRuleByCondition(String condition, FormatRule formatRule) {
+        String ruleId = formatRule.getId();
+        FormatRule childFormat = new FormatRule();
+        BeanUtils.copyProperties(formatRule, childFormat);
+        childFormat.setId(null);
+        childFormat.setChildElement(null);
+        childFormat.setRuleCondition(condition);
+        childFormat.setCreateTime(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+        childFormat.setSubmitDate(DateFormatUtil.format(new Date(), DateFormatUtil.DATETIME_PATTERN_SS));
+        childFormat.setParentId(ruleId);
+        Object o = JSONObject.toJSON(childFormat);
+        String forObject = null;
+        try {
+            forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.addrule, o, String.class);
+        } catch (Exception e) {
+            logger.debug("添加子规则失败,原因为：{},返回结果{}", e.getMessage(), forObject);
+        } finally {
+            JSONObject jsonObject = JSONObject.parseObject(forObject);
+            String code = jsonObject.getString("code");
+            if (BaseConstants.OK.equals(code)) {
+            } else {
+                logger.debug("添加子规则失败,条件为{},返回结果{}", condition, forObject);
+            }
+        }
+
+    }
+
+    /**
+     * 判断规则条件是否是正确的 ((   1and2and3  ))
+     *
+     * @param str
+     * @return
+     */
+    public boolean isRule(String str) {
+        if ("((".equals(str.substring(1, 2)) && "))".equals(str.substring(str.length() - 2))) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 将条件修改为标准规则
+     *
+     * @param str
+     * @return
+     */
+    public String updateOldRule(String str) {
+        StringBuffer sb = new StringBuffer("(");
+        sb.append(str).append(")");
+        return sb.toString();
     }
 
 }

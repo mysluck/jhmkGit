@@ -111,7 +111,7 @@ public class UserModelService {
         }
         sb.append(")");
         System.out.println(sb);
-        return sb.toString();
+        return sb.toString().trim();
     }
 
 

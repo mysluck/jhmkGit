@@ -95,6 +95,10 @@ public class RuleController extends BaseEntityController<Object> {
 //        String ruleCondition = userModelService.analyzeOldRule(condition);
         String ruleCondition = userModelService.getOldRule(condition);
         param.put("ruleCondition", ruleCondition);
+        Boolean isStandard = (Boolean) param.get("isStandard");
+        if (isStandard){
+            param.put("childElement", ruleCondition);
+        }
 
         String userId = getUserId();
         param.put("doctorId", userId.trim());
@@ -432,10 +436,12 @@ public class RuleController extends BaseEntityController<Object> {
         try {
 
             data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, o, String.class);
-            Map<String, String> parse = (Map) JSONObject.parse(data);
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            Object result = jsonObject.get("result");
+            Map<String, String> parse = (Map) JSONObject.parse(result.toString());
             String ruleCondition = parse.get("ruleCondition");
             String s = ruleService.disposeRuleCondition(ruleCondition);
-            restList = ruleService.restoreRule(data);
+            restList = ruleService.restoreRule(s);
         } catch (Exception e) {
 
         } finally {

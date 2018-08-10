@@ -2,37 +2,56 @@ package com.jhmk.earlywaring.entity.rule;
 
 import java.io.Serializable;
 import java.io.StringReader;
+import java.util.Date;
+import java.util.Objects;
 
 /**
  * 格式化规则 用于前台显示
  */
 public class FormatRule implements Serializable {
+
+    private String id;
     private String doctorId;
     private String createTime;
+    private String submitDate;
     //规则条件
     private String ruleCondition;
-    private String id;
-    //是否提交
-    private String isSubmit;
-    //规则出处
-    private String ruleSource;
-    //所属类别 医嘱 、诊断
-    private String classification;
-    //提示内容
+    //标准规则专用 标志子元素
+    private String childElement;
+    //tishi
     private String hintContent;
-    //示意内容
+    //释义
     private String signContent;
-    //预警等级
+    //出处
+    private String ruleSource;
+
+
+    private boolean isSubmit=true;//是否提交
+
+    private String progress;//进度
+
+    private String examine;//是否审核
+
+    private String isRun;//是否运行
+
+    private String identification;//专科标识
+
+    private String classification;//规则分类
+
     private String warninglevel;
-    //审核
-    private String examine;
-    //是否运行规则
-    private String isRun;
+    //是否是标准规则
+    private boolean isStandard;
+    //父id
+    private String  parentId;
 
-    //专科标志
-    private String identification;
+    private String sts;//状态 20180522字段新增
 
-    public FormatRule() {
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public String getDoctorId() {
@@ -43,12 +62,12 @@ public class FormatRule implements Serializable {
         this.doctorId = doctorId;
     }
 
-    public String getCreateTime() {
-        return createTime;
-    }
-
     public void setCreateTime(String createTime) {
         this.createTime = createTime;
+    }
+
+    public String getCreateTime() {
+        return createTime;
     }
 
     public String getRuleCondition() {
@@ -57,38 +76,6 @@ public class FormatRule implements Serializable {
 
     public void setRuleCondition(String ruleCondition) {
         this.ruleCondition = ruleCondition;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getIsSubmit() {
-        return isSubmit;
-    }
-
-    public void setIsSubmit(String isSubmit) {
-        this.isSubmit = isSubmit;
-    }
-
-    public String getRuleSource() {
-        return ruleSource;
-    }
-
-    public void setRuleSource(String ruleSource) {
-        this.ruleSource = ruleSource;
-    }
-
-    public String getIdentification() {
-        return identification;
-    }
-
-    public void setIdentification(String identification) {
-        this.identification = identification;
     }
 
     public String getHintContent() {
@@ -107,20 +94,28 @@ public class FormatRule implements Serializable {
         this.signContent = signContent;
     }
 
-    public String getWarninglevel() {
-        return warninglevel;
+    public String getRuleSource() {
+        return ruleSource;
     }
 
-    public void setWarninglevel(String warninglevel) {
-        this.warninglevel = warninglevel;
+    public void setRuleSource(String ruleSource) {
+        this.ruleSource = ruleSource;
     }
 
-    public String getClassification() {
-        return classification;
+    public boolean isSubmit() {
+        return isSubmit;
     }
 
-    public void setClassification(String classification) {
-        this.classification = classification;
+    public void setSubmit(boolean submit) {
+        isSubmit = submit;
+    }
+
+    public String getProgress() {
+        return progress;
+    }
+
+    public void setProgress(String progress) {
+        this.progress = progress;
     }
 
     public String getExamine() {
@@ -137,5 +132,87 @@ public class FormatRule implements Serializable {
 
     public void setIsRun(String isRun) {
         this.isRun = isRun;
+    }
+
+    public String getIdentification() {
+        return identification;
+    }
+
+    public void setIdentification(String identification) {
+        this.identification = identification;
+    }
+
+    public String getClassification() {
+        return classification;
+    }
+
+    public void setClassification(String classification) {
+        this.classification = classification;
+    }
+
+    public String getWarninglevel() {
+        return warninglevel;
+    }
+
+    public void setWarninglevel(String warninglevel) {
+        this.warninglevel = warninglevel;
+    }
+
+    public String getSts() {
+        return sts;
+    }
+
+    public void setSts(String sts) {
+        this.sts = sts;
+    }
+
+    public String getChildElement() {
+        return childElement;
+    }
+
+    public void setChildElement(String childElement) {
+        this.childElement = childElement;
+    }
+
+    public String getSubmitDate() {
+        return submitDate;
+    }
+
+    public void setSubmitDate(String submitDate) {
+        submitDate = submitDate;
+    }
+
+    public FormatRule() {
+    }
+
+    public boolean isStandard() {
+        return isStandard;
+    }
+
+    public void setStandard(boolean standard) {
+        isStandard = standard;
+    }
+
+    public String getParentId() {
+        return parentId;
+    }
+
+    public void setParentId(String parentId) {
+        this.parentId = parentId;
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
+    @Override
+    protected Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }

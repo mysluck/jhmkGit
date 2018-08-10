@@ -29,8 +29,7 @@ public class StandardRule {
 
     private String status;
 
-    //标志 用来区分规则位置的标志
-    private int mark;
+
 
     public String getStatus() {
         return status;
@@ -80,11 +79,5 @@ public class StandardRule {
         this.allValues = allValues;
     }
 
-    public int getMark() {
-        return mark;
-    }
 
-    public void setMark(int mark) {
-        this.mark = mark;
-    }
 }

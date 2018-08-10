@@ -4,7 +4,6 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.entity.UserModel;
-import com.jhmk.earlywaring.entity.rule.ReciveRule;
 import com.jhmk.earlywaring.entity.rule.Rule;
 import com.jhmk.earlywaring.service.RuleService;
 import jdk.nashorn.internal.scripts.JS;

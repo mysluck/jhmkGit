@@ -16,7 +16,6 @@ import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.entity.rule.Binglizhenduan;
 import com.jhmk.earlywaring.entity.rule.Rule;
 import com.jhmk.earlywaring.entity.rule.Shouyezhenduan;
-import com.jhmk.earlywaring.entity.rule.Zhenduan;
 import com.jhmk.earlywaring.model.WebPage;
 import com.jhmk.earlywaring.util.CompareUtil;
 import com.jhmk.earlywaring.util.DateFormatUtil;
