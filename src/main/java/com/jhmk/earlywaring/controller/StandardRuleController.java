@@ -141,8 +141,9 @@ public class StandardRuleController extends BaseController {
             standardRuleService.deleteChildRuleByCondition(field, formatRule);
         }
         standardRuleService.updataStandardChildElement(field, standardName, standRule, false);
-
-        wirte(response, "");
+        AtResponse atResponse = new AtResponse();
+        atResponse.setResponseCode(ResponseCode.OK);
+        wirte(response, atResponse);
     }
 
     /**
@@ -161,18 +162,15 @@ public class StandardRuleController extends BaseController {
         String id = jsonObject.getString("id");
         String field = jsonObject.getString("field");
 
+
         String standardName = jsonObject.getString("standardName");
         //新加字段
         //查询规则实体
         FormatRule formatRule = ruleService.getFormatRuleById(id);
         formatRule.setDoctorId(getUserId());
         String childElement = formatRule.getChildElement();
-
-
         boolean b = standardRuleService.updataStandardChildElement(field, standardName, formatRule, true);
         if (b) {
-
-
             List<List<StandardRule>> basicStandardRuleList = standardRuleService.getBasicStandardRule(childElement);
             // 删除 此标准规则下所有字段 并替换新加字段  然后互相交叉添加子规则
             for (int i = 0, x = basicStandardRuleList.size(); i < x; i++) {
@@ -180,7 +178,7 @@ public class StandardRuleController extends BaseController {
                 for (int j = 0, y = basicStandardRuleList.size(); j < y; j++) {
                     StandardRule standardRule = standardRuleList.get(j);
                     if (standardName.equals(standardRule.getStandardValue())) {
-                        basicStandardRuleList.get(i).get(j).setAllValues(Arrays.asList(field));
+                        basicStandardRuleList.get(i).get(j).setAllValues(Arrays.asList(field.split(",")));
                     }
                 }
 
@@ -190,8 +188,8 @@ public class StandardRuleController extends BaseController {
             for (String s : list) {
                 if (!ruleService.isRule(s)) {
                     s = ruleService.updateOldRule(s);
+                    ruleService.addChildRuleByCondition(s, formatRule);
                 }
-                ruleService.addChildRuleByCondition(s, formatRule);
             }
             //修改标准规则的子规则条件字段
         } else {

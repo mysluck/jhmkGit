@@ -26,7 +26,7 @@ public class FormatRule implements Serializable {
     private String ruleSource;
 
 
-    private boolean isSubmit=true;//是否提交
+    private boolean isSubmit;//是否提交
 
     private String progress;//进度
 
@@ -40,7 +40,7 @@ public class FormatRule implements Serializable {
 
     private String warninglevel;
     //是否是标准规则
-    private boolean isStandard;
+    private String isStandard;
     //父id
     private String  parentId;
 
@@ -102,12 +102,12 @@ public class FormatRule implements Serializable {
         this.ruleSource = ruleSource;
     }
 
-    public boolean isSubmit() {
+    public boolean getIsSubmit() {
         return isSubmit;
     }
 
-    public void setSubmit(boolean submit) {
-        isSubmit = submit;
+    public void setIsSubmit(boolean submit) {
+        this.isSubmit = submit;
     }
 
     public String getProgress() {
@@ -179,17 +179,19 @@ public class FormatRule implements Serializable {
     }
 
     public void setSubmitDate(String submitDate) {
-        submitDate = submitDate;
+        this.submitDate = submitDate;
     }
+
+
 
     public FormatRule() {
     }
 
-    public boolean isStandard() {
+    public String getIsStandard() {
         return isStandard;
     }
 
-    public void setStandard(boolean standard) {
+    public void setIsStandard(String standard) {
         isStandard = standard;
     }
 

@@ -212,6 +212,8 @@ public class StandardRuleService {
      * @return
      */
     public boolean updataStandardChildElement(String field, String standardName, FormatRule formatrule, boolean flag) {
+        String[] childNames = field.split(",");
+
         // ture 增加
         String childElement = formatrule.getChildElement();
         StringBuffer sb = new StringBuffer();
@@ -225,13 +227,15 @@ public class StandardRuleService {
                         int i1 = and.indexOf(")");
                         String startStr = and.substring(0, i1);
                         String endStr = and.substring(i1);
-                        stringBuffer.append(startStr).append("/").append(field).append(endStr);
+                        stringBuffer.append(startStr).append(endStr);
+
                         sb.append(stringBuffer);
                     } else {
-                        sb.append(and).append("/").append(field);
+                        sb.append(and);
+                        for (String name : childNames) {
+                            sb.append("/").append(name);
+                        }
                     }
-
-
                 } else {
                     sb.append(and);
                 }
@@ -244,7 +248,9 @@ public class StandardRuleService {
         } else {
             for (int i = 0; i < ands.length; i++) {
                 String and = ands[i];
-                if (and.contains(field)) {
+                String[] split1 = field.split(",");
+                List<String> list = Arrays.asList(split1);
+                if (and.contains(split1[0])) {
                     //包含 此字段 和）
                     if (and.contains(")")) {
                         int i1 = and.indexOf(")");
@@ -255,7 +261,7 @@ public class StandardRuleService {
                         if (split.length > 1) {
                             for (int j = 0; j < split.length; j++) {
                                 String tempStr = split[j];
-                                if (field.equals(tempStr)) {
+                                if (list.contains(tempStr)) {
                                     continue;
                                 } else {
                                     sb.append(split[j]);
@@ -278,7 +284,7 @@ public class StandardRuleService {
                         if (split.length > 1) {
                             for (int j = 0; j < split.length; j++) {
                                 String tempStr = split[j];
-                                if (field.equals(tempStr)) {
+                                if (list.contains(tempStr)) {
                                     continue;
                                 } else {
                                     sb.append(split[j]);
@@ -301,11 +307,12 @@ public class StandardRuleService {
 
             }
         }
-
+        String s1 = sb.toString();
+        String replace = s1.replaceAll("\\/\\)", ")").replaceAll("//", "/").replaceAll("/and", "and").trim();
         Map<String, String> param = new HashMap<>();
         String id = formatrule.getId();
         param.put("_id", id);
-        param.put("childElement", sb.toString().trim());
+        param.put("childElement", replace);
         Object parse = JSONObject.toJSON(param);
         String s = "";
         try {
@@ -365,22 +372,25 @@ public class StandardRuleService {
 
 
     public void deleteChildRuleByCondition(String condition, FormatRule formatRule) {
+        String[] split = condition.split(",");
         String ruleCondition = formatRule.getRuleCondition();
-        List<String> ruleConditions = getRuleConditions(ruleCondition);
-        if (ruleConditions.contains(condition)) {
-            String id = formatRule.getId();
-            Map<String, String> param = new HashMap<>();
-            param.put("_id", id);
-            Object obj = JSONObject.toJSON(param);
-            try {
-                String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, obj, String.class);
-                JSONObject jsonObject = JSONObject.parseObject(result);
-                String code = jsonObject.getString("code");
-                if (!BaseConstants.OK.equals(code)) {
-                    logger.debug("删除子规则失败失败，子规则id为{}，条件为{}", id, condition);
+        for (String s : split) {
+            List<String> ruleConditions = getRuleConditions(ruleCondition);
+            if (ruleConditions.contains(s)) {
+                String id = formatRule.getId();
+                Map<String, String> param = new HashMap<>();
+                param.put("_id", id);
+                Object obj = JSONObject.toJSON(param);
+                try {
+                    String result = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.deleterule, obj, String.class);
+                    JSONObject jsonObject = JSONObject.parseObject(result);
+                    String code = jsonObject.getString("code");
+                    if (!BaseConstants.OK.equals(code)) {
+                        logger.debug("删除子规则失败失败，子规则id为{}，条件为{}", id, s);
+                    }
+                } catch (Exception e) {
+                    logger.debug("调用" + BaseConstants.deleterule + "接口失败：{}", e.getMessage());
                 }
-            } catch (Exception e) {
-                logger.debug("调用" + BaseConstants.deleterule + "接口失败：{}", e.getMessage());
             }
 
         }

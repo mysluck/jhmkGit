@@ -130,12 +130,33 @@ public class RuleController extends BaseEntityController<Object> {
     @PostMapping("/view")
     @ResponseBody
     public void view(HttpServletResponse response, @RequestBody String map) {
-        JSONObject jsonObject = JSONObject.parseObject(map);
-        String id = jsonObject.getString("_id");
-        OriRule one = oriRuleRepService.findOne(id);
-        String rule = one.getRule();
-        wirte(response, rule);
 
+        Object o = JSONObject.parse(map);
+        List<AnalyzeBean> restList = null;
+        String data = "";
+        try {
+
+            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, map, String.class);
+            JSONObject jsonObject = JSONObject.parseObject(data);
+            Object result = jsonObject.get("result");
+            Map<String, String> parse = (Map) JSONObject.parse(result.toString());
+            String ruleCondition = parse.get("ruleCondition");
+            String s = ruleService.disposeRuleCondition(ruleCondition);
+            restList = ruleService.restoreRule(s);
+        } catch (Exception e) {
+            logger.debug("获取规则信息失败：{}",e.getMessage());
+        } finally {
+            wirte(response, restList);
+        }
+
+
+
+
+//        JSONObject jsonObject = JSONObject.parseObject(map);
+//        String id = jsonObject.getString("_id");
+//        OriRule one = oriRuleRepService.findOne(id);
+//        String rule = one.getRule();
+//        wirte(response, rule);
     }
 
 
@@ -443,7 +464,7 @@ public class RuleController extends BaseEntityController<Object> {
             String s = ruleService.disposeRuleCondition(ruleCondition);
             restList = ruleService.restoreRule(s);
         } catch (Exception e) {
-
+            logger.debug("获取规则信息失败：{}",e.getMessage());
         } finally {
             wirte(response, restList);
         }
