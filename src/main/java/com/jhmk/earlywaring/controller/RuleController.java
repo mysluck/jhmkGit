@@ -6,18 +6,16 @@ import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseEntityController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.config.UrlConfig;
-import com.jhmk.earlywaring.entity.OriRule;
-import com.jhmk.earlywaring.entity.SmHospitalLog;
 import com.jhmk.earlywaring.entity.SmShowLog;
-import com.jhmk.earlywaring.entity.repository.service.OriRuleRepService;
-import com.jhmk.earlywaring.entity.repository.service.SmHospitalLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmShowLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.entity.rule.AnalyzeBean;
+import com.jhmk.earlywaring.entity.rule.FormatRule;
 import com.jhmk.earlywaring.entity.rule.Rule;
 import com.jhmk.earlywaring.model.AtResponse;
 import com.jhmk.earlywaring.model.ResponseCode;
 import com.jhmk.earlywaring.service.HosptailLogService;
+import com.jhmk.earlywaring.service.ResolveRuleService;
 import com.jhmk.earlywaring.service.RuleService;
 import com.jhmk.earlywaring.service.UserModelService;
 import com.jhmk.earlywaring.util.DateFormatUtil;
@@ -59,12 +57,13 @@ public class RuleController extends BaseEntityController<Object> {
     UserModelService userModelService;
     @Autowired
     UrlConfig urlConfig;
-    @Autowired
-    OriRuleRepService oriRuleRepService;
+
     @Autowired
     CdrService cdrService;
     @Autowired
     AnalysisXmlService analysisXmlService;
+    @Autowired
+    ResolveRuleService resolveRuleService;
     private static final Logger logger = LoggerFactory.getLogger(RuleController.class);
 
 
@@ -95,8 +94,8 @@ public class RuleController extends BaseEntityController<Object> {
 //        String ruleCondition = userModelService.analyzeOldRule(condition);
         String ruleCondition = userModelService.getOldRule(condition);
         param.put("ruleCondition", ruleCondition);
-        Boolean isStandard = (Boolean) param.get("isStandard");
-        if (isStandard){
+        String isStandard =  (String)param.get("isStandard");
+        if ("true".equals(isStandard)) {
             param.put("childElement", ruleCondition);
         }
 
@@ -108,17 +107,6 @@ public class RuleController extends BaseEntityController<Object> {
         String forObject = "";
         try {
             forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.addrule, o, String.class);
-            //mongo库中_id
-            String id = ruleService.getId(forObject);
-            OriRule rule = new OriRule();
-            JSONObject jsonObject = JSONObject.parseObject(map);
-            String oriRule = JSONObject.toJSONString(jsonObject);
-            rule.setRule(oriRule);
-            rule.setMid(id);
-            OriRule save = oriRuleRepService.save(rule);
-            if (save == null) {
-                logger.info("添加本地原始规则失败：" + oriRule);
-            }
         } catch (Exception e) {
             logger.info("添加规则失败：" + e.getMessage());
         } finally {
@@ -134,22 +122,21 @@ public class RuleController extends BaseEntityController<Object> {
         Object o = JSONObject.parse(map);
         List<AnalyzeBean> restList = null;
         String data = "";
+        FormatRule formatRule = null;
         try {
 
-            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, map, String.class);
+            data = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.getruleforid, o, String.class);
             JSONObject jsonObject = JSONObject.parseObject(data);
             Object result = jsonObject.get("result");
-            Map<String, String> parse = (Map) JSONObject.parse(result.toString());
-            String ruleCondition = parse.get("ruleCondition");
-            String s = ruleService.disposeRuleCondition(ruleCondition);
-            restList = ruleService.restoreRule(s);
+            formatRule = JSONObject.parseObject(result.toString(), FormatRule.class);
+            String ruleCondition = formatRule.getRuleCondition();
+            List<List<AnalyzeBean>> oldRuleConditionList = resolveRuleService.getOldRuleConditionList(ruleCondition);
+            formatRule.setOldRuleConditionList(oldRuleConditionList);
         } catch (Exception e) {
-            logger.debug("获取规则信息失败：{}",e.getMessage());
+            logger.debug("获取规则信息失败：{}", e.getMessage());
         } finally {
-            wirte(response, restList);
+            wirte(response, formatRule);
         }
-
-
 
 
 //        JSONObject jsonObject = JSONObject.parseObject(map);
@@ -362,8 +349,6 @@ public class RuleController extends BaseEntityController<Object> {
     }
 
 
-
-
     /**
      * @param response
      * @throws ExecutionException
@@ -385,7 +370,7 @@ public class RuleController extends BaseEntityController<Object> {
             data = ruleService.ruleMatchGetResp(rule);
             wirte(response, data);
         } catch (Exception e) {
-            logger.info("规则匹配失败:{}" , e.getMessage());
+            logger.info("规则匹配失败:{}", e.getMessage());
         }
         if (StringUtils.isNotBlank(data)) {
             ruleService.add2LogTable(data, rule);
@@ -464,7 +449,7 @@ public class RuleController extends BaseEntityController<Object> {
             String s = ruleService.disposeRuleCondition(ruleCondition);
             restList = ruleService.restoreRule(s);
         } catch (Exception e) {
-            logger.debug("获取规则信息失败：{}",e.getMessage());
+            logger.debug("获取规则信息失败：{}", e.getMessage());
         } finally {
             wirte(response, restList);
         }
@@ -514,25 +499,12 @@ public class RuleController extends BaseEntityController<Object> {
         String forObject = "";
         try {
             forObject = restTemplate.postForObject(urlConfig.getCdssurl() + BaseConstants.updaterule, o, String.class);
-            //mongo库中_id
-            String id = ruleService.getId(forObject);
-            OriRule rule = oriRuleRepService.findOne(id);
-            JSONObject jsonObject = JSONObject.parseObject(map);
-            String oriRule = JSONObject.toJSONString(jsonObject);
-            rule.setRule(oriRule);
-            OriRule save = oriRuleRepService.save(rule);
-            if (save == null) {
-                logger.info("更新本地原始规则失败：" + oriRule);
-            }
         } catch (Exception e) {
             logger.info("更新规则失败：" + e.getMessage());
         } finally {
             wirte(response, forObject);
         }
     }
-
-
-
 
 
     /**

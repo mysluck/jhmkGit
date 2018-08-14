@@ -35,6 +35,8 @@ import org.springframework.web.client.RestTemplate;
 
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class RuleService {
@@ -88,6 +90,8 @@ public class RuleService {
     YizhunRepService yizhunRepService;
     @Autowired
     DocumentMappingRepService documentMappingRepService;
+    @Autowired
+    ResolveRuleService resolveRuleService;
     @Autowired
     YizhuService yizhuService;
 
@@ -242,13 +246,13 @@ public class RuleService {
 
             AnalyzeBean analyzeBean = objects.get(i);
             String field = analyzeBean.getField();
-            Optional.ofNullable(userModelRepService.findByUmName(field.substring(field.lastIndexOf("_") + 1)))
+            Optional.ofNullable(userModelRepService.findByUmName(field.substring(field.lastIndexOf("_") + 1)).get(0))
                     .ifPresent(s -> {
                         analyzeBean.setUmType(s.getUmType());
                     });
 
             //java8
-            Optional.ofNullable(userDataModelMappingRepService.findByDmNamePath(field))
+            Optional.ofNullable(userDataModelMappingRepService.findByDmNamePath(field).get(0))
                     .ifPresent(s -> {
                         analyzeBean.setField(s.getUmNamePath());
                     });
@@ -804,7 +808,6 @@ public class RuleService {
 //        }
 //        return logMappingList;
 //    }
-
     public List<LogMapping> getNotSaveLogMapping(Rule rule, JSONArray diseaseMessageArray) {
         List<LogMapping> logMappingList = new LinkedList<>();
         List<String> order0List = smOrderRepService.findAllByOrOrderNum(0);
@@ -1358,5 +1361,6 @@ public class RuleService {
         sb.append(str).append(")");
         return sb.toString();
     }
+
 
 }

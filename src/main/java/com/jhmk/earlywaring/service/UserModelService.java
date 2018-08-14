@@ -30,8 +30,8 @@ public class UserModelService {
         Iterable<UserModel> iterable = userModelRepService.findAll();
 //        List<UserModel> pModuls = userModulRepService.findByUmParentIdAndUmHospitalName(null, hosptialName);
         Iterator<UserModel> iterator = iterable.iterator();
-       List<UserModel> pModuls=new ArrayList<>();
-        while (iterator.hasNext()){
+        List<UserModel> pModuls = new ArrayList<>();
+        while (iterator.hasNext()) {
             pModuls.add(iterator.next());
         }
         List<UserModel> userModels = recursiveSel1(pModuls);
@@ -91,6 +91,13 @@ public class UserModelService {
         return pModuls;
     }
 
+
+    /**
+     * 前台规则数据解析为cdss 规则
+     *
+     * @param str
+     * @return
+     */
     public String getOldRule(Object str) {
         String string = JSONObject.toJSONString(str);
         JSONArray ruleCondition = JSONArray.parseArray(string);
@@ -101,6 +108,16 @@ public class UserModelService {
             String s = analyzeOldRule(next);
             list.add(s);
         }
+        String s = appensRuleCondition(list);
+        return s;
+    }
+
+    /**
+     *
+     * @param list 小并列条件信息
+     * @return 一条大并列条件
+     */
+    public String appensRuleCondition(List<String> list) {
         StringBuffer sb = new StringBuffer();
         sb.append("(");
         for (int i = 0; i < list.size(); i++) {
@@ -110,10 +127,8 @@ public class UserModelService {
             }
         }
         sb.append(")");
-        System.out.println(sb);
         return sb.toString().trim();
     }
-
 
     /**
      * 解析原始规则

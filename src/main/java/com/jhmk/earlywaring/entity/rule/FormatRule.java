@@ -3,6 +3,7 @@ package com.jhmk.earlywaring.entity.rule;
 import java.io.Serializable;
 import java.io.StringReader;
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -45,6 +46,17 @@ public class FormatRule implements Serializable {
     private String  parentId;
 
     private String sts;//状态 20180522字段新增
+
+    private List<List<AnalyzeBean>>oldRuleConditionList;
+
+
+    public List<List<AnalyzeBean>> getOldRuleConditionList() {
+        return oldRuleConditionList;
+    }
+
+    public void setOldRuleConditionList(List<List<AnalyzeBean>> oldRuleConditionList) {
+        this.oldRuleConditionList = oldRuleConditionList;
+    }
 
     public String getId() {
         return id;

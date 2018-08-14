@@ -83,7 +83,7 @@ public class CmsController extends BaseEntityController<SmUsers> {
 
                     httpServletRequest.getSession().setAttribute(BaseConstants.TOKEN, token);
                     //设置session超时时间(2小时)
-                    httpServletRequest.getSession().setMaxInactiveInterval(2 * 60 * 60);
+                    httpServletRequest.getSession().setMaxInactiveInterval(4 * 60 * 60);
 
                     logger.info("登录成功");
                     resp.setMessage("登录成功");

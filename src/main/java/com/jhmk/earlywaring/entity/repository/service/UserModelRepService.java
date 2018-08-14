@@ -81,7 +81,7 @@ public class UserModelRepService extends BaseRepService<UserModel, Integer> {
 
 
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
-    public  UserModel findByUmName(String umname){
+    public  List<UserModel> findByUmName(String umname){
         return repository.findByUmName(umname);
     }
 

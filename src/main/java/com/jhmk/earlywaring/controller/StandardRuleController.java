@@ -1,11 +1,9 @@
 package com.jhmk.earlywaring.controller;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.jhmk.earlywaring.base.BaseController;
 import com.jhmk.earlywaring.config.BaseConstants;
 import com.jhmk.earlywaring.config.UrlConfig;
-import com.jhmk.earlywaring.entity.repository.service.OriRuleRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmShowLogRepService;
 import com.jhmk.earlywaring.entity.repository.service.SmUsersRepService;
 import com.jhmk.earlywaring.entity.rule.FormatRule;
@@ -63,8 +61,8 @@ public class StandardRuleController extends BaseController {
     UserModelService userModelService;
     @Autowired
     UrlConfig urlConfig;
-    @Autowired
-    OriRuleRepService oriRuleRepService;
+//    @Autowired
+//    OriRuleRepService oriRuleRepService;
     @Autowired
     CdrService cdrService;
     @Autowired

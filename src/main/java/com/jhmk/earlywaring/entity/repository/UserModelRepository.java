@@ -26,7 +26,7 @@ public interface UserModelRepository extends PagingAndSortingRepository<UserMode
      * @param umname 字典名称
      * @return
      */
-    UserModel findByUmName(String umname);
+    List<UserModel> findByUmName(String umname);
 
 
 }
