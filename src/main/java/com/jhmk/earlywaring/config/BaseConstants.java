@@ -3,7 +3,6 @@ package com.jhmk.earlywaring.config;
 import org.springframework.stereotype.Component;
 
 
-@Component
 public class BaseConstants {
 
     public static final String USER_STATUS = "0";//用户状态 0-正常 1-异常
